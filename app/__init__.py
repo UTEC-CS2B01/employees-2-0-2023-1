@@ -1,10 +1,74 @@
-from flask import Flask
-from .models import db, setup_db
+from flask import (
+    Flask,
+    request,
+    jsonify
+)
+from .models import db, setup_db, Employee
+from flask_cors import CORS
+from .utilities import allowed_file
 
+import os
+import sys
 
 def create_app(test_config=None):
     app = Flask(__name__)
     with app.app_context():
+        app.config['UPLOAD_FOLDER'] = 'static/employees'
         setup_db(app)
+        CORS(app, origins='*')
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        return response
+    
+
+    @app.route('/employees', methods=['POST'])
+    def create_employee():
+        try:
+            firstname = request.form.get('firstname')
+            lastname = request.form['lastname']
+            age = request.form['age']
+            department_id = request.form['selectDepartment']
+
+            if 'image' not in request.files:
+                return jsonify({'success': False, 'message': 'No image provided by the employee'}), 400
+        
+            file = request.files['image']
+
+            if file.filename == '':
+                return jsonify({'success': False, 'message': 'No image selected'}), 400
+        
+            if not allowed_file(file.filename):
+                return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
+        
+
+            employee = Employee(firstname, lastname, age, department_id)
+            db.session.add(employee)
+            db.session.commit()
+
+            cwd = os.getcwd()
+
+            employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+            os.makedirs(employee_dir, exist_ok=True)
+
+            upload_folder = os.path.join(cwd, employee_dir)
+
+            file.save(os.path.join(upload_folder, file.filename))
+
+            employee.image = file.filename
+            db.session.commit()
+
+            return jsonify({'id': employee.id, 'success': True, 'message': 'Employee Created successfully!'}), 200
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            return jsonify({'success': False, 'message': 'Error creating employee'}), 500
+
+        finally:
+            db.session.close()
+
 
     return app
