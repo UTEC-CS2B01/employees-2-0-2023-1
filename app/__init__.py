@@ -118,15 +118,15 @@ def create_app(test_config=None):
                     name = body['name']
 
                 if 'short_name' not in body:
-                    list_errors.append(' short name is required')
+                    list_errors.append('short name is required')
                 else:
-                    name = body['short_name']
+                    short_name = body['short_name']
 
                 
                 if len(list_errors) > 0:
                     returned_code = 400
                 else:
-                    department = Department(name)
+                    department = Department(name,short_name=short_name)
                     db.session.add(department)
                     db.session.commit()
 
