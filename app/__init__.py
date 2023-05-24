@@ -3,7 +3,7 @@ from flask import (
     request,
     jsonify
 )
-from .models import db, setup_db, Employee
+from .models import db, setup_db, Employee, Department
 from flask_cors import CORS
 from .utilities import allowed_file
 
@@ -102,5 +102,46 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
+    
+    @app.route('/departaments', methods=['POST'])
+    def create_departament():
+        returned_code = 200
+        list_errors = []
+        try:
+            body = request.form
+
+            if 'name' not in body:
+                list_errors.append('name is required')
+            else:
+                name = request.form.get('name')
+
+            if 'short_name' not in body:
+                list_errors.append('short name is required')    
+            else:
+                shot_name = request.form.get('short_name')
+            if len(list_errors) > 0:
+                returned_code = 400
+            else:
+                departament = Department(name, shot_name)
+                db.session.add(departament)
+                db.session.commit()
+
+                departament_id = departament.id
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error creating departament', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error creating departament'}), returned_code
+        else:
+            return jsonify({'id': departament_id, 'success': True, 'message': 'Departament Created successfully!'}), returned_code
 
     return app
