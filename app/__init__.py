@@ -122,7 +122,7 @@ def create_app(test_config=None):
             if len(list_errors) > 0:
                 returned_code = 400
             else:
-                department = Department(name)
+                department = Department(name, short_name)
                 db.session.add(department)
                 db.session.commit()
 
