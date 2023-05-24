@@ -444,6 +444,7 @@ def create_app(test_config=None):
         return jsonify({'success': True, 'department_id': department_id, 'message': 'Department assigned to employee successfully!'}), returned_code
 
 
+    # GET Method
     @app.route('/employees/<employee_id>/departments', methods=['GET'])
     def get_employee_departments(employee_id):
         returned_code = 200
@@ -456,7 +457,7 @@ def create_app(test_config=None):
                 returned_code = 404
                 error_message = 'Employee not found'
             else:
-                departments = [department.serialize() for department in employee.departments]
+                departments = employee.departments
 
         except Exception as e:
             print(e)
@@ -467,7 +468,83 @@ def create_app(test_config=None):
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
 
-        return jsonify({'success': True, 'departments': departments}), returned_code
+        department_list = [department.serialize() for department in departments]
+        return jsonify({'success': True, 'departments': department_list}), returned_code
+
+
+    # PATCH Method
+    @app.route('/employees/<employee_id>/departments', methods=['PATCH'])
+    def update_employee_departments(employee_id):
+        returned_code = 200
+        error_message = ''
+
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if not employee:
+                returned_code = 404
+                error_message = 'Employee not found'
+            else:
+                body = request.form
+
+                if 'department_id' not in body:
+                    returned_code = 400
+                    error_message = 'Department ID is required'
+                else:
+                    department_id = request.form['department_id']
+                    department = Department.query.get(department_id)
+
+                    if not department:
+                        returned_code = 404
+                        error_message = 'Department not found'
+                    else:
+                        employee.departments = [department]
+
+                        db.session.add(employee)
+                        db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error updating employee departments'
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'message': 'Employee departments updated successfully!'}), returned_code
+
+
+    # DELETE Method
+    @app.route('/employees/<employee_id>/departments', methods=['DELETE'])
+    def remove_employee_departments(employee_id):
+        returned_code = 200
+        error_message = ''
+
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if not employee:
+                returned_code = 404
+                error_message = 'Employee not found'
+            else:
+                employee.departments = []
+
+                db.session.add(employee)
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error removing employee departments'
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
 
 
     return app
