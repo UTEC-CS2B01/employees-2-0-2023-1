@@ -108,7 +108,119 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
 
+    @app.route('/employees', methods=['PATCH'])
+    def update_employee():
+        returned_code = 200
+        list_errors = []
+        try:
+            body = request.form
+
+            if 'firstname' not in body:
+                list_errors.append('firstname is required')
+            else:
+                firstname = request.form.get('firstname')
+
+            if 'lastname' not in body:
+                list_errors.append('lastname is required')    
+            else:
+                lastname = request.form['lastname']
+
+            if 'age' not in body:
+                list_errors.append('age is required')    
+            else:
+                age = request.form['age']
+
+            if 'selectDepartment' not in body:
+                list_errors.append('selectDepartment is required')
+            else:
+                department_id = request.form['selectDepartment']
+
+            if 'image' not in request.files:
+                list_errors.append('image is required')
+            else:
+                file = request.files['image']
+
+                if file.filename == '':
+                    return jsonify({'success': False, 'message': 'No image selected'}), 400
+
+                if not allowed_file(file.filename):
+                    return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
+
+            if len(list_errors) > 0:
+                returned_code = 400
+            else:
+                employee = Employee.query.first()  # Obtén el primer empleado de la base de datos o ajusta la lógica según tus necesidades
+
+                if employee is None:
+                    return jsonify({'success': False, 'message': 'No employees found'}), 404
+
+                employee.firstname = firstname
+                employee.lastname = lastname
+                employee.age = age
+                employee.department_id = department_id
+
+                cwd = os.getcwd()
+
+                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(employee.id))
+                os.makedirs(employee_dir, exist_ok=True)
+
+                upload_folder = os.path.join(cwd, employee_dir)
+
+                file.save(os.path.join(upload_folder, file.filename))
+
+                employee.image = file.filename
+
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error updating employee', 'errors': list_errors}), returned_code
+        elif returned_code == 404:
+            return jsonify({'success': False, 'message': 'No employees found'}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error updating employee'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code
+        
+    @app.route('/employees', methods=['DELETE'])
+    def delete_all_employees():
+        returned_code = 200
+        try:
+            employees = Employee.query.all()
+
+            if not employees:
+                return jsonify({'success': False, 'message': 'No employees found'}), 404
+
+            for employee in employees:
+                db.session.delete(employee)
+
+            db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 404:
+            return jsonify({'success': False, 'message': 'No employees found'}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting employees'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'All employees deleted successfully!'}), returned_code
     
+
     @app.route('/employees/<int:employee_id>', methods=['PATCH'])
     def update_employee(employee_id):
         returned_code = 200
