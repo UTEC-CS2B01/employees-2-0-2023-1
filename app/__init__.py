@@ -150,9 +150,7 @@ def create_app(test_config=None):
             return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
         
 
-# GET
-#######################################################################################
-    
+
     @app.route('/departments', methods=['GET'])
     def get_departments():
         returned_code = 200
@@ -541,6 +539,8 @@ def create_app(test_config=None):
 
     return app
 
+=======
+>>>>>>> 7c37b81 (Implement department endpoint)
     @app.route('/departments', methods=['POST'])
     def create_departments():
         returned_code = 200
