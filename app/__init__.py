@@ -7,6 +7,7 @@ from .models import db, setup_db, Employee
 from .models import db, setup_db, Department
 
 from flask_cors import CORS
+from flask_sqlalchemy import or_
 from .utilities import allowed_file
 
 import os
@@ -134,6 +135,7 @@ def create_app(test_config=None):
         for key, value in employee_data.items():
             setattr(employee, key, value)
         db.session.commit()
+        db.session.close()
         return jsonify({'success': True, 'message': 'Employee updated successfully!'}), 200
     
     @app.route('/employees/<int:employee_id>', methods=['DELETE'])
@@ -144,6 +146,7 @@ def create_app(test_config=None):
         
         db.session.delete(employee)
         db.session.commit()
+        db.session.close()
         return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), 200
 
 
@@ -214,6 +217,7 @@ def create_app(test_config=None):
         for key, value in department_data.items():
             setattr(department, key, value)
         db.session.commit()
+        db.session.close()
         return jsonify({'success': True, 'message': 'Department updated successfully!'}), 200
     
     @app.route('/departments/<int:department_id>', methods=['DELETE'])
@@ -224,6 +228,7 @@ def create_app(test_config=None):
         
         db.session.delete(department)
         db.session.commit()
+        db.session.close()
         return jsonify({'success': True, 'message': 'Department deleted successfully!'}), 200
     
 
@@ -345,19 +350,41 @@ def create_app(test_config=None):
         if employee.department != department:
             return jsonify({'success': False, 'message': 'Employee does not belong to this department'}), 400
         
-        # Eliminar la relación entre el empleado y el departamento
         employee.department = None
         db.session.commit()
 
         return jsonify({'success': True, 'message': 'Employee department deleted successfully'}), 200
 
 
-    @app.route('/employees?search=<q>')
-    def search_employee():
+    @app.route('/employees', methods=['GET'])
+    def search_employees():
+        search_query = request.args.get('search', '')
         
+        employees = Employee.query.filter(
+            or_(
+                Employee.firstname.ilike(f'%{search_query}%'),
+                Employee.lastname.ilike(f'%{search_query}%')
+            )
+        ).all()
+        
+        serialized_employees = [employee.serialize() for employee in employees]
+        
+        return jsonify(serialized_employees), 200
 
-
-
+    @app.route('/departments', methods=['GET'])
+    def search_departments():
+        search_query = request.args.get('search', '')
+        
+        departments = Department.query.filter(
+            or_(
+                Department.name.ilike(f'%{search_query}%'),
+                Department.short_name.ilike(f'%{search_query}%')
+            )
+        ).all()
+        
+        serialized_departments = [department.serialize() for department in departments]
+        
+        return jsonify(serialized_departments), 200
 
     
 
