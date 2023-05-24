@@ -3,7 +3,7 @@ from flask import (
     request,
     jsonify
 )
-from .models import db, setup_db, Employee
+from .models import db, setup_db, Employee, Department
 from flask_cors import CORS
 from .utilities import allowed_file
 
@@ -117,6 +117,12 @@ def create_app(test_config=None):
                 else:
                     name = body['name']
 
+                if 'short_name' not in body:
+                    list_errors.append(' short name is required')
+                else:
+                    name = body['short_name']
+
+                
                 if len(list_errors) > 0:
                     returned_code = 400
                 else:
@@ -142,4 +148,4 @@ def create_app(test_config=None):
             else:
                 return jsonify({'id': department_id, 'success': True, 'message': 'Department Created successfully!'}), returned_code
         
-        return app    
+    return app    
