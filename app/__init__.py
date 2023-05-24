@@ -26,8 +26,8 @@ def create_app(test_config=None):
 
     @app.route('/employees', methods=['POST', 'GET', 'PATCH', 'DELETE'])
     def create_employee():
-    returned_code = 200
-    list_errors = []
+        returned_code = 200
+        list_errors = []
     try:
         if request.method == 'POST':
             body = request.form
@@ -134,14 +134,14 @@ def create_app(test_config=None):
             if employee is None:
                 return jsonify({'success': False, 'message': 'Employee not found'})
         
-        except Exception as e:
+    except Exception as e:
             print(e)
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
-        finally:
-            db.session.close()
+    finally:
+        db.session.close()
 
         if returned_code == 400:
             return jsonify({'success': False, 'message': 'Error creating employee', 'errors': list_errors}), returned_code
@@ -150,19 +150,12 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
         
-        
-        
-
-
-
-
-
 
     @app.route('/departments', methods=['POST', 'GET', 'PATCH', 'DELETE'])
-    def create_departments():
-        returned_code = 200
-        list_errors = []
-        try:
+def create_departments():
+    returned_code = 200
+    list_errors = []
+    try:
         if request.method == 'POST':
             body = request.form
 
@@ -253,5 +246,8 @@ def create_app(test_config=None):
         return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
     else:
         return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
+    
+
+
 
     return app
