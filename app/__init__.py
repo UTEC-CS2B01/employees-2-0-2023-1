@@ -273,6 +273,45 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
 
-    #@app.route('/departments',methods=['PATCH'])
-    #def change_department( )
+    @app.route('/departments/<department_id>',methods=['PATCH'])
+    def change_department(department_id):
+        return_code = 200
+        list_errors = []
+
+        try:
+            body = request.form
+            department = Department.query.get(department_id)
+
+            if department is None:
+                list_errors.append('department dont exist')
+                return_code = 404
+            else:     
+
+                if 'newname' not in body:
+                    list_errors.append('newname is required')
+                else:
+                    department.name = request.form['newname']
+                if 'newshortname' not in body:
+                    list_errors.append('newshortname is required')
+                else:
+                    department.short_name = request.form['newshortname']
+                    
+            db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            return_code = 500
+        finally:
+            db.session.close() 
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error changing department', 'errors': list_errors}), return_code
+        elif return_code == 500:
+            return jsonify({'success': False, 'message': 'Error changing department'}), return_code
+        else:
+            return jsonify({'success': True, 'message': 'Deparmeent changed successfully!'}), return_code                            
+
+
+
     return app
