@@ -7,23 +7,29 @@ database_uri = config['DATABASE_URI']
 
 db = SQLAlchemy()
 
+
 def setup_db(app, database_path=database_uri):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     db.app = app
     db.init_app(app)
     db.create_all()
 
+
 class Employee(db.Model):
     __tablename__ = 'employees'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(
+        uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     firstname = db.Column(db.String(80), nullable=False)
     lastname = db.Column(db.String(120), unique=False, nullable=False)
     age = db.Column(db.Integer, unique=False, nullable=False)
     image = db.Column(db.String(500), nullable=True)
     is_active = db.Column(db.Boolean(), nullable=False, default=True)
-    department_id = db.Column(db.String(36), db.ForeignKey('departments.id'), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    department_id = db.Column(db.String(36), db.ForeignKey(
+        'departments.id'), nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True),
+                           nullable=False, server_default=db.text("now()"))
+    modified_at = db.Column(db.DateTime(timezone=True),
+                            nullable=True, server_default=db.text("now()"))
 
     def __init__(self, firstname, lastname, age, department_id):
         self.firstname = firstname
@@ -35,7 +41,7 @@ class Employee(db.Model):
 
     def __repr__(self):
         return '<Employee %r %r>' % (self.firstname, self.lastname)
-    
+
     def serialize(self):
         return {
             'id': self.id,
@@ -47,16 +53,19 @@ class Employee(db.Model):
             'created_at': self.created_at,
             'modified_at': self.modified_at,
         }
-    
+
+
 class Department(db.Model):
     __tablename__ = 'departments'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(
+        uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     name = db.Column(db.String(120), nullable=False)
     short_name = db.Column(db.String(20), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    created_at = db.Column(db.DateTime(timezone=True),
+                           nullable=False, server_default=db.text("now()"))
+    modified_at = db.Column(db.DateTime(timezone=True),
+                            nullable=True, server_default=db.text("now()"))
     employees = db.relationship('Employee', backref='department', lazy=True)
-
 
     def __init__(self, name, short_name):
         self.name = name
@@ -65,7 +74,7 @@ class Department(db.Model):
 
     def __repr__(self):
         return '<Department %r %r>' % (self.name, self.short_name)
-    
+
     def serialize(self):
         return {
             'id': self.id,

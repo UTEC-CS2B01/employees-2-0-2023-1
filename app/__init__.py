@@ -3,12 +3,13 @@ from flask import (
     request,
     jsonify
 )
-from .models import db, setup_db, Employee
+from .models import db, setup_db, Employee, Department
 from flask_cors import CORS
 from .utilities import allowed_file
 
 import os
 import sys
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -20,9 +21,9 @@ def create_app(test_config=None):
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET,PATCH,POST,DELETE,OPTIONS')
         return response
-    
 
     @app.route('/employees', methods=['POST'])
     def create_employee():
@@ -37,12 +38,12 @@ def create_app(test_config=None):
                 firstname = request.form.get('firstname')
 
             if 'lastname' not in body:
-                list_errors.append('lastname is required')    
+                list_errors.append('lastname is required')
             else:
                 lastname = request.form['lastname']
 
             if 'age' not in body:
-                list_errors.append('age is required')    
+                list_errors.append('age is required')
             else:
                 age = request.form['age']
 
@@ -56,15 +57,14 @@ def create_app(test_config=None):
             else:
                 if 'image' not in request.files:
                     return jsonify({'success': False, 'message': 'No image provided by the employee'}), 400
-        
+
                 file = request.files['image']
 
                 if file.filename == '':
                     return jsonify({'success': False, 'message': 'No image selected'}), 400
-        
+
                 if not allowed_file(file.filename):
                     return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-        
 
             if len(list_errors) > 0:
                 returned_code = 400
@@ -77,7 +77,8 @@ def create_app(test_config=None):
 
                 cwd = os.getcwd()
 
-                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+                employee_dir = os.path.join(
+                    app.config['UPLOAD_FOLDER'], employee.id)
                 os.makedirs(employee_dir, exist_ok=True)
 
                 upload_folder = os.path.join(cwd, employee_dir)
@@ -102,5 +103,44 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
+
+    @app.route('/departments', methods=['POST'])
+    def departments():
+        return_code = 200
+        errorList = []
+        body = request.form
+
+        try:
+            if 'name' not in body:
+                errorList.append("name is required")
+            else:
+                name = request.form['name']
+
+            if 'short name' not in body:
+                errorList.append("short name is required")
+            else:
+                short_name = request.form["short_name"]
+
+            if len(errorList) != 0:
+                return_code = 400
+            else:
+                department = Department(name, short_name)
+                db.session.add(department)
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            return_code = 500
+
+        finally:
+            db.session.close()
+            if return_code == 400:
+                return jsonify({'success': False, 'message': 'Error creating department', 'errors': errorList}), return_code
+            elif return_code == 500:
+                return jsonify({'success': False, 'message': 'Error creating department', 'errors': errorList}), return_code
+            else:
+                return jsonify({'name': name, 'success': True, 'message': 'Department created successfully!'}), return_code
 
     return app
