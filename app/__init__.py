@@ -155,41 +155,13 @@ def create_app(test_config=None):
         
         
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    @app.route('/departments', methods=['POST', 'GET', 'PATCH','DELETE'])
-    def create_departaments():
+    @app.route('/departments', methods=['POST', 'GET', 'PATCH', 'DELETE'])
+    def create_departments():
         returned_code = 200
         list_errors = []
         try:
-            body = request.form
+            if request.method == 'POST':
+                body = request.form
 
             if 'name' not in body:
                 list_errors.append('name is required')
@@ -201,38 +173,82 @@ def create_app(test_config=None):
             else:
                 short_name = request.form['short_name']
 
-
             if len(list_errors) > 0:
                 returned_code = 400
             else:
-                departament = Department(name, short_name )
-                db.session.add(departament)
+                department = Department(name, short_name)
+                db.session.add(department)
                 db.session.commit()
 
-                departament_id = departament.id
+                department_id = department.id
 
                 cwd = os.getcwd()
 
-                departament_dir = os.path.join(app.config['UPLOAD_FOLDER'], departament.id)
-                os.makedirs(departament_dir, exist_ok=True)
+                department_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(department.id))
+                os.makedirs(department_dir, exist_ok=True)
 
-                upload_folder = os.path.join(cwd, departament_dir)
+                upload_folder = os.path.join(cwd, department_dir)
 
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            db.session.rollback()
-            returned_code = 500
+        elif request.method == 'GET':
+            # Aquí va la lógica para obtener todos los departamentos
+            departments = Department.query.all()
+            department_data = []
+            for department in departments:
+                department_data.append({
+                    'id': department.id,
+                    'name': department.name,
+                    'short_name': department.short_name
+                })
+            return jsonify({'departments': department_data})
 
-        finally:
-            db.session.close()
+        elif request.method == 'PATCH':
+            department_id = request.args.get('id')
+            if department_id is None:
+                return jsonify({'success': False, 'message': 'Department ID is required'}), 400
+            
+            department = Department.query.get(department_id)
+            if department is None:
+                return jsonify({'success': False, 'message': 'Department not found'}), 404
 
-        if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error creating departament', 'errors': list_errors}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating departament'}), returned_code
-        else:
-            return jsonify({'id': departament_id, 'success': True, 'message': 'Departament Created successfully!'}), returned_code
+            # Aquí va la lógica para actualizar los datos del departamento
+            body = request.form
+            if 'name' in body:
+                department.name = body['name']
+            
+            if 'short_name' in body:
+                department.short_name = body['short_name']
 
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Department updated successfully'})
+
+        elif request.method == 'DELETE':
+            department_id = request.args.get('id')
+            if department_id is None:
+                return jsonify({'success': False, 'message': 'Department ID is required'}), 400
+
+            department = Department.query.get(department_id)
+            if department is None:
+                return jsonify({'success': False, 'message': 'Department not found'}), 404
+
+            db.session.delete(department)
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Department deleted successfully'})
+
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        returned_code = 500
+
+    finally:
+        db.session.close()
+
+    if returned_code == 400:
+        return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), returned_code
+    elif returned_code == 500:
+        return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
+    else:
+        return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
 
     return app
