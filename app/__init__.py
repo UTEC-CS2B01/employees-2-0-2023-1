@@ -164,6 +164,7 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error founding department'}), returned_code
         else:
             if len(departments_serialized) == 0:
+                returned_code = 400
                 return jsonify({'success': True, 'message': 'No departments found'}), returned_code
             return jsonify({'success': True, 'message': departments_serialized}), returned_code
 
@@ -186,6 +187,7 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error founding employees'}), returned_code
         else:
             if len(employees_serialized) == 0:
+                returned_code = 400
                 return jsonify({'success': True, 'message': 'No employees found'}), returned_code
             return jsonify({'success': True, 'message': employees_serialized}), returned_code
 
@@ -195,6 +197,7 @@ def create_app(test_config=None):
         try:
             employee = Employee.query.get(id)
             if employee is None:
+                returned_code = 400
                 return jsonify({'success': True, 'message': 'No employees found'}), returned_code
             employee = Employee.query.filter_by(id = id)
             employee.delete()
@@ -219,6 +222,7 @@ def create_app(test_config=None):
         try:
             department = Department.query.get(id)
             if department is None:
+                returned_code = 400
                 return jsonify({'success': True, 'message': 'No department found'}), returned_code
             department = Department.query.filter_by(id = id)
             department.delete()
