@@ -335,6 +335,37 @@ def create_app(test_config=None):
 
         return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
 
+    @app.route('/employees', methods=['GET'])
+    def search_employees():
+        search_query = request.args.get('search', '')  # Get the value of the 'search' query parameter
+
+        # Perform search operation based on the search query
+        employees = Employee.query.filter(
+            db.or_(
+                Employee.firstname.ilike(f'%{search_query}%'),
+                Employee.lastname.ilike(f'%{search_query}%')
+            )
+        ).all()
+
+        serialized_employees = [employee.serialize() for employee in employees]
+
+        return jsonify({'employees': serialized_employees})
+
+    @app.route('/departments', methods=['GET'])
+    def search_departments():
+        search_query = request.args.get('search', '')  # Get the value of the 'search' query parameter
+
+        # Perform search operation based on the search query
+        departments = Department.query.filter(
+            db.or_(
+                Department.name.ilike(f'%{search_query}%'),
+                Department.short_name.ilike(f'%{search_query}%')
+            )
+        ).all()
+
+        serialized_departments = [department.serialize() for department in departments]
+
+        return jsonify({'departments': serialized_departments})
 
 
     return app
