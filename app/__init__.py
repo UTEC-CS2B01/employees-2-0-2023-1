@@ -220,8 +220,24 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': 'All employees deleted successfully!'}), returned_code
     
+    @app.route('/employees/<employee_id>', methods=['GET'])
+    def get_employee(employee_id):
+        try:
+            employee = Employee.query.get(employee_id)
 
-    @app.route('/employees/<int:employee_id>', methods=['PATCH'])
+            if employee is None:
+                return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+            employee_data = employee.serialize()
+
+            return jsonify({'success': True, 'employee': employee_data}), 200
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            return jsonify({'success': False, 'message': 'Error retrieving employee'}), 500
+        
+    @app.route('/employees/<employee_id>', methods=['PATCH'])
     def update_employee(employee_id):
         returned_code = 200
         list_errors = []
@@ -282,7 +298,7 @@ def create_app(test_config=None):
             return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code
         
 
-    @app.route('/employees/<int:employee_id>', methods=['DELETE'])
+    @app.route('/employees/<employee_id>', methods=['DELETE'])
     def delete_employee(employee_id):
         returned_code = 200
         try:
@@ -307,6 +323,7 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error deleting employee'}), returned_code
         else:
             return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), returned_code
+        
 
 
     @app.route('/departments', methods=['POST'])
