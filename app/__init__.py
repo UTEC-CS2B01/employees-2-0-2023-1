@@ -216,6 +216,21 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
         else:
             return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
+        
+    
+    @app.route('/departments', methods=['GET'])
+    def get_departments():
+        returned_code = 200
+        try:
+            departments = Department.query.all()
+            department_list = [department.serialize() for department in departments]
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+
+        return jsonify({'success': returned_code == 200, 'data': department_list}), returned_code
+
 
     return app
 
