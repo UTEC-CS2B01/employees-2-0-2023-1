@@ -104,6 +104,126 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
 
+    @app.route('/employees', methods=['GET'])
+    def getEmployees():
+        return_code = 200
+        error_List = []
+        body = request.headers.get('Content-Type')
+        employees = [b.serialize() for b in db.view()]
+        try:
+            if (body == 'application/json'):
+                json = request.json
+                for e in employees:
+                    if (e['id'] == json['id']):
+                        return_code = 200
+                    else:
+                        return_code = 400
+                        error_List.append(
+                            f"Could not find employee with id: {json['id']}")
+
+            else:
+                return_code = 200
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            return_code = 500
+
+        finally:
+            db.session.close()
+
+            if return_code == 500:
+                return jsonify({'success': False, 'message': 'Error retrieving employees', 'errors': error_List}), return_code
+            elif return_code == 400:
+                return jsonify({'success': False, 'message': 'Error retrieving employees', 'errors': error_List}), return_code
+            else:
+                return jsonify({'success': True, 'message': 'Employees retrieved succesfully'}), return_code
+
+    @app.route('/employees/<_id>', methods=['PATCH'])
+    def patch_employee(_id):
+        return_code = 200
+        errorList = []
+        body = request.get_json()
+        try:
+            employee = Employee.query.filter_by(id=_id).first()
+
+            if employee is None:
+                return_code = 400
+                errorList.append(f'Could not find employee with id: {_id}')
+            else:
+                if 'name' in body:
+                    employee.name = body.get('name')
+
+                if 'lastname' in body:
+                    employee.lastname = body.get('lastname')
+
+                if 'age' in body:
+                    employee.age = body.get('age')
+
+                if 'image' in body and not (allowed_file(image)):
+                    return_code = 400
+                    errorList.append("Image file type not allowed")
+                else:
+                    image = body.get('image')
+                    db.session.commit()
+                    cwd = os.getcwd()
+                    employee_dir = os.path.join(
+                        app.config['UPLOAD_FOLDER'], employee.id)
+                    os.makedirs(employee_dir, exist_ok=True)
+                    upload_folder = os.path.join(cwd, employee_dir)
+                    image.save(os.path.join(upload_folder, image.filename))
+                    employee.image = image.filename
+
+                if 'selectDepartment' in body:
+                    employee.department_id = body.get('selectDepartment')
+
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            return_code = 500
+        finally:
+            db.session.close()
+            if return_code == 400:
+                return jsonify({'success': False, 'message': 'Error updating employee', 'errors': errorList}), return_code
+            elif return_code == 500:
+                return jsonify({'success': False, 'message': 'Error updating employee'}), return_code
+            else:
+                return jsonify({'id': employee.id, 'success': True, 'message': 'Employee updated successfully!'}), return_code
+
+    @app.route('/employee/<_id>', methods=['DELETE'])
+    def delete_employee(_id):
+        return_code = 200
+        errorList = []
+        try:
+            employee = Employee.query.filter_by(id=_id).first()
+            if employee is None:
+                return_code = 400
+                errorList.append(f'Unable to find employee with id {_id}')
+            else:
+                n_id = employee.id
+                employee.delete()
+
+            db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            return_code = 500
+
+        finally:
+            db.session.close()
+            if return_code == 400:
+                return jsonify({'success': False, 'message': 'Unable to delete employee', 'errors': errorList}), return_code
+            elif return_code == 500:
+                return jsonify({'success': False, 'message': 'Unable to delete employee', 'errors': errorList}), return_code
+            else:
+                return jsonify({'id': n_id, 'success': True, 'message': 'Employee deleted successfully!'}), return_code
+
     @app.route('/departments', methods=['POST'])
     def departments():
         return_code = 200
