@@ -380,7 +380,7 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': 'Deparmeent changed successfully!'}), return_code                            
 
-    @app.route('/employees/<employee_id>/departments', methods=['GET'])
+    @app.route('/employees/<employee_id>/department', methods=['GET'])
     def get_employee_departments(employee_id):
         returned_code = 200
         list_errors = []
@@ -405,5 +405,42 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error getting employee department'}), returned_code
         else:
             return jsonify({'employee':employee.firstname,'department': department.name, 'success': True}), returned_code                  
+
+    @app.route('/departments/<department_id>/employees', methods=['GET'])
+    def get_department_employees(department_id):
+        returned_code = 200
+        list_errors = []
+        try:
+            department = Department.query.get(department_id)
+            
+            if department is None:
+                list_errors.append('department dont exist')
+                returned_code = 404
+            else:
+                employees = Employee.query.filter_by(department_id=department_id).all()
+                if len(employees) == 0:
+                    list_errors.append('no employees found')
+                    returned_code = 400
+                else: 
+                    employee_list = []
+                    for employee in employees:
+                        employee_list.append({
+                            'id': employee.id,
+                            'firstname': employee.firstname,
+                            'lastname': employee.lastname,
+                        })
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error getting department employees', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error getting department employees'}), returned_code
+        else:
+            return jsonify({'employees':employee_list, 'success': True}), returned_code
+
 
     return app
