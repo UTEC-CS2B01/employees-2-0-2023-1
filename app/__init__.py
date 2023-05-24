@@ -3,9 +3,9 @@ from flask import (
     request,
     jsonify
 )
-from .models import db, setup_db, Employee
+from models import db, setup_db, Employee, Department
 from flask_cors import CORS
-from .utilities import allowed_file
+from utilities import allowed_file
 
 import os
 import sys
@@ -24,11 +24,12 @@ def create_app(test_config=None):
         return response
     
 
-    @app.route('/employees', methods=['POST'])
+    @app.route('/employees', methods=['POST', 'GET', 'PATCH', 'DELETE'])
     def create_employee():
-        returned_code = 200
-        list_errors = []
-        try:
+    returned_code = 200
+    list_errors = []
+    try:
+        if request.method == 'POST':
             body = request.form
 
             if 'firstname' not in body:
@@ -54,9 +55,6 @@ def create_app(test_config=None):
             if 'image' not in request.files:
                 list_errors.append('image is required')
             else:
-                if 'image' not in request.files:
-                    return jsonify({'success': False, 'message': 'No image provided by the employee'}), 400
-        
                 file = request.files['image']
 
                 if file.filename == '':
@@ -65,7 +63,6 @@ def create_app(test_config=None):
                 if not allowed_file(file.filename):
                     return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
         
-
             if len(list_errors) > 0:
                 returned_code = 400
             else:
@@ -87,6 +84,59 @@ def create_app(test_config=None):
                 employee.image = file.filename
                 db.session.commit()
 
+        elif request.method == 'GET':
+            # Aquí va la lógica para obtener todos los empleados
+            employees = Employee.query.all()
+            employee_data = []
+            for employee in employees:
+                employee_data.append({
+                    'id': employee.id,
+                    'firstname': employee.firstname,
+                    'lastname': employee.lastname,
+                    'age': employee.age,
+                    'department_id': employee.department_id,
+                    'image': employee.image
+                })
+            return jsonify({'employees': employee_data})
+
+        elif request.method == 'PATCH':
+            employee_id = request.args.get('id')
+            if employee_id is None:
+                return jsonify({'success': False, 'message': 'Employee ID is required'}), 400
+            
+            employee = Employee.query.get(employee_id)
+            if employee is None:
+                return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+            # Aquí va la lógica para actualizar los datos del empleado
+            body = request.form
+            if 'firstname' in body:
+                employee.firstname = body['firstname']
+            
+            if 'lastname' in body:
+                employee.lastname = body['lastname']
+
+            if 'age' in body:
+                employee.age = body['age']
+
+            if 'selectDepartment' in body:
+                employee.department_id = body['selectDepartment']
+
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Employee updated successfully'})
+
+        elif request.method == 'DELETE':
+            employee_id = request.args.get('id')
+            if employee_id is None:
+                return jsonify({'success': False, 'message': 'Employee ID is required'}), 400
+
+            employee = Employee.query.get(employee_id)
+            if employee is None:
+                return jsonify({'success': False, 'message': 'Employee not found'})
+
+            employee.image = file.filename
+            db.session.commit()
+
         except Exception as e:
             print(e)
             print(sys.exc_info())
@@ -102,5 +152,87 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @app.route('/departments', methods=['POST', 'GET', 'PATCH','DELETE'])
+    def create_departaments():
+        returned_code = 200
+        list_errors = []
+        try:
+            body = request.form
+
+            if 'name' not in body:
+                list_errors.append('name is required')
+            else:
+                name = request.form.get('name')
+
+            if 'short_name' not in body:
+                list_errors.append('short_name is required')    
+            else:
+                short_name = request.form['short_name']
+
+
+            if len(list_errors) > 0:
+                returned_code = 400
+            else:
+                departament = Department(name, short_name )
+                db.session.add(departament)
+                db.session.commit()
+
+                departament_id = departament.id
+
+                cwd = os.getcwd()
+
+                departament_dir = os.path.join(app.config['UPLOAD_FOLDER'], departament.id)
+                os.makedirs(departament_dir, exist_ok=True)
+
+                upload_folder = os.path.join(cwd, departament_dir)
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error creating departament', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error creating departament'}), returned_code
+        else:
+            return jsonify({'id': departament_id, 'success': True, 'message': 'Departament Created successfully!'}), returned_code
+
 
     return app
