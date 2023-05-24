@@ -25,3 +25,9 @@ curl -F "first_name=Juan" -F "last_name=perez" -F "job_title=Reclutador" -F "sel
   "success": false
 }
 ```
+
+
+### Create Departaments
+```	
+
+```
