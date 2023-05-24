@@ -265,6 +265,149 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'data': employee_list}), returned_code
+    
+    
+    @app.route('/employees/<employee_id>', methods=['PATCH'])
+    def update_employee(employee_id):
+        returned_code = 200
+        error_message = ''
+
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if not employee:
+                returned_code = 404
+                error_message = 'Employee not found'
+            else:
+                body = request.form
+
+                if 'firstname' in body:
+                    employee.firstname = request.form['firstname']
+
+                if 'lastname' in body:
+                    employee.lastname = request.form['lastname']
+
+                if 'age' in body:
+                    employee.age = request.form['age']
+
+                if 'is_active' in body:
+                    employee.is_active = bool(request.form['is_active'])
+
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error updating employee'
+
+        finally:
+            db.session.close()
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'message': 'Employee updated successfully'}), returned_code
+    
+    @app.route('/departments/<department_id>', methods=['PATCH'])
+    def update_department(department_id):
+        returned_code = 200
+        error_message = ''
+
+        try:
+            department = Department.query.get(department_id)
+
+            if not department:
+                returned_code = 404
+                error_message = 'Department not found'
+            else:
+                body = request.form
+
+                if 'name' in body:
+                    department.name = request.form['name']
+
+                if 'short_name' in body:
+                    department.short_name = request.form['short_name']
+
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error updating department'
+
+        finally:
+            db.session.close()
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'message': 'Department updated successfully'}), returned_code
+    
+    @app.route('/departments/<department_id>', methods=['DELETE'])
+    def delete_department(department_id):
+        returned_code = 200
+        error_message = ''
+
+        try:
+            department = Department.query.get(department_id)
+
+            if not department:
+                returned_code = 404
+                error_message = 'Department not found'
+            else:
+                db.session.delete(department)
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error deleting department'
+
+        finally:
+            db.session.close()
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
+
+    @app.route('/employees/<employee_id>', methods=['DELETE'])
+    def delete_employee(employee_id):
+        returned_code = 200
+        error_message = ''
+
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if not employee:
+                returned_code = 404
+                error_message = 'Employee not found'
+            else:
+                db.session.delete(employee)
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error deleting employee'
+
+        finally:
+            db.session.close()
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
+
+
 
     return app
 
