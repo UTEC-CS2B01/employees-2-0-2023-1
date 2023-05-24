@@ -137,6 +137,37 @@ def create_app(test_config=None):
         else:
             return jsonify({'employees':employee_list}), returned_code
 
+    @app.route('/employees/<employee_id>', methods=['DELETE'])
+    def delete_employee(employee_id):
+        returned_code = 200
+        list_errors = []
+
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if employee is None:
+                list_errors.append('employee dont exist')
+                returned_code = 404
+            else:
+                db.session.delete(employee)
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error deleting employee', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting employee'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), returned_code
+
     @app.route('/departments', methods=['POST'])
     def create_department():
         returned_code = 200
