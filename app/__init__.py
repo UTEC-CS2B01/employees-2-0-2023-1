@@ -221,16 +221,50 @@ def create_app(test_config=None):
     @app.route('/departments', methods=['GET'])
     def get_departments():
         returned_code = 200
+        error_message = ''
+        department_list = []
+
         try:
             departments = Department.query.all()
             department_list = [department.serialize() for department in departments]
+
+            if not department_list:
+                returned_code = 404
+                error_message = 'No departments found'
         except Exception as e:
             print(e)
             print(sys.exc_info())
             returned_code = 500
+            error_message = 'Error retrieving departments'
 
-        return jsonify({'success': returned_code == 200, 'data': department_list}), returned_code
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
 
+        return jsonify({'success': True, 'data': department_list}), returned_code
+
+    @app.route('/employees', methods=['GET'])
+    def get_employees():
+        returned_code = 200
+        error_message = ''
+        employee_list = []
+
+        try:
+            employees = Employee.query.all()
+            employee_list = [employee.serialize() for employee in employees]
+
+            if not employee_list:
+                returned_code = 404
+                error_message = 'No employees found'
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+            error_message = 'Error retrieving employees'
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'data': employee_list}), returned_code
 
     return app
 
