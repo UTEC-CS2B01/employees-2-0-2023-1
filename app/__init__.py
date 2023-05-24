@@ -277,10 +277,10 @@ def create_app(test_config=None):
             if department:
                 try:
                     if 'name' in body:
-                        department.firstname = request.form['name']
+                        department.name = request.form['name']
 
                     if 'short_name' in body:
-                        department.lastname = request.form['short_name']  
+                        department.short_name = request.form['short_name']  
                     
                     db.session.commit()
 
