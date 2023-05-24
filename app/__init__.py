@@ -7,8 +7,6 @@ from .models import db, setup_db, Employee, Department
 from flask_cors import CORS
 from .utilities import allowed_file
 
-# Ejecutar el .sh
-# sh ejecutar.sh
 import os
 import sys
 
@@ -176,105 +174,32 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
-    return app
-
-    @app.route('/departments/<department_id>', methods=['PATCH'])
-    def modify_department(department_id):
-        returned_code = 200
-        try:
-            body = request.form
-
-            ids = [department.id for department in Department.query.all()]
-            if department_id in ids:
-               department = Department.query.filter_by(id=department_id)
-               if 'name' in body:
-                   department.name = request.form.get('name')
-               if 'shortname' in body:
-                   department.shortname = request.form.get('shortname')
-
-                db.session.commit()
-            else:
-                return_code = 400
-
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            db.session.rollback()
-            returned_code = 500
-
-        finally:
-            db.session.close()
-
-        if returned_code == 400:
-            return jsonify({'success': False,
-                            'message': 'Error deleting department',
-                            'errors': "Id doesn't exist in the database"}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error deleting department'}), returned_code
-        else:
-            return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
-
-
-
-
-    @app.route('/departments/<department_id>', methods=['DELETE'])
-    def delete_employee(department_id):
-        returned_code = 200
-        try:
-            ids = [department.id for department in Department.query.all()]
-            if department_id in ids:
-               department = Department.query.filter_by(id=department_id)
-               db.session.delete(department)
-               db.session.commit()
-            else:
-                return_code = 400
-
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            db.session.rollback()
-            returned_code = 500
-
-        finally:
-            db.session.close()
-
-        if returned_code == 400:
-            return jsonify({'success': False,
-                            'message': 'Error deleting department',
-                            'errors': "Id doesn't exist in the database"}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error deleting department'}), returned_code
-        else:
-            return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
-
 
     @app.route('/departments', methods=['POST'])
-    def create_departments():
+    def create_department():
+>>>>>>> b9f263d (Arreglando __init__)
         returned_code = 200
         list_errors = []
         try:
             body = request.form
-
             if 'name' not in body:
                 list_errors.append('name is required')
             else:
-                name = request.form.get('name')
+                name = request.form['name']
 
-            if 'shortname' not in body:
-                list_errors.append('shortname is required')
+            if 'short_name' not in body:
+                list_errors.append('short_name is required')
             else:
-                shortname = request.form['shortname']
+                short_name = request.form['short_name']
 
             if len(list_errors) > 0:
                 returned_code = 400
             else:
-                department = Department(name, shortname)
+                department = Department(name, short_name)
                 db.session.add(department)
                 db.session.commit()
 
                 department_id = department.id
-
-                db.session.commit()
 
         except Exception as e:
             print(e)
@@ -290,49 +215,7 @@ def create_app(test_config=None):
         elif returned_code == 500:
             return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
         else:
-            return jsonify({'id': department_id, 'success': True, 'message': 'Department Created successfully!'}), returned_code
-
-@app.route('/departments', methods=['POST'])
-def create_department():
-    returned_code = 200
-    list_errors = []
-    try:
-        body = request.form
-
-        if 'name' not in body:
-            list_errors.append('name is required')
-        else:
-            name = request.form['name']
-
-        if 'short_name' not in body:
-            list_errors.append('short_name is required')
-        else:
-            short_name = request.form['short_name']
-
-        if len(list_errors) > 0:
-            returned_code = 400
-        else:
-            department = Department(name, short_name)
-            db.session.add(department)
-            db.session.commit()
-
-            department_id = department.id
-
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        returned_code = 500
-
-    finally:
-        db.session.close()
-
-    if returned_code == 400:
-        return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), returned_code
-    elif returned_code == 500:
-        return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
-    else:
-        return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
+            return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
 
     return app
 
