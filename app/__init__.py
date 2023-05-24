@@ -121,6 +121,7 @@ def create_app(test_config=None):
                         'lastname': employee.lastname,
                         'age': employee.age,
                         'department': employee.department.name,
+                        'id': employee.id
                     })
 
         except Exception as e:
@@ -210,4 +211,36 @@ def create_app(test_config=None):
         else:
             return jsonify({'departments':department_list}), returned_code
     
+    @app.route('/departments/<department_id>', methods=['DELETE'])
+    def delete_department(department_id):
+        returned_code = 200
+        list_errors = []
+
+        try:
+            department = Department.query.get(department_id)
+
+            if department is None:
+                list_errors.append('department dont exist')
+                returned_code = 404
+            else:
+                db.session.delete(department)
+                db.session.commit()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error deleting department', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting department'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
+
+
     return app
