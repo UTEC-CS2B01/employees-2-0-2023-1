@@ -395,25 +395,38 @@ def create_app(test_config=None):
 # /employees/<employee_id>/departments
 ###########################################################################################
     
+    # POST Method
     @app.route('/employees/<employee_id>/departments', methods=['POST'])
     def assign_employee_department(employee_id):
         returned_code = 200
         error_message = ''
 
         try:
-            name = request.form.get('name')
-            short_name = request.form.get('short_name')
-
             employee = Employee.query.get(employee_id)
 
             if not employee:
                 returned_code = 404
                 error_message = 'Employee not found'
             else:
-                department = Department(name=name, short_name=short_name)
-                employee.department = department
-                db.session.add(department)
-                db.session.commit()
+                body = request.form
+
+                if 'name' not in body:
+                    returned_code = 400
+                    error_message = 'Department name is required'
+                elif 'short_name' not in body:
+                    returned_code = 400
+                    error_message = 'Department short_name is required'
+                else:
+                    name = request.form['name']
+                    short_name = request.form['short_name']
+
+                    department = Department(name, short_name)
+                    department.employees.append(employee)
+
+                    db.session.add(department)
+                    db.session.commit()
+
+                    department_id = department.id
 
         except Exception as e:
             print(e)
@@ -428,7 +441,7 @@ def create_app(test_config=None):
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
 
-        return jsonify({'success': True, 'message': 'Department assigned to employee successfully'}), returned_code
+        return jsonify({'success': True, 'department_id': department_id, 'message': 'Department assigned to employee successfully!'}), returned_code
 
 
     @app.route('/employees/<employee_id>/departments', methods=['GET'])
