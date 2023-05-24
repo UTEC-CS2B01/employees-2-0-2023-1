@@ -139,11 +139,11 @@ def create_app(test_config=None):
             db.session.close()
 
         if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error creating employee', 'errors': list_errors}), returned_code
+            return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), returned_code
         elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
+            return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
         else:
-            return jsonify({'id': department_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
+            return jsonify({'id': department_id, 'success': True, 'message': 'Department Created successfully!'}), returned_code
          
 
 
