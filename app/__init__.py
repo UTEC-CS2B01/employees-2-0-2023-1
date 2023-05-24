@@ -3,9 +3,9 @@ from flask import (
     request,
     jsonify
 )
-from .models import db, setup_db, Employee, Department
+from models import db, setup_db, Employee, Department
 from flask_cors import CORS
-from .utilities import allowed_file
+from utilities import allowed_file
 
 import os
 import sys
@@ -103,39 +103,71 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
     
-    @app.route('/departaments', methods=['POST'])
+    @app.route('/departaments', methods=['GET','POST','PATCH','DELETE'])
     def create_departament():
+
         returned_code = 200
         list_errors = []
-        try:
-            body = request.form
+        if request.method == 'GET':
+            try:
+                departaments = Department.query.all()
+                departaments = [departament.format() for departament in departaments]
+                return jsonify({'success': True, 'departaments': departaments}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                returned_code = 500
+            finally:
+                db.session.close()
+        if request.method == 'POST':
+            try:
+                body = request.form
 
-            if 'name' not in body:
-                list_errors.append('name is required')
-            else:
-                name = request.form.get('name')
+                if 'name' not in body:
+                    list_errors.append('name is required')
+                else:
+                    name = request.form.get('name')
 
-            if 'short_name' not in body:
-                list_errors.append('short name is required')    
-            else:
-                shot_name = request.form.get('short_name')
-            if len(list_errors) > 0:
-                returned_code = 400
-            else:
-                departament = Department(name, shot_name)
-                db.session.add(departament)
+                if 'short_name' not in body:
+                    list_errors.append('short name is required')    
+                else:
+                    shot_name = request.form.get('short_name')
+                if len(list_errors) > 0:
+                    returned_code = 400
+                else:
+                    departament = Department(name, shot_name)
+                    db.session.add(departament)
+                    db.session.commit()
+
+                    departament_id = departament.id
+
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                returned_code = 500
+
+            finally:
+                db.session.close()
+        if request.method == 'PATCH':
+        #Vamos a actualizar un departamento parcialmente
+            new_name = request.json.get('name')
+            new_short_name = request.json.get('short_name')
+
+            # Realiza la actualización de todos los registros
+            departments = Department.query.all()
+            for department in departments:
+                if new_name is not None:
+                    department.name = new_name
+                if new_short_name is not None:
+                    department.short_name = new_short_name
+                department.modified_at = datetime.utcnow()
+            #Cambiamos la fecha de actualización
                 db.session.commit()
+            return jsonify({'message': 'Departments updated successfully'})
 
-                departament_id = departament.id
-
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            db.session.rollback()
-            returned_code = 500
-
-        finally:
-            db.session.close()
+            
 
         if returned_code == 400:
             return jsonify({'success': False, 'message': 'Error creating departament', 'errors': list_errors}), returned_code
