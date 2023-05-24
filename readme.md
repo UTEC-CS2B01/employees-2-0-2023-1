@@ -26,7 +26,15 @@ curl -F "firstname=Juan" -F "lastname=perez" -F "age=20" -F "selectDepartment=ee
   "message": "Employee Created successfully!",
   "success": true
 }
->>>>>>> 5efae3b (0007 - fix errors in endpoints)
+### Create Department
+
+```
+curl -F "name=ingenieros" -F "shortname=ing" -X POST "http://127.0.0.1:5000/departments"
+```
+
+### Errors
+>>>>>>> 86c9ef8 (readme.md: Add error for department and instructions to create)
+>>>>>>> 36e513e (readme.md: Add error for department and instructions to create)
 
 curl -X POST http://localhost:5002/employees
 {
@@ -175,4 +183,12 @@ $ curl http://localhost:5002/departments?search=z
 
 ```
 
+```
+
+```
+{"errors":[
+  "name is required",
+  "shortname is required"],
+  "message":"Error creating department",
+  "success":false}
 ```
