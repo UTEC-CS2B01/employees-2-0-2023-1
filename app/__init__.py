@@ -420,7 +420,7 @@ def create_app(test_config=None):
                 employees = Employee.query.filter_by(department_id=department_id).all()
                 if len(employees) == 0:
                     list_errors.append('no employees found')
-                    returned_code = 400
+                    returned_code = 404
                 else: 
                     employee_list = []
                     for employee in employees:
@@ -442,5 +442,230 @@ def create_app(test_config=None):
         else:
             return jsonify({'employees':employee_list, 'success': True}), returned_code
 
+    @app.route('/employees/search', methods=['GET'])
+    def search_employees():
+        returned_code = 200
+        list_errors = []
+        try:
+            # Obtener los parámetros de la solicitud GET
+            search_query_firstname = request.args.get('firstname')
+            search_query_lastname = request.args.get('lastname')
+            search_query_age = request.args.get('age')
 
+            # Crear una lista de filtros vacía
+            filters = []
+
+            # Agregar filtros a la lista si se proporcionan los parámetros correspondientes
+            if search_query_firstname:
+                filters.append(Employee.firstname.ilike(f'%{search_query_firstname}%'))
+
+            if search_query_lastname:
+                filters.append(Employee.lastname.ilike(f'%{search_query_lastname}%'))
+
+            if search_query_age:
+                filters.append(Employee.age == search_query_age)
+
+            # Verificar si se proporcionó al menos un parámetro de búsqueda
+            if not filters:
+                list_errors.append('at least one search query is required')
+                returned_code = 400
+
+            # Realizar la consulta a la base de datos utilizando los filtros
+            employees = Employee.query.filter(*filters).all()
+
+            if len(employees) == 0:
+                list_errors.append('no employee found')
+                returned_code = 404
+            else:
+                employee_list = []
+                for employee in employees:
+                    employee_list.append({
+                        'id': employee.id,
+                        'firstname': employee.firstname,
+                        'lastname': employee.lastname,
+                    })
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error searching employees', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error searching employees'}), returned_code
+        else: 
+            return jsonify({'employees':employee_list, 'success':True}), returned_code 
+
+    @app.route('/departments/search', methods=['GET'])
+    def search_departments():
+        returned_code = 200
+        list_errors = []
+        try:
+            # Obtener los parámetros de la solicitud GET
+            search_query_name = request.args.get('name')
+            search_query_short_name = request.args.get('short_name')
+
+            # Crear una lista de filtros vacía
+            filters = []
+
+            # Agregar filtros a la lista si se proporcionan los parámetros correspondientes
+            if search_query_name:
+                filters.append(Department.name.ilike(f'%{search_query_name}%'))
+
+            if search_query_short_name:
+                filters.append(Department.short_name.ilike(f'%{search_query_short_name}%'))
+
+            # Verificar si se proporcionó al menos un parámetro de búsqueda
+            if not filters:
+                list_errors.append('at least one search query is required')
+                returned_code = 400
+
+            # Realizar la consulta a la base de datos utilizando los filtros
+            departments = Department.query.filter(*filters).all()
+
+            if len(departments) == 0:
+                list_errors.append('no department found')
+                returned_code = 404
+            else:
+                department_list = []
+                for department in departments:
+                    department_list.append({
+                        'id': department.id,
+                        'name': department.name,
+                        'short_name': department.short_name,
+                    })
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error searching departments', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error searching departments'}), returned_code
+        else: 
+            return jsonify({'departments':department_list, 'success':True}), returned_code 
+    
     return app
+
+
+
+
+
+
+"""
+search_query_firstname = request.args.get('firstname')
+search_query_lastname = request.args.get('lastname')
+search_query_age = request.args.get('age')
+
+if not search_query_firstname and not search_query_lastname and not search_query_age:
+    list_errors.append('at least one search query is required')
+    returned_code = 400
+
+employees = Employee.query.filter(
+    Employee.firstname.ilike(f'%{search_query_firstname}%'),
+    Employee.lastname.ilike(f'%{search_query_lastname}%'),
+    Employee.age == search_query_age
+).all()
+
+"""
+"""
+    BUSQUEDA CON 1 PARAMETRO: FIRSTNAME
+
+    @app.route('/employees/search', methods=['GET'])
+    def search_employees():
+        returned_code = 200
+        list_errors = []
+        try:
+            search_query = request.args.get('firstname')
+
+            if not search_query:
+                list_errors.append('search query is required')
+                returned_code = 400
+
+            employees = Employee.query.filter(Employee.firstname.ilike(f'%{search_query}%')).all()
+
+            if len(employees) == 0:
+                list_errors.append('no employee found')
+                returned_code = 404
+            else:
+                employee_list = []
+                for employee in employees:
+                    employee_list.append({
+                        'id': employee.id,
+                        'firstname': employee.firstname,
+                        'lastname': employee.lastname,
+                    })
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error searching employees', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error searching employees'}), returned_code
+        else: 
+            return jsonify({'employees':employee_list, 'success':True}), returned_code 
+
+    
+    return app
+"""
+
+"""
+    BUSQUEDA CON 3 PARAMETROS: FIRSTNAME, LASTNAME, AGE
+
+    @app.route('/employees/search', methods=['GET'])
+    def search_employees():
+        returned_code = 200
+        list_errors = []
+        try:
+            search_query_firstname = request.args.get('firstname')
+            search_query_lastname = request.args.get('lastname')
+            search_query_age = request.args.get('age')
+
+            if not search_query_firstname and not search_query_lastname and not search_query_age:
+                list_errors.append('at least one search query is required')
+                returned_code = 400
+
+            employees = Employee.query.filter(
+                Employee.firstname.ilike(f'%{search_query_firstname}%'),
+                Employee.lastname.ilike(f'%{search_query_lastname}%'),
+                Employee.age == search_query_age
+            ).all()
+
+            if len(employees) == 0:
+                list_errors.append('no employee found')
+                returned_code = 404
+            else:
+                employee_list = []
+                for employee in employees:
+                    employee_list.append({
+                        'id': employee.id,
+                        'firstname': employee.firstname,
+                        'lastname': employee.lastname,
+                    })
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error searching employees', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error searching employees'}), returned_code
+        else: 
+            return jsonify({'employees':employee_list, 'success':True}), returned_code 
+"""
