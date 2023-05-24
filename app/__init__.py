@@ -145,6 +145,52 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': department_id, 'success': True, 'message': 'Department Created successfully!'}), returned_code
          
+    @app.route('/departments', methods=['GET'])
+    def show_departaments():
+        returned_code = 200
+        list_errors = []
+        try:
+            departments = Department.query.all()
+            departments_serialized = [department.serialize() for department in departments]
+            
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
 
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
+        else:
+            if len(departments_serialized) == 0:
+                return jsonify({'success': True, 'message': 'No departments found'}), returned_code
+            return jsonify({'success': True, 'message': departments_serialized}), returned_code
+
+    @app.route('/employees', methods=['GET'])
+    def show_employees():
+        returned_code = 200
+        list_errors = []
+        try:
+            employees = Employee.query.all()
+            employees_serialized = [employee.serialize() for employee in employees]
+            
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
+        else:
+            if len(employees_serialized) == 0:
+                return jsonify({'success': True, 'message': 'No employees found'}), returned_code
+            return jsonify({'success': True, 'message': employees_serialized}), returned_code
 
     return app
