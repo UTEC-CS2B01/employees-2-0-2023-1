@@ -1,6 +1,18 @@
 # Structure Project
 
--Mantenimiento + app/ + **init**.py + models.py + controller.py + service.py + confi/ + local.py + qa.py + ingtegration.py + production.py + tests/ + test_controller.py + test_service.py
+- Mantenimiento
+  - app/ + **init**.py
+  - models.py
+  - controller.py
+  - service.py
+    - confi/
+      - local.py
+      - qa.py
+      - ingtegration.py
+      - production.py
+  - tests/
+    - test_controller.py
+    - test_service.py
 
 ## Operations
 
