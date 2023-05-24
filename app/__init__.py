@@ -541,16 +541,34 @@ def create_app(test_config=None):
 
     return app
 
-    @app.route('/employees', methods=['GET'])
-    def get_employees():
+    @app.route('/departments', methods=['POST'])
+    def create_departments():
+        returned_code = 200
+        list_errors = []
         try:
-            employees = Employee.query
-            if request.args.has("search"):
-                search_querry = request.args.get("search")
-                employees = employees.filter(Employee.firstname.ilike(f'%{search_querry}%'))
+            body = request.form
 
-            employees = employees.all()
-            employees_serialized = [employee.serialize() for employee in employees]
+            if 'name' not in body:
+                list_errors.append('name is required')
+            else:
+                name = request.form.get('name')
+
+            if 'shortname' not in body:
+                list_errors.append('shortname is required')
+            else:
+                shortname = request.form['shortname']
+
+            if len(list_errors) > 0:
+                returned_code = 400
+            else:
+                department = Department(name, shortname)
+                db.session.add(department)
+                db.session.commit()
+
+                department_id = department.id
+
+                db.session.commit()
+
         except Exception as e:
             print(e)
             print(sys.exc_info())
