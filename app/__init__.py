@@ -102,24 +102,7 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
-        
-    @app.route('/departments', methods=['POST'])
-    def create_department():
-        returned_code = 200
-        list_errors = []
-        try:
-            body: request.form
-            if 'name' not in body:
-                list_errors.append('name is required')
-            else:
-                name = request.form['name']
-            if 'shortname' not in body:
-                list_errors.append('shortname is required')
-            else:
-                shortname = request.form['shortname']
-            if len(list_errors) > 0:
-                returned_code = 400
-         
+    return app
 
 
     @app.route('/departments', methods=['POST'])
