@@ -103,4 +103,45 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
 
-    return app
+
+
+    @app.route('/departments', methods['POST'])
+    def create_department():
+        status_code = 200;
+        errors = [];
+
+        try:
+            body = request.form;
+
+            if 'name' not in body:
+                errors.append('name is required')
+
+            if 'short_name' not in body:
+                errors.append('short_name is required')
+
+            if len(errors) > 0:
+                status_code = 400
+            else:
+                name = body['name']
+                short_name = body['short_name']
+
+                department = Department(name, short_name)
+
+                department_id = department.id;
+
+                db.session.add(department)
+                db.session.commit()
+
+        except Exception as e:
+            print(e);
+            print(sys.exc_info())
+            db.session.rollback()
+            status_code = 500
+
+
+        if status_code == 400:
+            return jsonify({'success': False, 'message': 'Error creating department', 'errors': errors}), status_code;
+        elif status_code == 500:
+            return jsonify({'success': False, 'message': 'Error creating department'}), status_code;
+        else:
+            return jsonify({'id': department_id, 'success': True, 'message': 'Department Created successfully'}), status_code;
