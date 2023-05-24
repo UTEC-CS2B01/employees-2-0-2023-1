@@ -47,7 +47,7 @@ def create_app(test_config=None):
                 age = request.form['age']
 
             if 'selectDepartment' not in body:
-                list_errors.append('selectDepartment is required')
+                list_errors.append('department is required')
             else:
                 department_id = request.form['selectDepartment']
 
@@ -102,6 +102,39 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
+
+    @app.route('/employees', methods=['GET'])
+    def get_employees():
+        returned_code = 200
+        list_errors = []
+        try:
+            employees = Employee.query.all()
+            employee_list = []
+
+            if len(employees) == 0:
+                list_errors.append('no employees found')
+                returned_code = 400
+            else: 
+                for employee in employees:
+                    employee_list.append({
+                        'firstname': employee.firstname,
+                        'lastname': employee.lastname,
+                        'age': employee.age,
+                        'department': employee.department.name,
+                    })
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error getting employees', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error getting employees'}), returned_code
+        else:
+            return jsonify({'employees':employee_list}), returned_code
 
     @app.route('/departments', methods=['POST'])
     def create_department():
@@ -159,6 +192,7 @@ def create_app(test_config=None):
             else: 
                 for department in departments:
                     department_list.append({
+                        'id': department.id,
                         'name': department.name,
                         'short_name': department.short_name
                     })
