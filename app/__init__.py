@@ -148,7 +148,6 @@ def create_app(test_config=None):
     @app.route('/departments', methods=['GET'])
     def show_departaments():
         returned_code = 200
-        list_errors = []
         try:
             departments = Department.query.all()
             departments_serialized = [department.serialize() for department in departments]
@@ -161,10 +160,8 @@ def create_app(test_config=None):
         finally:
             db.session.close()
 
-        if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
+        if returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error founding department'}), returned_code
         else:
             if len(departments_serialized) == 0:
                 return jsonify({'success': True, 'message': 'No departments found'}), returned_code
@@ -173,7 +170,6 @@ def create_app(test_config=None):
     @app.route('/employees', methods=['GET'])
     def show_employees():
         returned_code = 200
-        list_errors = []
         try:
             employees = Employee.query.all()
             employees_serialized = [employee.serialize() for employee in employees]
@@ -187,10 +183,58 @@ def create_app(test_config=None):
             db.session.close()
 
         if returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
+            return jsonify({'success': False, 'message': 'Error founding employees'}), returned_code
         else:
             if len(employees_serialized) == 0:
                 return jsonify({'success': True, 'message': 'No employees found'}), returned_code
             return jsonify({'success': True, 'message': employees_serialized}), returned_code
+
+    @app.route('/employees/<id>', methods=['DELETE'])
+    def delete_employees(id):
+        returned_code = 200
+        try:
+            employee = Employee.query.get(id)
+            if employee is None:
+                return jsonify({'success': True, 'message': 'No employees found'}), returned_code
+            employee = Employee.query.filter_by(id = id)
+            employee.delete()
+            db.session.commit()
+            
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting employee'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee delete'}), returned_code
+
+    @app.route('/departments/<id>', methods=['DELETE'])
+    def delete_departments(id):
+        returned_code = 200
+        try:
+            department = Department.query.get(id)
+            if department is None:
+                return jsonify({'success': True, 'message': 'No department found'}), returned_code
+            department = Department.query.filter_by(id = id)
+            department.delete()
+            db.session.commit()
+            
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting department'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Department delete'}), returned_code
 
     return app
