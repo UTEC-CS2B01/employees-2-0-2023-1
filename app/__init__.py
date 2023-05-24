@@ -349,7 +349,7 @@ def create_app(test_config=None):
 
         serialized_employees = [employee.serialize() for employee in employees]
 
-        return jsonify({'employees': serialized_employees})
+        return jsonify({'employees': serialized_employees}), 200
 
     @app.route('/departments', methods=['GET'])
     def search_departments():
@@ -365,7 +365,7 @@ def create_app(test_config=None):
 
         serialized_departments = [department.serialize() for department in departments]
 
-        return jsonify({'departments': serialized_departments})
+        return jsonify({'departments': serialized_departments}), 200
 
 
     return app
