@@ -104,3 +104,8 @@ def create_app(test_config=None):
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
 
     return app
+
+    @app.route('/departments', methods=['POST'])
+        def create_department():
+        
+        
