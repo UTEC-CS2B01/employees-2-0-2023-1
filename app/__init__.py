@@ -120,7 +120,6 @@ def create_app(test_config=None):
                         'firstname': employee.firstname,
                         'lastname': employee.lastname,
                         'age': employee.age,
-                        'department': employee.department.name,
                         'id_employee': employee.id
                     })
 
@@ -135,7 +134,7 @@ def create_app(test_config=None):
         elif returned_code == 500:
             return jsonify({'success': False, 'message': 'Error getting employees'}), returned_code
         else:
-            return jsonify({'employees':employee_list}), returned_code
+            return jsonify({'employees':employee_list, 'success': True}), returned_code
 
     @app.route('/employees/<employee_id>', methods=['DELETE'])
     def delete_employee(employee_id):
@@ -309,7 +308,7 @@ def create_app(test_config=None):
         elif returned_code == 500:
             return jsonify({'success': False, 'message': 'Error getting deparments'}), returned_code
         else:
-            return jsonify({'departments':department_list}), returned_code
+            return jsonify({'departments':department_list, 'success': True}), returned_code
     
     @app.route('/departments/<department_id>', methods=['DELETE'])
     def delete_department(department_id):
@@ -381,6 +380,30 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': 'Deparmeent changed successfully!'}), return_code                            
 
-
+    @app.route('/employees/<employee_id>/departments', methods=['GET'])
+    def get_employee_departments(employee_id):
+        returned_code = 200
+        list_errors = []
+        try:
+            employee = Employee.query.get(employee_id)
+            
+            if employee is None:
+                list_errors.append('employee dont exist')
+                returned_code = 404
+            else:
+                # como un empleado solo tiene un departamento
+                department = Department.query.get(employee.department_id)
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+        if len(list_errors) > 0:
+            return jsonify({'success': False, 'message': 'Error getting employee department', 'errors': list_errors}), returned_code 
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error getting employee department'}), returned_code
+        else:
+            return jsonify({'employee':employee.firstname,'department': department.name, 'success': True}), returned_code                  
 
     return app
