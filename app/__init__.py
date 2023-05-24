@@ -105,6 +105,78 @@ def create_app(test_config=None):
 
     return app
 
+    @app.route('/employees/<id>', methods=['GET', 'DELETE', 'PATCH'])
+    def get_employee(id):
+        if request.method == 'GET':
+            try:
+                employee = Employee.query.get(id)
+                if employee is None:
+                    return jsonify({'success': False, 'message': 'Employee not found'}), 404
+                else:
+                    return jsonify({'success': True, 'employee': employee.format()}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                return jsonify({'success': False, 'message': 'Error getting employee'}), 500
+            finally:
+                db.session.close()
+        elif request.method == 'DELETE':
+            try:
+                employee = Employee.query.get(id)
+                if employee is None:
+                    return jsonify({'success': False, 'message': 'Employee not found'}), 404
+                else:
+                    db.session.delete(employee)
+                    db.session.commit()
+                    return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                return jsonify({'success': False, 'message': 'Error deleting employee'}), 500
+            finally:
+                db.session.close()
+
+        elif request.method == 'PATCH':
+            returned_code = 200
+            list_errors = []
+            try:
+                body = request.form
+                if 'firstname' not in body:
+                    list_errors.append('firstname is required')
+                if 'lastname' not in body:
+                    list_errors.append('lastname is required')
+                if 'age' not in body:
+                    list_errors.append('age is required')
+                if 'selectDepartment' not in body:
+                    list_errors.append('selectDepartment is required')
+                if len(list_errors) > 0:
+                    returned_code = 400
+                else:
+                    employee = Employee.query.get(id)
+                    if employee is None:
+                        return jsonify({'success': False, 'message': 'Employee not found'}), 404
+                    else:
+                        employee.firstname = request.form['firstname']
+                        employee.lastname = request.form['lastname']
+                        employee.age = request.form['age']
+                        employee.department_id = request.form['selectDepartment']
+                        db.session.commit()
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                returned_code = 500
+            finally:
+                db.session.close()
+            
+            if returned_code == 400:
+                return jsonify({'success': False, 'message': 'Error updating employee', 'errors': list_errors}), returned_code
+            elif returned_code == 500:
+                return jsonify({'success': False, 'message': 'Error updating employee'}), returned_code
+            else:
+                return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code
+            
+
     @app.route('/departments', methods=['GET'])
     def create_departments():
         returned_code = 200
@@ -137,3 +209,69 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
         else:
             return jsonify({'success': True, 'message': 'Department Created successfully!'}), returned_code
+        
+
+    @app.route('/departments/<id>', methods=['GET', 'DELETE', 'PATCH'])
+    def get_department(id):
+        if request.method == 'GET':
+            try: 
+                department = Department.query.get(id)
+                if department is None:
+                    return jsonify({'success': False, 'message': 'Department not found'}), 404
+                else:
+                    return jsonify({'success': True, 'department': department.format()}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                return jsonify({'success': False, 'message': 'Error getting department'}), 500
+            finally:
+                db.session.close()
+        elif request.method == 'DELETE':
+            try:
+                department = Department.query.get(id)
+                if department is None:
+                    return jsonify({'success': False, 'message': 'Department not found'}), 404
+                else:
+                    db.session.delete(department)
+                    db.session.commit()
+                    return jsonify({'success': True, 'message': 'Department deleted successfully!'}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                return jsonify({'success': False, 'message': 'Error deleting department'}), 500
+            finally:
+                db.session.close()
+        elif request.method == 'PATCH':
+            returned_code = 200
+            list_errors = []
+            try:
+                body = request.form
+                if 'name' not in body:
+                    list_errors.append('name is required')
+                if 'short_name' not in body:
+                    list_errors.append('short_name is required')
+                if len(list_errors) > 0:
+                    returned_code = 400
+                else:
+                    department = Department.query.get(id)
+                    if department is None:
+                        return jsonify({'success': False, 'message': 'Department not found'}), 404
+                    else:
+                        department.name = request.form['name']
+                        department.short_name = request.form['short_name']
+                        db.session.commit()
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                returned_code = 500
+            finally:
+                db.session.close()
+            
+            if returned_code == 400:
+                return jsonify({'success': False, 'message': 'Error updating department', 'errors': list_errors}), returned_code
+            elif returned_code == 500:
+                return jsonify({'success': False, 'message': 'Error updating department'}), returned_code
+            else:
+                return jsonify({'success': True, 'message': 'Department updated successfully!'}), returned_code
+        
