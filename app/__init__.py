@@ -121,7 +121,7 @@ def create_app(test_config=None):
                         'lastname': employee.lastname,
                         'age': employee.age,
                         'department': employee.department.name,
-                        'id': employee.id
+                        'id_employee': employee.id
                     })
 
         except Exception as e:
@@ -167,6 +167,75 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error deleting employee'}), returned_code
         else:
             return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), returned_code
+
+    @app.route('/employees/<employee_id>', methods=['PATCH'])
+    def update_employee(employee_id):
+        returned_code = 200
+        list_errors = []
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if employee is None:
+                list_errors.append('employee dont exist')
+                returned_code = 404
+            else:
+                body = request.form
+                # No creo que sea necesario actualizar el nombre y el apellido
+                # ya que una persona no podria cambiarse de nombre y apellido
+                # solo seria necesario poder cambiar la imagen, edad y el id del departamento.
+                """
+                if 'new' not in body:
+                    list_errors.append('newfirstname is required')
+                else:
+                    employee.firstname = request.form['newfirstname']
+                if 'newlastname' not in body:
+                    list_errors.append('newlastname is required')
+                else: 
+                    employee.lastname = request.form['newlastname']    
+                    """
+                if 'newage' not in body:
+                    list_errors.append('newage is required')
+                else:
+                    employee.age = request.form['newage']    
+                if 'newselectDepartment' not in body:
+                    list_errors.append('newdepartment is required')
+                else:
+                    employee.department_id = request.form['newselectDepartment']
+                if 'newimage' not in request.files:
+                    list_errors.append('newimage is required')
+                else:
+                    file = request.files['newimage']
+
+                    if file.filename == '':
+                        return jsonify({'success': False, 'message': 'No image selected'}), 400
+            
+                    if not allowed_file(file.filename):
+                        return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
+                    
+                    cwd = os.getcwd()
+
+                    employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+                    os.makedirs(employee_dir, exist_ok=True)
+
+                    upload_folder = os.path.join(cwd, employee_dir)
+
+                    file.save(os.path.join(upload_folder, file.filename))
+
+                    employee.image = file.filename
+                    db.session.commit()
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+        finally:
+            db.session.close()
+        if len(list_errors)>0:
+            return jsonify({'success': False, 'message': 'Error updating employee', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error updating employee'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code        
 
     @app.route('/departments', methods=['POST'])
     def create_department():
@@ -274,7 +343,7 @@ def create_app(test_config=None):
             return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
 
     @app.route('/departments/<department_id>',methods=['PATCH'])
-    def change_department(department_id):
+    def update_department(department_id):
         return_code = 200
         list_errors = []
 
@@ -295,7 +364,7 @@ def create_app(test_config=None):
                     list_errors.append('newshortname is required')
                 else:
                     department.short_name = request.form['newshortname']
-                    
+
             db.session.commit()
 
         except Exception as e:
