@@ -133,10 +133,7 @@ def create_app(test_config=None):
             employee = Employee.query.get(employee_id)
             if employee is None:
                 return jsonify({'success': False, 'message': 'Employee not found'})
-
-            employee.image = file.filename
-            db.session.commit()
-
+        
         except Exception as e:
             print(e)
             print(sys.exc_info())
@@ -155,13 +152,19 @@ def create_app(test_config=None):
         
         
         
+
+
+
+
+
+
     @app.route('/departments', methods=['POST', 'GET', 'PATCH', 'DELETE'])
     def create_departments():
         returned_code = 200
         list_errors = []
         try:
-            if request.method == 'POST':
-                body = request.form
+        if request.method == 'POST':
+            body = request.form
 
             if 'name' not in body:
                 list_errors.append('name is required')
