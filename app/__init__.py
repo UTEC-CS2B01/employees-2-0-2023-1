@@ -457,7 +457,7 @@ def create_app(test_config=None):
                 returned_code = 404
                 error_message = 'Employee not found'
             else:
-                departments = employee.departments
+                departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
 
         except Exception as e:
             print(e)
@@ -498,9 +498,9 @@ def create_app(test_config=None):
                         returned_code = 404
                         error_message = 'Department not found'
                     else:
-                        employee.departments = [department]
+                        department.employees.append(employee)
 
-                        db.session.add(employee)
+                        db.session.add(department)
                         db.session.commit()
 
         except Exception as e:
@@ -529,9 +529,11 @@ def create_app(test_config=None):
                 returned_code = 404
                 error_message = 'Employee not found'
             else:
-                employee.departments = []
+                departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
 
-                db.session.add(employee)
+                for department in departments:
+                    department.employees.remove(employee)
+
                 db.session.commit()
 
         except Exception as e:
@@ -545,6 +547,7 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
+
 
 
     return app
