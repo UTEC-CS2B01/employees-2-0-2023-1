@@ -144,5 +144,36 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
         else:
             return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
+        
+    @app.route('/departments', methods=['GET'])
+    def get_departments():
+        returned_code = 200
+        list_errors = []
+        try:
+            departments = Department.query.all()
+            department_list = []
 
+            if len(departments) == 0:
+                list_errors.append('no departments found')
+                returned_code = 400
+            else: 
+                for department in departments:
+                    department_list.append({
+                        'name': department.name,
+                        'short_name': department.short_name
+                    })
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+        finally:
+            db.session.close()
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error getting departments', 'errors': list_errors}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error getting deparments'}), returned_code
+        else:
+            return jsonify({'departments':department_list}), returned_code
+    
     return app
