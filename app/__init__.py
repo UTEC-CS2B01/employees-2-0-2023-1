@@ -273,5 +273,6 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
 
-
+    #@app.route('/departments',methods=['PATCH'])
+    #def change_department( )
     return app
