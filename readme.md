@@ -25,3 +25,12 @@ curl -F "first_name=Juan" -F "last_name=perez" -F "job_title=Reclutador" -F "sel
   "success": false
 }
 ```
+
+# Tarea 1
+
+1.- /employees - GET/POST/PATCH/DELETE
+2.- /departments - GET/POST/PATCH/DELETE
+3.- /employees/<id>/departments - GET/POST/PATCH/DELETE
+4.- /employees/<id>/departments/<id> - GET/POST/PATCH/DELETE
+5.- Search - /employees?search=<q>
+6.- Search - /departments?search=<q>
