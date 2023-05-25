@@ -202,10 +202,10 @@ def create_app(test_config=None):
         employee_list = []
 
         try:
+            #SEARCH
             search_query = request.args.get('search', None)
             if search_query:
                 employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
-
                 serialized_employees = [employee.serialize() for employee in employees]
 
                 return jsonify({'employees': serialized_employees}), returned_code
@@ -442,6 +442,14 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
+            search_query = request.args.get('search_query', None)
+            if search_query:
+                departments = Department.query.filter(Department.employees.any(id=employee_id)).filter(or_(Department.name.ilike(f'%{search_query}%'), Department.short_name.ilike(f'%{search_query}%'))).all()
+                serialized_employee = [employee.serialize() for employee in departments]
+                
+            else:
+                departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
+
             employee = Employee.query.get(employee_id)
 
             if not employee:
@@ -540,5 +548,32 @@ def create_app(test_config=None):
         return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
 
 
+    #SEARCH Method
+    @app.route('/employees/search', methods=['POST'])
+    def search_employees():
+        returned_code = 200
+        error_message = ''
+
+        try:
+            body = request.form
+
+            if 'search_term' not in body:
+                returned_code = 400
+                error_message = 'Search term is required'
+            else:
+                search_term = request.form['search_term']
+                employees = Employee.query.filter(Employee.name.ilike(f'%{search_term}%')).all()
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+            error_message = 'Error searching employees'
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        employee_list = [employee.serialize() for employee in employees]
+        return jsonify({'success': True, 'employees': employee_list}), returned_code
 
     return app
