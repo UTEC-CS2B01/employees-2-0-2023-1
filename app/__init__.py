@@ -16,7 +16,7 @@ def create_app(test_config=None):
         app.config['UPLOAD_FOLDER'] = 'static/employees'
         setup_db(app)
         CORS(app, origins='*')
-
+    #
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
