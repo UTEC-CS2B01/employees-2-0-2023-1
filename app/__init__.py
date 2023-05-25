@@ -7,7 +7,6 @@ from .models import db, setup_db, Employee
 from .models import db, setup_db, Department
 
 from flask_cors import CORS
-# from flask_sqlalchemy import or_
 from .utilities import allowed_file
 
 import os
@@ -24,371 +23,304 @@ def create_app(test_config=None):
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        
         return response
     
-
+    # post:
     @app.route('/employees', methods=['POST'])
     def create_employee():
-        returned_code = 200
+        returned_code= 200
         list_errors = []
         try:
             body = request.form
-
             if 'firstname' not in body:
-                list_errors.append('firstname is required')
+                list_errors.append('Nombre es requerido ')
             else:
                 firstname = request.form.get('firstname')
-
+            
             if 'lastname' not in body:
-                list_errors.append('lastname is required')    
+                list_errors.append('Apellido es requerido')
             else:
-                lastname = request.form['lastname']
-
+                lastname = request.form.get('lastname') 
+            
             if 'age' not in body:
-                list_errors.append('age is required')    
+                list_errors.append('Edad es requerida')
             else:
-                age = request.form['age']
-
+                age = request.form.get('age')
             if 'selectDepartment' not in body:
-                list_errors.append('selectDepartment is required')
+                list_errors.append('SelecctDepartment es requerido')
             else:
-                department_id = request.form['selectDepartment']
+                department_id = request.form.get('selectDepartment')
 
             if 'image' not in request.files:
-                list_errors.append('image is required')
+                list_errors.append('Imagen es requerida')
             else:
                 if 'image' not in request.files:
-                    return jsonify({'success': False, 'message': 'No image provided by the employee'}), 400
-        
-                file = request.files['image']
-
-                if file.filename == '':
-                    return jsonify({'success': False, 'message': 'No image selected'}), 400
-        
-                if not allowed_file(file.filename):
-                    return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-        
-
+                    list_errors.append('Imagen es Requerida')
+                else:
+                    if 'image' not in request.files:
+                        return jsonify({'success': False, 'message': 'Imagen no agregada'}),400
+                    file = request.files['image']
+                    if file.filename == '':
+                        return jsonify({'success': False, 'message': 'Imagen no agregada'}),400
+                    if not allowed_file(file.filename):
+                        return jsonify({'success': False, 'message': 'Imagen no permitida'}), 400
             if len(list_errors) > 0:
                 returned_code = 400
             else:
                 employee = Employee(firstname, lastname, age, department_id)
                 db.session.add(employee)
                 db.session.commit()
-
                 employee_id = employee.id
-
+                
                 cwd = os.getcwd()
-
-                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee_id)
                 os.makedirs(employee_dir, exist_ok=True)
 
                 upload_folder = os.path.join(cwd, employee_dir)
-
                 file.save(os.path.join(upload_folder, file.filename))
-
                 employee.image = file.filename
                 db.session.commit()
-
         except Exception as e:
             print(e)
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
-
         finally:
             db.session.close()
-
         if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error creating employee', 'errors': list_errors}), returned_code
+            return jsonify({'success': False, 'message': 'Error al crear empleado', 'errors': list_errors}), returned_code
         elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
+            return jsonify({'success': False, 'message': 'Error al crear empleado'}), returned_code
         else:
-            return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
-
-    @app.route('/employees', methods=['GET'])
-    def get_employees():
-        employees = Employee.query.all()
-        employees_list = []
-        for employee in employees:
-            employee_data = {
-                'id': employee.id,
-                'firstname': employee.firstname,
-                'lastname': employee.lastname,
-                'age': employee.age,
-                'is_active': employee.is_active,
-                'department_id': employee.department_id,
-                'image': employee.image
-            }
-            employees_list.append(employee_data)
-
-        return jsonify(employees_list), 200
-    
-    @app.route('/employees/<int:employee_id>', methods=['PATCH'])
-    def update_employee(employee_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
+            return jsonify({'success': True, 'message': 'Empleado creado exitosamente'}), returned_code
         
-        employee_data = request.get_json()
-
-        for key, value in employee_data.items():
-            setattr(employee, key, value)
-        db.session.commit()
-        db.session.close()
-        return jsonify({'success': True, 'message': 'Employee updated successfully!'}), 200
-    
-    @app.route('/employees/<int:employee_id>', methods=['DELETE'])
-    def delete_employee(employee_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-        
-        db.session.delete(employee)
-        db.session.commit()
-        db.session.close()
-        return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), 200
-
-
-    
     @app.route('/departments', methods=['POST'])
-    def create_departments():
-        returned_code = 200
+    def create_department():
+        returned_code= 200
         list_errors = []
         try:
             body = request.form
             if 'name' not in body:
-                list_errors.append('name is required')
+                list_errors.append('Nombre es requerido')
             else:
                 name = request.form.get('name')
-            
             if 'short_name' not in body:
-                list_errors.append('shortname is required')    
+                list_errors.append('Short_name es requerido')
             else:
-                short_name = request.form.get['shortname']
-
+                short_name = request.form.get('short_name')
             if len(list_errors) > 0:
                 returned_code = 400
             else:
                 department = Department(name, short_name)
                 db.session.add(department)
                 db.session.commit()
-
                 department_id = department.id
-                
+
         except Exception as e:
             print(e)
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
-                       
         finally:
             db.session.close()
-
         if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), returned_code
+            return jsonify({'success': False, 'message': 'Error al crear departamento', 'errors': list_errors}), returned_code
         elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
+            return jsonify({'success': False, 'message': 'Error al crear departamento'}), returned_code
         else:
-            return jsonify({'id': department_id, 'success': True, 'message': 'Department Created successfully!'}), returned_code
+            return jsonify({'success': True, 'message': 'Departamento creado exitosamente'}), returned_code
+        
+    # get:
+    @app.route('/employees', methods=['GET'])
+    def get_employees():
+        returned_code= 200
+        error_message = ''
+        list_errrors = []
+        try:
+            search_query = request.args.get('search_query', None)
+            if search_query:
+                employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
+                serialized_employees = [employee.serialize() for employee in employees]
+                return jsonify({'employees': serialized_employees}), returned_code
+            
+            employees = Employee.query.all()
+            employee_list = [employee.serialize() for employee in employees]          
 
+            if not employee_list:
+                returned_code = 404 
+                error_message = 'No se encontraron empleados'
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+            error_message = 'Error al obtener empleados'
+        finally:
+            db.session.close()
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        
+        return jsonify({'success': True, 'employees': employee_list}), returned_code
+    
     @app.route('/departments', methods=['GET'])
     def get_departments():
-        departments = Department.query.all()
-        departments_list = []
-        for department in departments:
-            department_data = {
-                'id': department.id,
-                'name': department.name,
-                'short_name': department.short_name
-            }
-            departments_list.append(department_data)
-
-        return jsonify(departments_list), 200
-    
-    @app.route('/departments/<int:department_id>', methods=['PATCH'])
-    def update_department(department_id):
-        department = Department.query.get(department_id)
-        if department is None:
-            return jsonify({'success': False, 'message': 'Department not found'}), 404
-        
-        department_data = request.get_json()
-
-        for key, value in department_data.items():
-            setattr(department, key, value)
-        db.session.commit()
-        db.session.close()
-        return jsonify({'success': True, 'message': 'Department updated successfully!'}), 200
-    
-    @app.route('/departments/<int:department_id>', methods=['DELETE'])
-    def delete_department(department_id):
-        department = Department.query.get(department_id)
-        if department is None:
-            return jsonify({'success': False, 'message': 'Department not found'}), 404
-        
-        db.session.delete(department)
-        db.session.commit()
-        db.session.close()
-        return jsonify({'success': True, 'message': 'Department deleted successfully!'}), 200
-    
-
-
-
-    @app.route('/employees/<employees_id>/departments', methods=['POST'])
-    def create_employee_department(id):
-        employee = Employee.query.get(id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-        data = request.get_json()
-        department = Department(name=data['name'], short_name=data['short_name'])
-        department.employees.append(employee)
-        db.session.add(department)
-        db.session.commit()
-
-        return jsonify(department.serialize()), 201
-    
-    @app.route('/employees/<employees_id>/departments', methods=['GET'])
-    def get_employee_departments(id):
-        employee = Employee.query.get(id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-
-        departments = employee.departments
-        departments_list = []
-        for department in departments:
-            department_data = {
-                'id': department.id,
-                'name': department.name,
-                'short_name': department.short_name
-            }
-            departments_list.append(department_data)
-
-        return jsonify(departments_list), 200
-    
-    @app.route('/employees/<employees_id>/departments', methods = ['PATCH'])
-    def update_employee_department(employee_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-        department_data = request.get_json()
-        department_id = department_data.get('department_id')
-
-        if not department_id:
-            return jsonify({'success': False, 'message': 'Department ID is required'}), 400 
-        
-    @app.route('/employees/<employees_id>/departments', methods = ['DELETE'])
-    def delete_employee_department(employee_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-        if employee.department is None:
-            return jsonify({'success': False, 'message': 'Employee does not belong to any department'}), 400
-        employee.department = None
-        db.session.commit()
-
-        return jsonify({'success': True, 'message': 'Employee removed from department successfully!'}), 200
-    
-    
-
-    @app.route('/employees/<employees_id>/departments/<departments_id>', methods=['POST'])
-    def add_employee_department(employee_id, department_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-        department = Department.query.get(department_id)
-        if department is None:
-            return jsonify({'success': False, 'message': 'Department not found'}), 404
-
-        employee.departments.append(department)
-        db.session.commit() 
-        return jsonify({'success': True, 'message': 'Employee added to department successfully!'}), 200
-    
-
-    @app.route('/employees/<employee_id>/departments/<departments_id>', methods=['GET'])
-    def get_employee_department(employee_id, department_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-        department = Department.query.get(department_id)
-        if department is None:
-            return jsonify({'success': False, 'message': 'Department not found'}), 404
-        
-        if employee.department != department:
-            return jsonify({'success': False, 'message': 'Employee does not belong to this department'}), 400
-        
-        return jsonify(employee.department.serialize()), 200
-    
-    @app.route('/employees/<employee_id>/departments/<department_id>', methods=['PATCH'])
-    def update_employeeanddepartment(employee_id, department_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
-        department = Department.query.get(department_id)
-        if department is None:
-            return jsonify({'success': False, 'message': 'Department not found'}), 404
-        if employee.department != department:
-            return jsonify({'success': False, 'message': 'Employee does not belong to this department'}), 404
-        
-        department_data = request.get_json()
-        for key, value in department_data.items():
-            setattr(department, key, value)
-        db.session.commit()
-
-        return jsonify(employee.department.serialize()), 200
+        returned_code= 200
+        error_message = ''
+        list_errrors = []
+        try:
+            search_query = request.args.get('search_query', None)
+            if search_query:
+                departments = Department.query.filter(Department.name.like('%{}%'.format(search_query))).all()
+                serialized_departments = [department.serialize() for department in departments]
+                return jsonify({'departments': serialized_departments}), returned_code
             
+            departments = Department.query.all()
+            department_list = [department.serialize() for department in departments]          
+
+            if not department_list:
+                returned_code = 404 
+                error_message = 'No se encontraron departamentos'
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            returned_code = 500
+            error_message = 'Error al obtener departamentos'
+        finally:
+            db.session.close()
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        
+        return jsonify({'success': True, 'departments': department_list}), returned_code
     
-    @app.route('/employees/<employee_id>/departments/<department_id>', methods=['DELETE'])
-    def delete_employeewithdepartment(employee_id, department_id):
-        employee = Employee.query.get(employee_id)
-        if employee is None:
-            return jsonify({'success': False, 'message': 'Employee not found'}), 404
+    #patch:
+    @app.route('/employees/<employee_id>', methods=['PATCH'])
+    def update_employee(employee_id):
+        returned_code= 200
+        error_message = ''
+        try:
+            employee = Employee.query.get(employee_id)  
+            if not employee:
+                returned_code= 404
+                error_message = 'Empleado no encontrado'
+            else:
+                body = request.form
+                if 'firstname' in body:
+                    employee.firstname = request.form('firstname')
+                if 'lastname' in body:
+                    employee.lastname = request.form('lastname')
+                if 'age' in body:
+                    employee.age = request.form('age')
+                print(request.form['is_active'])
+                if 'is_active' in body:
+                    employee.is_active = True if request.form['is_active'] == 'true' else False
+                db.session.commit()
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error al actualizar empleado'
+        finally:
+            db.session.close()
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
         
-        department = Department.query.get(department_id)
-        if department is None:
-            return jsonify({'success': False, 'message': 'Department not found'}), 404
-        
-        if employee.department != department:
-            return jsonify({'success': False, 'message': 'Employee does not belong to this department'}), 400
-        
-        employee.department = None
-        db.session.commit()
+        return jsonify({'success': True, 'message': 'Empleado actualizado exitosamente'}), returned_code
+    @app.route('/departments/<department_id>', methods=['PATCH'])
+    def update_department(department_id):
+        returned_code= 200
+        error_message = ''  
+        try:
+            department = Department.query.get(department_id)
+            if not department:
+                returned_code= 404
+                error_message = 'Departamento no encontrado'
+            else:
+                body = request.form
+                if 'name' in body:
+                    department.name = request.form('name')
+                if 'short_name' in body:
+                    department.short_name = request.form('short_name')
+                db.session.commit()
 
-        return jsonify({'success': True, 'message': 'Employee department deleted successfully'}), 200
-
-
-    @app.route('/employees', methods=['GET'])
-    def search_employees():
-        search_query = request.args.get('search', '')
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error al actualizar departamento'
+        finally:
+            db.session.close()
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
         
-        employees = Employee.query.filter(
-            or_(
-                Employee.firstname.ilike(f'%{search_query}%'),
-                Employee.lastname.ilike(f'%{search_query}%')
-            )
-        ).all()
-        
-        serialized_employees = [employee.serialize() for employee in employees]
-        
-        return jsonify(serialized_employees), 200
-
-    @app.route('/departments', methods=['GET'])
-    def search_departments():
-        search_query = request.args.get('search', '')
-        
-        departments = Department.query.filter(
-            or_(
-                Department.name.ilike(f'%{search_query}%'),
-                Department.short_name.ilike(f'%{search_query}%')
-            )
-        ).all()
-        
-        serialized_departments = [department.serialize() for department in departments]
-        
-        return jsonify(serialized_departments), 200
-
+        return jsonify({'success': True, 'message': 'Departamento actualizado exitosamente'}), returned_code
     
+    #delete:
+    @app.route('/employees/<employee_id>', methods=['DELETE'])
+    def delete_employee(employee_id):
+        returned_code= 200
+        error_message = ''
+        try:
+            employee = Employee.query.get(employee_id)
+            if not employee:
+                returned_code= 404
+                error_message = 'Empleado no encontrado'
+            else:
+                db.session.delete(employee)
+                db.session.commit()
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error al eliminar empleado'
+        finally:
+            db.session.close()
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        
+        return jsonify({'success': True, 'message': 'Empleado eliminado exitosamente'}), returned_code
+    @app.route('/departments/<department_id>', methods=['DELETE'])
+    def delete_department(department_id):
+        returned_code= 200
+        error_message = ''
+        try:
+            department = Department.query.get(department_id)
+            if not department:
+                returned_code= 404
+                error_message = 'Departamento no encontrado'
+            else:
+                db.session.delete(department)
+                db.session.commit()
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+            error_message = 'Error al eliminar departamento'
+        finally:
+            db.session.close()
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        
+        return jsonify({'success': True, 'message': 'Departamento eliminado exitosamente'}), returned_code
 
+    # #postCOLLECTION:
+    # @app.rooute('/employess/employee_id/departments', methods=['POST'])
+    # def assign_employee_department(employee_id):
+    #     returned_code= 200
+    #     error_message = ''
+    #     try:
+    #         employee = request.query.get['employee_id']
+    #         if not employee:
+    #            returned_code= 404
+    #             error_message = 'Empleado no encontrado'
+    #         else:
+    #             body = request.form
+    #             if 'name' in 
     return app
 
 
 
+            
