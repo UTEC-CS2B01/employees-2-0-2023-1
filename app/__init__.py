@@ -354,15 +354,166 @@ def create_app(test_config=None):
                 returned_code = 400
                 return jsonify({'success':False, 'message':'Department id not found'}), returned_code  
 
-
-
-    @app.route('/employees/<id>', methods=['GET','PATCH', 'DELETE'])
-    def employee_id():
+    @app.route('/employee/<id>', methods=['GET','PATCH', 'DELETE'])
+    def employee_id(id):
         if request.method == 'GET':
-            return 0
+            employee = Employee.query.filter_by(id=id).first()
+            if employee:
+                return jsonify({'success':True, 'data':employee.serialize()}),200
+            else:
+                return jsonify({'success':False, 'message': 'employee not found'}),400
+
         if request.method == 'PATCH':
-            return 0
+            returned_code = 200
+            body = request.form
+
+            employee = Employee.query.filter_by(id=id).first()
+
+            if employee:
+                try:
+                    if 'firstname' in body:
+                        employee.firstname = request.form['firstname']
+
+                    if 'lastname' in body:
+                        employee.lastname = request.form['lastname']  
+
+                    if 'age' in body:
+                        employee.age = request.form['age'] 
+
+                    if 'selectDepartment'in body:
+                        employee.department_id = request.form['selectDepartment']
+
+                    if 'image' in request.files:
+                
+                        file = request.files['image']
+
+                        if file.filename == '':
+                            return jsonify({'success': False, 'message': 'No image selected'}), 400
+                
+                        if not allowed_file(file.filename):
+                            return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
+
+                        cwd = os.getcwd()
+
+                        employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+                        os.makedirs(employee_dir, exist_ok=True)
+
+                        upload_folder = os.path.join(cwd, employee_dir)
+
+                        file.save(os.path.join(upload_folder, file.filename))
+
+                        employee.image = file.filename
+                        db.session.commit()
+                    
+                    db.session.commit()
+                    employee_id = employee.id
+
+                except Exception as e:
+                    print(e)
+                    print(sys.exc_info())
+                    db.session.rollback()
+                    returned_code = 500
+
+                finally:
+                    db.session.close()
+
+                if returned_code == 500:
+                    return jsonify({'success': False, 'message': 'Error updating employee'}), returned_code
+                else:
+                    return jsonify({'id': employee_id, 'success': True, 'message': 'Employee updated successfully!'}), returned_code
+
+            else:
+                returned_code = 400
+                return jsonify({'success':False, 'message':'Id not found'}), returned_code
+
         if request.method == 'DELETE':
-            return 0
+            returned_code = 200
+            employee = Employee.query.filter_by(id=id).first()
+            if employee:
+                try:
+                    db.session.delete(employee)
+                    db.session.commit()
+                except Exception as e:
+                    print(e)
+                    print(sys.exc_info())
+                    db.session.rollback()
+                    returned_code = 500
+                finally:
+                    db.session.close()
+
+                if returned_code == 500:
+                    return jsonify({'success': False, 'message': 'Error deleting employee'}), returned_code
+                else:
+                    return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), returned_code
+            else:
+                returned_code = 400
+                return jsonify({'success':False, 'message':'Id not found'}), returned_code
+            
+    @app.route('/department/<id>', methods=['GET','PATCH', 'DELETE'])
+    def department_id(id):
+        if request.method == 'GET':
+            department = Department.query.filter_by(id=id).first()
+            if department:
+                return jsonify({'success':True, 'data':department.serialize()}),200
+            else:
+                return jsonify({'success':False, 'message': 'employee not found'}),400
+        if request.method == 'PATCH':
+            body = request.form
+
+            department = Department.query.filter_by(id=id).first()
+
+            if department:
+                try:
+                    if 'name' in body:
+                        department.name = request.form['name']
+
+                    if 'short_name' in body:
+                        department.short_name = request.form['short_name']  
+                    
+                    db.session.commit()
+
+                    department_id = department.id
+
+                except Exception as e:
+                    print(e)
+                    print(sys.exc_info())
+                    db.session.rollback()
+                    returned_code = 500
+
+                finally:
+                    db.session.close()
+
+                if returned_code == 500:
+                    return jsonify({'success': False, 'message': 'Error updating department'}), returned_code
+                else:
+                    return jsonify({'id': department_id, 'success': True, 'message': 'Department updated successfully!'}), returned_code
+
+            else:
+                returned_code = 400
+                return jsonify({'success':False, 'message':'Department id not found'}), returned_code
+
+        if request.method == 'DELETE':
+            department = Department.query.filter_by(id=id).first()
+            if department:
+                try:
+                    db.session.delete(department)
+                    db.session.commit()
+
+                except Exception as e:
+                    print(e)
+                    print(sys.exc_info())
+                    db.session.rollback()
+                    returned_code = 500
+                finally:
+                    db.session.close()
+
+                if returned_code == 500:
+                    return jsonify({'success': False, 'message': 'Error deleting department'}), returned_code
+                else:
+                    return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
+            else:
+                returned_code = 400
+                return jsonify({'success':False, 'message':'Department id not found'}), returned_code  
+
     return app
     
