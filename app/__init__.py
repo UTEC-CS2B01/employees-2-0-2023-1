@@ -203,7 +203,7 @@ def create_app(test_config=None):
 
         try:
             #SEARCH
-            search_query = request.args.get('search', None)
+            search_query = request.args.get('search_query', None)
             if search_query:
                 employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
                 serialized_employees = [employee.serialize() for employee in employees]
@@ -436,39 +436,39 @@ def create_app(test_config=None):
 
 
     # GET Method
-    @app.route('/employees/<employee_id>/departments', methods=['GET'])
-    def get_employee_departments(employee_id):
-        returned_code = 200
-        error_message = ''
+    #@app.route('/employees/<employee_id>/departments', methods=['GET'])
+    #def get_employee_departments(employee_id):
+    #    returned_code = 200
+    #    error_message = ''
 
-        try:
-            search_query = request.args.get('search_query', None)
-            if search_query:
-                departments = Department.query.filter(Department.employees.any(id=employee_id)).filter(or_(Department.name.ilike(f'%{search_query}%'), Department.short_name.ilike(f'%{search_query}%'))).all()
-                serialized_employee = [employee.serialize() for employee in departments]
+        # try:
+        #     search_query = request.args.get('search_query', None)
+        #     if search_query:
                 
-            else:
-                departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
+        #         serialized_employee = [employee.serialize() for employee in departments]
 
-            employee = Employee.query.get(employee_id)
+        #     else:
+        #         departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
 
-            if not employee:
-                returned_code = 404
-                error_message = 'Employee not found'
-            else:
-                departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
+        #     employee = Employee.query.get(employee_id)
 
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            returned_code = 500
-            error_message = 'Error retrieving employee departments'
+        #     if not employee:
+        #         returned_code = 404
+        #         error_message = 'Employee not found'
+        #     else:
+        #         departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
 
-        if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
+        # except Exception as e:
+        #     print(e)
+        #     print(sys.exc_info())
+        #     returned_code = 500
+        #     error_message = 'Error retrieving employee departments'
 
-        department_list = [department.serialize() for department in departments]
-        return jsonify({'success': True, 'departments': department_list}), returned_code
+        # if returned_code != 200:
+        #     return jsonify({'success': False, 'message': error_message}), returned_code
+
+        # department_list = [department.serialize() for department in departments]
+        # return jsonify({'success': True, 'departments': department_list}), returned_code
 
 
     # PATCH Method
