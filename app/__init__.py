@@ -110,7 +110,65 @@ def create_app(test_config=None):
                 return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
             else:
                 return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
-    
+            
+        if request.method == 'PATCH':
+            new_firstname = request.json.get('firstname')
+            new_lastname = request.json.get('lastname')
+            new_age = request.json.get('age')
+            new_department_id = request.json.get('selectDepartment')
+
+            try:
+                employees = Employee.query.all()
+
+                for employee in employees:
+                    # Actualizar los campos solo si se proporcionan nuevos valores
+                    if new_firstname is not None:
+                        employee.firstname = new_firstname
+
+                    if new_lastname is not None:
+                        employee.lastname = new_lastname
+
+                    if new_age is not None:
+                        employee.age = new_age
+
+                    if new_department_id is not None:
+                        employee.department_id = new_department_id
+                        
+                employee.modified_at = datetime.utcnow()
+                db.session.commit()
+
+                return jsonify({'success': True, 'message': 'Employees updated successfully'}), 200
+
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error updating employees'}), 500
+
+            finally:
+                db.session.close()
+
+        if request.method == 'DELETE':
+            try:
+                # Eliminar todos los departamentos de la tabla
+                departments = Department.query.all()
+
+                for department in departments:
+                    db.session.delete(department)
+
+                db.session.commit()
+
+                return jsonify({'success': True, 'message': 'Departments deleted successfully'}), 200
+
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error deleting departments'}), 500
+
+            finally:
+                db.session.close()        
+
     @app.route('/departaments', methods=['GET', 'POST', 'PATCH', 'DELETE'])
     def create_departament():
         if request.method == 'GET':
@@ -177,11 +235,10 @@ def create_app(test_config=None):
                 for department in departments:
                     if new_name is not None:
                         department.name = new_name
-                        department.modified_at = datetime.utcnow()
                     if new_short_name is not None:
                         department.short_name = new_short_name
-                        department.modified_at = datetime.utcnow()
-
+                
+                department.modified_at = datetime.utcnow()
                 db.session.commit()
 
                 return jsonify({'message': 'Departments updated successfully'})
