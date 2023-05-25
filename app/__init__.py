@@ -218,15 +218,6 @@ def create_app(test_config=None):
                 returned_code = 400
                 return jsonify({'success':False, 'message':'Id not found'}), returned_code            
 
-    @app.route('/employees', methods=['GET'])
-    def search_employees():
-        search_query = request.args.get('search')
-        employee = Employee.query.filter_by(id=search_query).first()
-        if employee:
-            return jsonify({employee.serialize()}),200
-        else:
-            return jsonify({'success':False, 'message': 'Employee not found'}),400
-
     @app.route('/department', methods=['GET','POST', 'PATCH', 'DELETE'])
     def create_department():
         returned_code = 200
@@ -363,5 +354,15 @@ def create_app(test_config=None):
                 returned_code = 400
                 return jsonify({'success':False, 'message':'Department id not found'}), returned_code  
 
+
+
+    @app.route('/employees/<id>', methods=['GET','PATCH', 'DELETE'])
+    def employee_id():
+        if request.method == 'GET':
+            return 0
+        if request.method == 'PATCH':
+            return 0
+        if request.method == 'DELETE':
+            return 0
     return app
     
