@@ -7,7 +7,7 @@ from .models import db, setup_db, Employee
 from .models import db, setup_db, Department
 
 from flask_cors import CORS
-from flask_sqlalchemy import or_
+# from flask_sqlalchemy import or_
 from .utilities import allowed_file
 
 import os
@@ -234,7 +234,7 @@ def create_app(test_config=None):
 
 
 
-    @app.route('/employees/<id>/departments', methods=['POST'])
+    @app.route('/employees/<employees_id>/departments', methods=['POST'])
     def create_employee_department(id):
         employee = Employee.query.get(id)
         if employee is None:
@@ -247,7 +247,7 @@ def create_app(test_config=None):
 
         return jsonify(department.serialize()), 201
     
-    @app.route('/employees/<id>/departments', methods=['GET'])
+    @app.route('/employees/<employees_id>/departments', methods=['GET'])
     def get_employee_departments(id):
         employee = Employee.query.get(id)
         if employee is None:
@@ -265,7 +265,7 @@ def create_app(test_config=None):
 
         return jsonify(departments_list), 200
     
-    @app.route('/employees/<id>/departments', methods = ['PATCH'])
+    @app.route('/employees/<employees_id>/departments', methods = ['PATCH'])
     def update_employee_department(employee_id):
         employee = Employee.query.get(employee_id)
         if employee is None:
@@ -276,7 +276,7 @@ def create_app(test_config=None):
         if not department_id:
             return jsonify({'success': False, 'message': 'Department ID is required'}), 400 
         
-    @app.route('/employees/<id>/departments', methods = ['DELETE'])
+    @app.route('/employees/<employees_id>/departments', methods = ['DELETE'])
     def delete_employee_department(employee_id):
         employee = Employee.query.get(employee_id)
         if employee is None:
@@ -290,7 +290,7 @@ def create_app(test_config=None):
     
     
 
-    @app.route('employees/<id>/departments/<id>', methods=['POST'])
+    @app.route('/employees/<employees_id>/departments/<departments_id>', methods=['POST'])
     def add_employee_department(employee_id, department_id):
         employee = Employee.query.get(employee_id)
         if employee is None:
@@ -304,7 +304,7 @@ def create_app(test_config=None):
         return jsonify({'success': True, 'message': 'Employee added to department successfully!'}), 200
     
 
-    @app.route('employees/<id>/departments/<id>', methods=['GET'])
+    @app.route('/employees/<employee_id>/departments/<departments_id>', methods=['GET'])
     def get_employee_department(employee_id, department_id):
         employee = Employee.query.get(employee_id)
         if employee is None:
@@ -318,8 +318,8 @@ def create_app(test_config=None):
         
         return jsonify(employee.department.serialize()), 200
     
-    @app.route('employees/<id>/departments/<id>', methods=['PATCH'])
-    def update_employee_department(employee_id, department_id):
+    @app.route('/employees/<employee_id>/departments/<department_id>', methods=['PATCH'])
+    def update_employeeanddepartment(employee_id, department_id):
         employee = Employee.query.get(employee_id)
         if employee is None:
             return jsonify({'success': False, 'message': 'Employee not found'}), 404
@@ -338,7 +338,7 @@ def create_app(test_config=None):
             
     
     @app.route('/employees/<employee_id>/departments/<department_id>', methods=['DELETE'])
-    def delete_employee_department(employee_id, department_id):
+    def delete_employeewithdepartment(employee_id, department_id):
         employee = Employee.query.get(employee_id)
         if employee is None:
             return jsonify({'success': False, 'message': 'Employee not found'}), 404
@@ -389,7 +389,6 @@ def create_app(test_config=None):
     
 
     return app
-
 
 
 
