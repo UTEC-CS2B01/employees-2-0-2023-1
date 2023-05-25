@@ -32,6 +32,13 @@ curl -F "name=ingenieros" -F "shortname=ing" -X POST "http://127.0.0.1:5000/depa
 }
 ```
 
+```
+{"errors":[
+  "name is required",
+  "shortname is required"],
+  "message":"Error creating department",
+  "success":false}
+```
 # Tarea 1
 
 1.- /employees - GET/POST/PATCH/DELETE
