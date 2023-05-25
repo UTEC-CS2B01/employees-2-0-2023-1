@@ -55,17 +55,11 @@ def create_app(test_config=None):
             if 'image' not in request.files:
                 list_errors.append('image is required')
             else:
-                if 'image' not in request.files:
-                    return jsonify({'success': False, 'message': 'No image provided by the employee'}), 400
         
                 file = request.files['image']
 
-                if file.filename == '':
-                    return jsonify({'success': False, 'message': 'No image selected'}), 400
-        
                 if not allowed_file(file.filename):
                     return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-        
 
             if len(list_errors) > 0:
                 returned_code = 400
