@@ -140,22 +140,21 @@ def create_app(test_config=None):
                 
                         if not allowed_file(file.filename):
                             return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-            
+
+                        cwd = os.getcwd()
+
+                        employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+                        os.makedirs(employee_dir, exist_ok=True)
+
+                        upload_folder = os.path.join(cwd, employee_dir)
+
+                        file.save(os.path.join(upload_folder, file.filename))
+
+                        employee.image = file.filename
+                        db.session.commit()
                     
                     db.session.commit()
                     employee_id = employee.id
-
-                    cwd = os.getcwd()
-
-                    employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
-                    os.makedirs(employee_dir, exist_ok=True)
-
-                    upload_folder = os.path.join(cwd, employee_dir)
-
-                    file.save(os.path.join(upload_folder, file.filename))
-
-                    employee.image = file.filename
-                    db.session.commit()
 
                 except Exception as e:
                     print(e)
