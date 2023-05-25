@@ -24,8 +24,78 @@ def create_app(test_config=None):
         response.headers.add(' Access-Control-Max-Age', '10')
         return response
 
-# Post
-#########################################################
+    @app.route('/employees/<employee_id>', methods=['PATCH'])
+    def modify_employee(employee_id):
+        returned_code = 200
+        try:
+            body = request.form
+
+            ids = [employee.id for employee in Employee.query.all()]
+            if employee_id in ids:
+               employee = Employee.query.filter_by(id=employee_id)
+               if 'firstname' in body:
+                   employee.firstname = request.form.get('firstname')
+
+               if 'lastname' in body:
+                   employee.lastname = request.form.get('lastname')
+
+               if 'age' in body:
+                   employee.age = request.form.get('age')
+
+               if 'selectDepartment' in body:
+                   employee.department_id = request.form.get('select_department')
+
+                db.session.commit()
+            else:
+                return_code = 400
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False,
+                            'message': 'Error modifying employee',
+                            'errors': "Invalid id"}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error modifying employee'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee modified successfully!'}), returned_code
+
+    @app.route('/employees/<employee_id', methods=['DELETE'])
+    def delete_employee(employee_id):
+        returned_code = 200
+        try:
+            ids = [employee.id for employee in Employee.query.all()]
+            if employee_id in ids:
+               employee = Employee.query.filter_by(id=employee_id)
+               db.session.delete(employee)
+               db.session.commit()
+            else:
+                return_code = 400
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False,
+                            'message': 'Error deleting employee',
+                            'errors': "Id doesn't exist in the database"}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting employee'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), returned_code
 
     @app.route('/employees', methods=['POST'])
     def create_employee():
@@ -149,6 +219,75 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
         
+
+    @app.route('/departments/<department_id>', methods=['PATCH'])
+    def modify_department(department_id):
+        returned_code = 200
+        try:
+            body = request.form
+
+            ids = [department.id for department in Department.query.all()]
+            if department_id in ids:
+               department = Department.query.filter_by(id=department_id)
+               if 'name' in body:
+                   department.name = request.form.get('name')
+               if 'shortname' in body:
+                   department.shortname = request.form.get('shortname')
+
+                db.session.commit()
+            else:
+                return_code = 400
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False,
+                            'message': 'Error deleting department',
+                            'errors': "Id doesn't exist in the database"}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting department'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
+
+
+
+
+    @app.route('/departments/<department_id>', methods=['DELETE'])
+    def delete_employee(department_id):
+        returned_code = 200
+        try:
+            ids = [department.id for department in Department.query.all()]
+            if department_id in ids:
+               department = Department.query.filter_by(id=department_id)
+               db.session.delete(department)
+               db.session.commit()
+            else:
+                return_code = 400
+
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False,
+                            'message': 'Error deleting department',
+                            'errors': "Id doesn't exist in the database"}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error deleting department'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Department deleted successfully!'}), returned_code
 
 
     @app.route('/departments', methods=['GET'])
@@ -610,3 +749,56 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': "Search successfully", "list": departments_serialized}), returned_code
     return app
+
+    @app.route('/employees', methods=['GET'])
+    def get_employees():
+        try:
+            employees = Employee.query
+            if request.args.has("search"):
+                search_querry = request.args.get("search")
+                employees = employees.filter(Employee.firstname.ilike(f'%{search_querry}%'))
+
+            employees = employees.all()
+            employees_serialized = [employee.serialize() for employee in employees]
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error doing search'}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error doing search'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': "Search successfully", "list": employees_serialized}), returned_code
+
+    @app.route('/departments', methods=['GET'])
+    def get_departments():
+        departments_serialized
+        try:
+            departments = Department.query
+            if request.args.has("search"):
+                search_querry = request.args.get("search")
+                departments = departments.filter(Department.name.ilike(f'%{search_querry}%'))
+
+            departments = departments.all()
+            departments_serialized = [employee.serialize() for employee in departments]
+        except Exception as e:
+            print(e)
+            print(sys.exc_info())
+            db.session.rollback()
+            returned_code = 500
+
+        finally:
+            db.session.close()
+
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error doing search'}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error doing search'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': "Search successfully", "list": departments_serialized}), returned_code
