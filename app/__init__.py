@@ -27,6 +27,21 @@ def create_app(test_config=None):
     @app.route('/employees', methods=['GET','POST', 'PATCH', 'DELETE'])
     def create_employee():
         if request.method == 'GET':
+            search_query = request.args.get('search','')
+
+            if search_query:
+                employee = Employee.query.filter(
+                    db.or_(
+                        Employee.firstname.ilike(f'%{search_query}%'),
+                        Employee.lastname.ilike(f'%{search_query}%')
+                    )
+                ).all()
+                if employee:
+                    serialized_employees = [emp.serialize() for emp in employee]
+                    return jsonify(serialized_employees), 200
+                else:
+                    return jsonify({'success':False, 'message': 'employee not found'}),400
+
             employees = Employee.query.all()
             return jsonify([employe.serialize() for employe in employees]), 200
         if request.method == 'POST':
@@ -217,12 +232,28 @@ def create_app(test_config=None):
         returned_code = 200
 
         if request.method == 'GET':
+            
+            search_query = request.args.get('search','')
+
+            if search_query:
+                department = Department.query.filter(
+                    db.or_(
+                        Department.name.ilike(f'%{search_query}%'),
+                        Department.short_name.ilike(f'%{search_query}%')
+                    )
+                ).all()
+                if department:
+                    serialized_departments = [dep.serialize() for dep in department]
+                    return jsonify(serialized_departments), 200
+                else:
+                    return jsonify({'success':False, 'message': 'Department not found'}),400
+
             try:
                 departments = Department.query.all()
                 departments_serialized = [department.serialize() for department in departments]
                 return jsonify({'success': True, 'departments': departments_serialized}), returned_code
             except Exception as e:
-                return jsonify({'success': False, 'message':'No departments found'})
+                return jsonify({'success': False, 'message':'No departments found'}),400
             
         if request.method == 'POST':
             list_errors = []
@@ -331,15 +362,6 @@ def create_app(test_config=None):
             else:
                 returned_code = 400
                 return jsonify({'success':False, 'message':'Department id not found'}), returned_code  
-    
-    @app.route('/department', methods=['GET'])
-    def search_department():
-        search_query = request.args.get('search')
-        department = Department.query.filter_by(id=search_query).first()
-        if department:
-            return jsonify({department.serialize()}),200
-        else:
-            return jsonify({'success':False, 'message': 'Department not found'}),400
 
     return app
     
