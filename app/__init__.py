@@ -206,7 +206,7 @@ def create_app(test_config=None):
                 if department is None:
                     return jsonify({'success': False, 'message': 'Department not found'}), 404
 
-           
+            # Aquí va la lógica para actualizar los datos del departamento
                 body = request.form
                 if 'name' in body:
                     department.name = body['name']
