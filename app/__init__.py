@@ -21,6 +21,7 @@ def create_app(test_config=None):
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Max-Age', '86400')
         return response
     
 
@@ -106,35 +107,35 @@ def create_app(test_config=None):
     @app.route('/employees', methods=['GET'])
     def get_employees():
         returned_code = 200
-        list_errors = []
+        error_message = ''
+        employee_list = []
+
         try:
+            search_query = request.args.get('search', None)
+            if search_query:
+                employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
+
+                serialized_employees = [employee.serialize() for employee in employees]
+
+                return jsonify({'employees': serialized_employees}), returned_code
+
+
             employees = Employee.query.all()
-            employee_list = []
+            employee_list = [employee.serialize() for employee in employees]
 
-            if len(employees) == 0:
-                list_errors.append('no employees found')
-                returned_code = 400
-            else: 
-                for employee in employees:
-                    employee_list.append({
-                        'firstname': employee.firstname,
-                        'lastname': employee.lastname,
-                        'age': employee.age,
-                        'id_employee': employee.id
-                    })
-
+            if not employee_list:
+                returned_code = 404
+                error_message = 'No employees found'
         except Exception as e:
             print(e)
             print(sys.exc_info())
             returned_code = 500
-        finally:
-            db.session.close()
-        if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error getting employees', 'errors': list_errors}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error getting employees'}), returned_code
-        else:
-            return jsonify({'employees':employee_list, 'success': True}), returned_code
+            error_message = 'Error retrieving employees'
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'data': employee_list}), returned_code
 
     @app.route('/employees/<employee_id>', methods=['DELETE'])
     def delete_employee(employee_id):
@@ -281,34 +282,41 @@ def create_app(test_config=None):
     @app.route('/departments', methods=['GET'])
     def get_departments():
         returned_code = 200
-        list_errors = []
+        error_message = ''
+        department_list = []
+
         try:
+            search_query = request.args.get('search', None)  
+            if search_query:
+                departments = Department.query.filter(
+                    db.or_(
+                        Department.name.ilike(f'%{search_query}%'),
+                        Department.short_name.ilike(f'%{search_query}%')
+                    )
+                ).all()
+                serialized_departments = [department.serialize() for department in departments]
+
+                return jsonify({'success': True, 'departments': serialized_departments, \
+                                'total': len(serialized_departments)}), returned_code
+
+
+
             departments = Department.query.all()
-            department_list = []
+            department_list = [department.serialize() for department in departments]
 
-            if len(departments) == 0:
-                list_errors.append('no departments found')
-                returned_code = 400
-            else: 
-                for department in departments:
-                    department_list.append({
-                        'id': department.id,
-                        'name': department.name,
-                        'short_name': department.short_name
-                    })
-
+            if not department_list:
+                returned_code = 404
+                error_message = 'No departments found'
         except Exception as e:
             print(e)
             print(sys.exc_info())
             returned_code = 500
-        finally:
-            db.session.close()
-        if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error getting departments', 'errors': list_errors}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error getting deparments'}), returned_code
-        else:
-            return jsonify({'departments':department_list, 'success': True}), returned_code
+            error_message = 'Error retrieving departments'
+
+        if returned_code != 200:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+
+        return jsonify({'success': True, 'data': department_list}), returned_code
     
     @app.route('/departments/<department_id>', methods=['DELETE'])
     def delete_department(department_id):
@@ -505,6 +513,7 @@ def create_app(test_config=None):
         list_errors = []
         try:
             # Obtener los parámetros de la solicitud GET
+            # se busca por los URL query parameters
             search_query_name = request.args.get('name')
             search_query_short_name = request.args.get('short_name')
 
