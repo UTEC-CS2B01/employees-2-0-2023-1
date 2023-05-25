@@ -272,6 +272,90 @@ def create_app(test_config=None):
                 db.session.close()
         
             
-
+    @app.route('/employees/<int:employee_id>', methods=['GET', 'DELETE', 'PATCH'])
+    def get_employee(employee_id):
+        if request.method == 'GET':
+            try:
+                employee = Employee.query.get(employee_id)
+                return jsonify({'success': True, 'employee': employee.format()}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error getting employee'}), 500
+            finally:
+                db.session.close()
+        elif request.method == 'PATCH':
+            try:
+                employee = Employee.query.get(employee_id)
+                employee.firstname = request.json.get('firstname')
+                employee.lastname = request.json.get('lastname')
+                employee.age = request.json.get('age')
+                employee.department_id = request.json.get('selectDepartment')
+                employee.modified_at = datetime.utcnow()
+                db.session.commit()
+                return jsonify({'success': True, 'message': 'Employee updated successfully'}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error updating employee'}), 500
+            finally:
+                db.session.close()
+        elif request.method == 'DELETE':
+            try:
+                employee = Employee.query.get(employee_id)
+                db.session.delete(employee)
+                db.session.commit()
+                return jsonify({'success': True, 'message': 'Employee deleted successfully'}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error deleting employee'}), 500
+            finally:
+                db.session.close()
+        
+    @app.route('/departaments/<int:departament_id>', methods=['GET', 'DELETE', 'PATCH'])
+    def get_departament(departament_id):
+        if request.method == 'GET':
+            try:
+                departament = Department.query.get(departament_id)
+                return jsonify({'success': True, 'departament': departament.format()}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error getting departament'}), 500
+            finally:
+                db.session.close()
+        elif request.method == 'PATCH':
+            try:
+                departament = Department.query.get(departament_id)
+                departament.name = request.json.get('name')
+                departament.short_name = request.json.get('short_name')
+                departament.modified_at = datetime.utcnow()
+                db.session.commit()
+                return jsonify({'success': True, 'message': 'Departament updated successfully'}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error updating departament'}), 500
+            finally:
+                db.session.close()
+        elif request.method == 'DELETE':
+            try:
+                departament = Department.query.get(departament_id)
+                db.session.delete(departament)
+                db.session.commit()
+                return jsonify({'success': True, 'message': 'Departament deleted successfully'}), 200
+            except Exception as e:
+                print(e)
+                print(sys.exc_info())
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Error deleting departament'}), 500
+            finally:
+                db.session.close()
         
     return app
