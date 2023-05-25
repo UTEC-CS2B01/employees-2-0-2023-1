@@ -256,7 +256,6 @@ def create_app(test_config=None):
                 if 'age' in body:
                     employee.age = request.form['age']
 
-                print(request.form['is_active'])
                 if 'is_active' in body:
                     employee.is_active = True if request.form['is_active'] == 'true' else False
 
@@ -273,7 +272,8 @@ def create_app(test_config=None):
             db.session.close()
 
         if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
+            return jsonify({'success': False, 'message': error_message,
+                            "code": returned_code}), returned_code
 
         return jsonify({'success': True, 'message': 'Employee updated successfully'}), returned_code
     
@@ -538,7 +538,5 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
-
-
 
     return app

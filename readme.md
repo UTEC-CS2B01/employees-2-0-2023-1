@@ -19,22 +19,19 @@
 ### Create Employee
 
 ```
-curl -F "firstname=Juan" -F "lastname=perez" -F "age=20" -F "selectDepartment=eef11f69-ffe9-4078-ad09-16e31fe7f77c" -F "image=@cristiano.jpeg;type=image/jpeg" -X POST http://localhost:5002/employees
+curl -F "firstname=Juan" -F "lastname=perez" -F "age=20" -F "selectDepartment=0cd34425-f007-4b37-9160-bff3fae9cba7" -F "image=@cristiano.jpeg;type=image/jpeg" -X POST "http://127.0.0.1.1:5000/employees"
 
 {
   "id": "27b79c53-edeb-4caf-9bcb-3725669eaa9d",
   "message": "Employee Created successfully!",
   "success": true
 }
-### Create Department
-
-```
-curl -F "name=ingenieros" -F "shortname=ing" -X POST "http://127.0.0.1:5000/departments"
 ```
 
 ### Errors
 
-curl -X POST http://localhost:5002/employees
+```
+curl -X POST http://127.0.0.1:5000/employees
 {
   "errors": [
     "firstname is required",
@@ -52,7 +49,7 @@ curl -X POST http://localhost:5002/employees
 ### Create Department
 
 ```
-curl -F "name=Departmento de Ventas" -F "short_name=DV" -X POST http://localhost:5002/departments
+curl -F "name=Departmento de Ventas" -F "short_name=DV" -X POST http://127.0.0.1:5000/departments
 
 {
   "id": "15f1b7a4-3f63-4e2e-b5b2-f4ea02a5b331",
@@ -60,7 +57,7 @@ curl -F "name=Departmento de Ventas" -F "short_name=DV" -X POST http://localhost
   "success": true
 }
 
-curl   -X POST http://localhost:5002/departments
+curl   -X POST http://127.0.0.1:5000/departments
 {
   "errors": [
     "name is required",
@@ -74,7 +71,7 @@ curl   -X POST http://localhost:5002/departments
 ### Patch Employee
 
 ```
-curl -F "firstname=juan2" -F "lastname=perez2" -F "age=40" -F "is_active=false" -X PATCH http://localhost:5002/employees/d2064332-6a02-43c8-b8d5-d070979bda4b
+curl -F "firstname=juan2" -F "lastname=perez2" -F "age=40" -F "is_active=false" -X PATCH http://127.0.0.1:5000/employees/d2064332-6a02-43c8-b8d5-d070979bda4b
 {
   "message": "Employee updated successfully",
   "success": true
@@ -84,7 +81,7 @@ curl -F "firstname=juan2" -F "lastname=perez2" -F "age=40" -F "is_active=false" 
 ### Patch Department
 
 ```
-curl -F "name=Departmento de Finanzas" -F "short_name=DF" -X PATCH http://localhost:5002/departments/15f1b7a4-3f63-4e2e-b5b2-f4ea02a5b331
+curl -F "name=Departmento de Finanzas" -F "short_name=DF" -X PATCH http://127.0.0.1:5000/departments/15f1b7a4-3f63-4e2e-b5b2-f4ea02a5b331
 {
   "message": "Department updated successfully",
   "success": true
@@ -93,20 +90,11 @@ curl -F "name=Departmento de Finanzas" -F "short_name=DF" -X PATCH http://localh
 
 ### Delete Deparmtent
 
+El departamento no debe tener empleados afiliados.
 ```
-curl -X DELETE http://localhost:5002/departments/15f1b7a4-3f63-4e2e-b5b2-f4ea02a5b331
+curl -X DELETE http://127.0.0.1:5000/departments/15f1b7a4-3f63-4e2e-b5b2-f4ea02a5b331
 {
   "message": "Department deleted successfully",
-  "success": true
-}
-```
-
-### Delete Deparmtent
-
-```
-curl -X DELETE http://localhost:5002/employees/d2064332-6a02-43c8-b8d5-d070979bda4b
-{
-  "message": "Employee deleted successfully",
   "success": true
 }
 ```
@@ -114,7 +102,7 @@ curl -X DELETE http://localhost:5002/employees/d2064332-6a02-43c8-b8d5-d070979bd
 ### Search employees by name
 
 ```
-curl http://localhost:5002/employees?search=gus
+curl http://127.0.0.1:5000/employees?search=gus
 {
   "employees": [
     {
@@ -144,7 +132,7 @@ curl http://localhost:5002/employees?search=gus
 ### Search departments by name
 
 ```
-curl http://localhost:5002/departments?search=s
+curl http://127.0.0.1:5000/departments?search=s
 {
   "departments": [
     {
@@ -157,19 +145,12 @@ curl http://localhost:5002/departments?search=s
   ]
 }
 
-$ curl http://localhost:5002/departments?search=z
+$ curl http://127.0.0.1:5000/departments?search=z
 {
   "departments": []
 }
 ```
 
-```
-{"errors":[
-  "name is required",
-  "shortname is required"],
-  "message":"Error creating department",
-  "success":false}
-```
 # Tarea 1
 
 1.- /employees - GET/POST/PATCH/DELETE
@@ -179,14 +160,3 @@ $ curl http://localhost:5002/departments?search=z
 5.- Search - /employees?search=<q>
 6.- Search - /departments?search=<q>
 
-```
-
-```
-
-```
-{"errors":[
-  "name is required",
-  "shortname is required"],
-  "message":"Error creating department",
-  "success":false}
-```
