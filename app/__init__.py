@@ -1,80 +1,77 @@
 from flask import (
     Flask,
     request,
-    jsonify
+    jsonify,
+    abort,
 )
-from .models import db, setup_db, Employee
+from .models import db, setup_db, Employee, Department
+from .utils.utilities import allowed_file
 from flask_cors import CORS
-from .utilities import allowed_file
-
 import os
 import sys
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    app.config['UPLOAD_FOLDER'] = 'static/employees'
     with app.app_context():
-        app.config['UPLOAD_FOLDER'] = 'static/employees'
         setup_db(app)
         CORS(app, origins='*')
 
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+        response.headers.add('Access-Control-Max-Age', '15')
         return response
     
-
     @app.route('/employees', methods=['POST'])
     def create_employee():
-        returned_code = 200
+        error_code = 200
         list_errors = []
         try:
             body = request.form
 
-            if 'firstname' not in body:
-                list_errors.append('firstname is required')
+            if 'first_name' not in body:
+                list_errors.append('first_name is required')
             else:
-                firstname = request.form.get('firstname')
+                first_name = request.form.get('first_name')
 
-            if 'lastname' not in body:
-                list_errors.append('lastname is required')    
+            if 'last_name' not in body:
+                list_errors.append('last_name is required')
             else:
-                lastname = request.form['lastname']
+                last_name = request.form.get('last_name')
 
-            if 'age' not in body:
-                list_errors.append('age is required')    
+            if 'job_title' not in body:
+                list_errors.append('job_title is required')
             else:
-                age = request.form['age']
+                job_title = request.form.get('job_title')
 
             if 'selectDepartment' not in body:
                 list_errors.append('selectDepartment is required')
             else:
-                department_id = request.form['selectDepartment']
+                department_id = request.form.get('selectDepartment')
 
             if 'image' not in request.files:
+                print('image is required')
                 list_errors.append('image is required')
             else:
-                if 'image' not in request.files:
-                    return jsonify({'success': False, 'message': 'No image provided by the employee'}), 400
-        
                 file = request.files['image']
 
                 if file.filename == '':
-                    return jsonify({'success': False, 'message': 'No image selected'}), 400
-        
+                    list_errors.append('filename should not be empty')
+                
                 if not allowed_file(file.filename):
-                    return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-        
+                    list_errors.append('File extension not allowed')
+            
 
             if len(list_errors) > 0:
-                returned_code = 400
+                error_code = 400
             else:
-                employee = Employee(firstname, lastname, age, department_id)
+                employee = Employee(first_name, last_name, job_title, department_id)
                 db.session.add(employee)
                 db.session.commit()
-
-                employee_id = employee.id
-
+                employeeid_created = employee.id
+                
                 cwd = os.getcwd()
 
                 employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
@@ -82,25 +79,196 @@ def create_app(test_config=None):
 
                 upload_folder = os.path.join(cwd, employee_dir)
 
-                file.save(os.path.join(upload_folder, file.filename))
+                absolute_path = os.path.join(upload_folder, file.filename)
+                file.save(absolute_path)
+                file.close()
 
-                employee.image = file.filename
+                relative_path = os.path.join(employee_dir, file.filename)
+
+                employee.image_path = relative_path
                 db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print("e: ", e)
+            print("sys.exc_info(): ", sys.exc_info())
+            error_code = 500
+
+        if error_code == 400:
+            return jsonify({'success': False, 'message': 'Error creating employee', 'errors': list_errors}), error_code
+        elif error_code == 500:
+            return jsonify({'success': False, 'message': 'Internal Server Error'}), error_code
+        else:
+            return jsonify({'success': True, 'id': employeeid_created, 'message': 'Employee created successfully'}), 201
+
+    @app.route('/employees', methods=['GET'])
+    def get_employees():
+        
+        try:
+            search_query = request.args.get('query', None)
+            if search_query:
+                employees = Employee.query.filter_by(is_active=True).filter(Employee.first_name.ilike('%{}%'.format(search_query)))\
+                    .order_by(Employee.first_name).all()
+                
+                return jsonify({'success': True, 'employees': [e.serialize() for e in employees], 'total': len(employees)}), 200
+
+            employees = Employee.query.filter_by(is_active=True).order_by(Employee.first_name).all()
+            return jsonify({'success': True, 'employees': [e.serialize() for e in employees]}), 200
+        except Exception as e:
+            print("e: ", e)
+            print("sys.exc_info(): ", sys.exc_info())
+            db.session.rollback()
+            return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+
+    @app.route('/employees/<id>', methods=['PATCH'])
+    def update_employee(id):
+        employee = Employee.query.get(id)
+
+        if not employee:
+            return jsonify({'success':False,'message': 'Empleado no encontrado'}), 404
+
+        data = request.form
+
+        if 'first_name' in data:
+            employee.first_name = data['first_name']
+        if 'last_name' in data:
+            employee.last_name = data['last_name']
+        if 'job_title' in data:
+            employee.job_title = data['job_title']
+        if 'selectDepartment' in data:
+            employee.department_id = data['selectDepartment']
+        db.session.commit()
+        db.session.close()
+
+        return jsonify({'success':True,'message': 'Empleado actualizado correctamente'}), 200
+
+    @app.route('/employees/<id>', methods=['DELETE'])
+    def delete_employee(id):
+        employee = Employee.query.get(id)
+
+        if not employee:
+            return jsonify({'success':False,'message': 'Empleado no encontrado'}), 404
+
+        employee.is_active = False
+        db.session.commit()
+        db.session.close()
+
+        return jsonify({'success':True,'message': 'Empleado eliminado correctamente'}), 200
+    
+    @app.route('/employees/search', methods=['GET'])
+    def search_employees():
+        if request.method == 'GET':
+            search_query = request.args.get('q')
+
+            # Realiza la búsqueda de empleados en función del query de búsqueda
+            employees = Employee.query.filter(Employee.firstname.ilike(f'%{search_query}%') |
+                                            Employee.lastname.ilike(f'%{search_query}%')).all()
+
+            serialized_employees = [employee.serialize() for employee in employees]
+
+            return jsonify(serialized_employees), 200
+
+    @app.route('/departments', methods=['GET'])
+    def get_departments():
+        try:
+            search_query = request.args.get('query', None)
+            if search_query:
+                departments = Department.query.filter(
+                    db.or_(Department.name.ilike('%{}%'.format(search_query)),
+                            Department.short_name.ilike('%{}%'.format(search_query)))    
+                ).all()
+
+                return jsonify({'success': True, 'departments': [d.serialize() for d in departments], 'total': len(departments)}), 200
+
+            departments = Department.query.order_by(Department.short_name).all()
+            return jsonify({'success': True, 'departments': [d.serialize() for d in departments]}), 200
+
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            print("e: ", e)
+            print("sys.exc_info(): ", sys.exc_info())
             db.session.rollback()
-            returned_code = 500
+            return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+             
+        
+    @app.route('/departments', methods=['POST'])
+    def create_department():
+        error_code = 200
+        list_errors = []
+        try:
+            body = request.form
 
-        finally:
-            db.session.close()
+            if 'name' not in body:
+                list_errors.append('name is required')
+            else:
+                name = body.get('name')
 
-        if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error creating employee', 'errors': list_errors}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
+            if 'short_name' not in body:
+                list_errors.append('short_name is required')
+            else:
+                short_name = body.get('short_name')
+
+            if len(list_errors) > 0:
+                error_code = 400
+            else:
+                department = Department(name, short_name)
+                db.session.add(department)
+                db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print("e: ", e)
+            print("sys.exc_info(): ", sys.exc_info())
+            error_code = 500
+
+        
+        if error_code == 400:
+            return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), error_code
+        elif error_code == 500:
+            return jsonify({'success': False, 'message': 'Internal Server Error'}), error_code
         else:
-            return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
+            return jsonify({'success': True, 'id': department.id, 'name':department.name, 'short_name':department.short_name ,'message': 'Department created successfully'}), 201
+
+    @app.route('/departments/<id>', methods=['PATCH'])
+    def update_department(id):
+        department = Department.query.get(id)
+
+        if not department:
+            return jsonify({'message': 'Departamento no encontrado'}), 404
+
+        data = request.form
+
+        if 'name' in data:
+            department.name = data['name']
+        if 'short_name' in data:
+            department.short_name = data['short_name']
+        db.session.commit()
+        db.session.close()
+
+        return jsonify({'success': True, 'message': 'Departamento actualizado exitosamente'})
+    
+    @app.route('/departments/<id>', methods=['DELETE'])
+    def delete_department(id):
+        department = Department.query.get(id)
+
+        if not department:
+            return jsonify({'message': 'Departamento no encontrado'}), 404
+
+        db.session.delete(department)
+        db.session.commit()
+        db.session.close()
+
+        return jsonify({'success': True,'message': 'Departamento eliminado exitosamente'})
+    
+    @app.route('/departments/search', methods=['GET'])
+    def search_departments():
+        if request.method == 'GET':
+            search_query = request.args.get('q')
+
+            # Realiza la búsqueda de departamentos en función del query de búsqueda
+            departments = Department.query.filter(Department.name.ilike(f'%{search_query}%') |
+                                                Department.short_name.ilike(f'%{search_query}%')).all()
+
+            serialized_departments = [department.serialize() for department in departments]
+
+            return jsonify(serialized_departments), 200
 
     return app
