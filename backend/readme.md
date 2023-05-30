@@ -171,13 +171,14 @@ git checkout -b feature/tarea-1-23-05-2021-<username de gitbhub>
 
 git checkout -b feature/tarea-1-23-05-2021-mabisrror
 
-
 ### Testing: Crear PR with rules
+
 - Not merge until 3 approvals
 
-
 ### Tarea 4
+
 - Crear Rama: fix/UTEC-O004-username-tests-endpoints-unnittest
 - Donde username es el usuario de github
 - Crear los tests para todos los endpoints (16)
-- success, failed_400, failed_500
+- # success, failed_400, failed_500
+- DO NOT merge until 3 approvals
