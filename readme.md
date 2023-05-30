@@ -168,3 +168,13 @@ $ curl http://localhost:5002/departments?search=z
 ```
 
 ```
+
+### Create Branch
+
+git checkout -b feature/tarea-1-23-05-2021-<username de gitbhub>
+
+git checkout -b feature/tarea-1-23-05-2021-mabisrror
+
+
+### Testing: Crear PR with rules
+- Not merge until 3 approvals
