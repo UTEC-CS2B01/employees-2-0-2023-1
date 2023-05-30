@@ -3,9 +3,9 @@ from flask import (
     request,
     jsonify
 )
-from models import db, setup_db, Employee, Department
+from .models import db, setup_db, Employee, Department
 from flask_cors import CORS
-from utilities import allowed_file
+from .utilities import allowed_file
 
 import os
 import sys
