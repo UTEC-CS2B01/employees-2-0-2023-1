@@ -535,69 +535,7 @@ def create_app(test_config=None):
 
 
 
-    @app.route('/employees', methods=['GET'])
-    def get_employees():
-        returned_code = 200
-        error_message = ''
-        employee_list = []
-
-        try:
-            search_query = request.args.get('search', None)
-            if search_query:
-                employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
-
-                serialized_employees = [employee.serialize() for employee in employees]
-
-                return jsonify({'employees': serialized_employees}), returned_code
-
-
-            employees = Employee.query.all()
-            employee_list = [employee.serialize() for employee in employees]
-
-            if not employee_list:
-                returned_code = 404
-                error_message = 'No employees found'
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            returned_code = 500
-            error_message = 'Error retrieving employees'
-
-        if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'data': employee_list}), returned_code
-
-    @app.route('/employees/<employee_id>', methods=['DELETE'])
-    def delete_employee(employee_id):
-        returned_code = 200
-        list_errors = []
-
-        try:
-            employee = Employee.query.get(employee_id)
-
-            if employee is None:
-                list_errors.append('employee dont exist')
-                returned_code = 404
-            else:
-                db.session.delete(employee)
-                db.session.commit()
-
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            db.session.rollback()
-            returned_code = 500
-
-        finally:
-            db.session.close()
-
-        if len(list_errors) > 0:
-            return jsonify({'success': False, 'message': 'Error deleting employee', 'errors': list_errors}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error deleting employee'}), returned_code
-        else:
-            return jsonify({'success': True, 'message': 'Employee deleted successfully!'}), returned_code
+    
 
     @app.route('/employees/<employee_id>', methods=['PATCH'])
     def update_employee(employee_id):
