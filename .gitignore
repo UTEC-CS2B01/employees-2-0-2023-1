@@ -4,6 +4,9 @@ virtual/
 __pycache__/
 *.py[cod]
 *$py.class
+app/__pycache__/
+
+config/__pycache__/
 
 # C extensions
 *.so
