@@ -8,7 +8,7 @@ from flask_cors import CORS
 from .utilities import allowed_file
 import os
 import sys
-################################################################
+
 def create_app(test_config=None):
     app = Flask(__name__)
     with app.app_context():
