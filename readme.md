@@ -156,18 +156,7 @@ $ curl http://localhost:5002/departments?search=z
 }
 ```
 
-# Tarea 1
 
-1.- /employees - GET/POST/PATCH/DELETE
-2.- /departments - GET/POST/PATCH/DELETE
-3.- /employees/<id> - GET/PATCH/DELETE
-4.- /departments/<id> - GET/PATCH/DELETE
-5.- Search - /employees?search=<q>
-6.- Search - /departments?search=<q>
-
-```
-
-```
 
 ### Create Branch
 

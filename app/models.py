@@ -15,7 +15,7 @@ def setup_db(app, database_path=database_uri):
 
 class Employee(db.Model):
     __tablename__ = 'employees'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     firstname = db.Column(db.String(80), nullable=False)
     lastname = db.Column(db.String(120), unique=False, nullable=False)
     age = db.Column(db.Integer, unique=False, nullable=False)
@@ -50,7 +50,7 @@ class Employee(db.Model):
     
 class Department(db.Model):
     __tablename__ = 'departments'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(120), nullable=False)
     short_name = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
