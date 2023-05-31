@@ -24,7 +24,6 @@ def create_app(test_config=None):
         response.headers.add(' Access-Control-Max-Age', '10')
         return response
     
-# Post Profe se me acaba la bateria pipipip
 #########################################################
 
     @app.route('/employees', methods=['POST'])

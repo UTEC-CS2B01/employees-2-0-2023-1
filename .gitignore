@@ -1,7 +1,10 @@
 virtual/
+local.py
+config/__pycache__/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+static/
 *.py[cod]
 *$py.class
 
