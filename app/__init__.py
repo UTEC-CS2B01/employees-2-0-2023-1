@@ -710,44 +710,7 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
         
-    @app.route('/departments', methods=['GET'])
-    def get_departments():
-        returned_code = 200
-        error_message = ''
-        department_list = []
-
-        try:
-            search_query = request.args.get('search', None)  
-            if search_query:
-                departments = Department.query.filter(
-                    db.or_(
-                        Department.name.ilike(f'%{search_query}%'),
-                        Department.short_name.ilike(f'%{search_query}%')
-                    )
-                ).all()
-                serialized_departments = [department.serialize() for department in departments]
-
-                return jsonify({'success': True, 'departments': serialized_departments, \
-                                'total': len(serialized_departments)}), returned_code
-
-
-
-            departments = Department.query.all()
-            department_list = [department.serialize() for department in departments]
-
-            if not department_list:
-                returned_code = 404
-                error_message = 'No departments found'
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            returned_code = 500
-            error_message = 'Error retrieving departments'
-
-        if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'data': department_list}), returned_code
+    
     
     @app.route('/departments/<department_id>', methods=['DELETE'])
     def delete_department(department_id):
