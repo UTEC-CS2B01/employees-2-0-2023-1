@@ -520,5 +520,5 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
-
+# Post a successful
     return app
