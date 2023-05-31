@@ -6,6 +6,10 @@ app/__pycache__/
 *.py[cod]
 *$py.class
 config/local.py
+config/__pycache__/local.cpython-311.pyc
+app/__pycache__/utilities.cpython-311.pyc
+app/__pycache__/models.cpython-311.pyc
+app/__pycache__/__init__.cpython-311.pyc
 
 # C extensions
 *.so
