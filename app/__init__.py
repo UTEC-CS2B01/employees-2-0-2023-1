@@ -127,7 +127,6 @@ def create_app(test_config=None):
 
                 employees_list = [e for e in employees_filter]
 
-
             else:
                 if (body == 'application/json'):
                     json = request.json
@@ -445,5 +444,20 @@ def create_app(test_config=None):
                 return jsonify({'success': False, 'message': 'Error finding department', 'errors': errorList}), return_code
             else:
                 return jsonify({'success': True, 'message': 'Department found', 'data': department.serialize()}), return_code
+
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        return jsonify({'success': False,
+                        'error': 'Method not allowed'}), 405
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({'success': False,
+                        'message': 'Resoure Not Found'}), 404
+
+    @app.errorhandler(500)
+    def not_found(error):
+        return jsonify({'success': False,
+                        'message': 'Internal Server Error'}), 500
 
     return app
