@@ -15,7 +15,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     with app.app_context():
         app.config['UPLOAD_FOLDER'] = 'static/employees'
-        setup_db(app)
+        setup_db(app, test_config['database_path'])
         CORS(app, origins='*')
 
     @app.after_request
@@ -106,17 +106,17 @@ def create_app(test_config=None):
         returned_code = 200
         list_errors = []
         try:
-            body = request.form
+            body = request.json
 
             if 'name' not in body:
                 list_errors.append('name is required')
             else:
-                name = request.form['name']
+                name = request.json['name']
 
             if 'short_name' not in body:
                 list_errors.append('short_name is required')
             else:
-                short_name = request.form['short_name']
+                short_name = request.json['short_name']
 
             if len(list_errors) > 0:
                 returned_code = 400
