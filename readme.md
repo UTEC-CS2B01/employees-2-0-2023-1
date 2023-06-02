@@ -177,4 +177,4 @@ git checkout -b feature/tarea-1-23-05-2021-mabisrror
 
 
 ### Testing: Crear PR with rules
-- Not merge until 3 approvals
+- DO NOT merge until 3 approvals
