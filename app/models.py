@@ -3,11 +3,11 @@ from config.local import config
 import uuid
 from datetime import datetime
 
-database_uri = config['DATABASE_URI']
+database_url = config['DATABASE_URI']
 
 db = SQLAlchemy()
 
-def setup_db(app, database_path=database_uri):
+def setup_db(app, database_path=database_url):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     db.app = app
     db.init_app(app)
