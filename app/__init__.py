@@ -7,7 +7,6 @@ from flask import (
 from .models import db, setup_db, Employee, Department, File
 from flask_cors import CORS
 from .utilities import allowed_file
-
 import os
 import sys
 
@@ -16,6 +15,13 @@ def create_app(test_config=None):
     with app.app_context():
         app.config['UPLOAD_FOLDER'] = 'static/employees'
         setup_db(app, test_config['database_path'] if test_config else None)
+        CORS(app, origins='*')
+
+def create_app(test_config=None):
+    app = Flask(__name__)
+    with app.app_context():
+        app.config['UPLOAD_FOLDER'] = 'static/departments'
+        setup_db(app)
         CORS(app, origins='*')
 
     @app.after_request
@@ -182,7 +188,7 @@ def create_app(test_config=None):
         returned_code = 200
         error_message = ''
         employee_list = []
-
+        
         try:
             search_query = request.args.get('search', None)
             if search_query:
@@ -227,6 +233,7 @@ def create_app(test_config=None):
                 body = request.form
 
                 if 'name' in body:
+          
                     department.name = request.form['name']
 
                 if 'short_name' in body:
@@ -335,7 +342,6 @@ def create_app(test_config=None):
                 else:
                     name = request.form['name']
                     short_name = request.form['short_name']
-
                     department = Department(name, short_name)
                     department.employees.append(employee)
 
@@ -358,7 +364,7 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'department_id': department_id, 'message': 'Department assigned to employee successfully!'}), returned_code
-
+      
     # GET Method
 
     # PATCH Method
@@ -404,6 +410,7 @@ def create_app(test_config=None):
 
         return jsonify({'success': True, 'message': 'Employee departments updated successfully!'}), returned_code
 
+
     # DELETE Method
     @app.route('/employees/<employee_id>/departments', methods=['DELETE'])
     def remove_employee_departments(employee_id):
@@ -433,7 +440,6 @@ def create_app(test_config=None):
 
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
-
         return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
 
     @app.route('/employees/<employee_id>', methods=['PATCH'])
