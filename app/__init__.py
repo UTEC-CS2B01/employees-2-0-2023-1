@@ -3,9 +3,10 @@ from flask import (
     request,
     jsonify
 )
-from .models import db, setup_db, Employee
+from .models import db, setup_db, Employee, Department
 from flask_cors import CORS
 from .utilities import allowed_file
+from datetime import datetime
 
 import os
 import sys
@@ -190,6 +191,63 @@ def create_app(test_config=None):
             print(e)
             returned_code = 500
         
+    @app.route('/departments', methods=['GET'])
+    def get_departments():
+        try:
+            departments = Department.query.all()
+            return jsonify([department.serialize() for department in departments]), 200
+        except Exception as e:
+            print(e)
+            return jsonify({'success': False, 'message': 'Error retrieving departments'}), 500
         
+    @app.route('/departments/<string:department_id>', methods=['PATCH'])
+    def patch_department(department_id):
+        try:
+            department = Department.query.get(department_id)
+
+            if not department:
+                return jsonify({'success': False, 'message': 'Department not found'}), 404
+
+            body = request.get_json()
+            if 'name' in body:
+                department.name = body['name']
+            if 'short_name' in body:
+                department.short_name = body['short_name']
+
+            department.modified_at = datetime.utcnow()
+
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Department updated successfully'}), 200
+
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return jsonify({'success': False, 'message': 'Error updating department'}), 500
+
+        finally:
+            db.session.close()
+
+    @app.route('/departments/<string:department_id>', methods=['DELETE'])
+    def delete_department(department_id):
+        try:
+            department = Department.query.get(department_id)
+
+            if not department:
+                return jsonify({'success': False, 'message': 'Department not found'}), 404
+
+            db.session.delete(department)
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Department deleted successfully'}), 200
+
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return jsonify({'success': False, 'message': 'Error deleting department'}), 500
+
+        finally:
+            db.session.close()
+
+
         
     return app
