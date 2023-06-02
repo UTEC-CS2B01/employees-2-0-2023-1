@@ -103,6 +103,72 @@ def create_app(test_config=None):
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
         
+        
+    @app.route('/employees', methods=['GET'])
+    def get_employees():
+        try:
+            employees = Employee.query.all()
+            return jsonify([employee.serialize() for employee in employees]), 200
+        except Exception as e:
+            print(e)
+            return jsonify({'success': False, 'message': 'Error retrieving employees'}), 500
+
+
+    @app.route('/employees/<string:employee_id>', methods=['PATCH'])
+    def patch_employee(employee_id):
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if not employee:
+                return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+            body = request.get_json()
+            if 'firstname' in body:
+                employee.firstname = body['firstname']
+            if 'lastname' in body:
+                employee.lastname = body['lastname']
+            if 'age' in body:
+                employee.age = body['age']
+            if 'department_id' in body:
+                employee.department_id = body['department_id']
+
+            employee.modified_at = datetime.utcnow()
+
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Employee updated successfully'}), 200
+
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return jsonify({'success': False, 'message': 'Error updating employee'}), 500
+
+        finally:
+            db.session.close()
+
+
+    @app.route('/employees/<string:employee_id>', methods=['DELETE'])
+    def delete_employee(employee_id):
+        try:
+            employee = Employee.query.get(employee_id)
+
+            if not employee:
+                return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+            db.session.delete(employee)
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Employee deleted successfully'}), 200
+
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return jsonify({'success': False, 'message': 'Error deleting employee'}), 500
+
+        finally:
+            db.session.close()
+        
+           
+    
     @app.route('/departments', methods=['POST'])
     def create_department():
         returned_code = 200
@@ -123,5 +189,7 @@ def create_app(test_config=None):
         except Exception as e:
             print(e)
             returned_code = 500
+        
+        
         
     return app
