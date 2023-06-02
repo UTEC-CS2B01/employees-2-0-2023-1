@@ -557,6 +557,7 @@ def create_app(test_config=None):
 
     # ERROR HANDLERS
     ########################################################################################
+    
     @app.errorhandler(405)
     def method_not_allowed(error):
         return jsonify({
