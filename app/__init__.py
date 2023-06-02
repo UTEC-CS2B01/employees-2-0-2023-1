@@ -108,7 +108,7 @@ def create_app(test_config=None):
         returned_code = 200
         list_errors = []
         try:
-            body: request.form
+            body = request.form
             if 'name' not in body:
                 list_errors.append('name is required')
             else:
@@ -119,7 +119,9 @@ def create_app(test_config=None):
                 shortname = request.form['shortname']
             if len(list_errors) > 0:
                 returned_code = 400
-         
-
-
+                
+        except Exception as e:
+            print(e)
+            returned_code = 500
+        
     return app
