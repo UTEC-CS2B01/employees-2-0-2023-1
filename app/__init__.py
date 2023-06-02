@@ -102,8 +102,8 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
-
-    return app
+        
+        return app
 
     @app.route('/employees/<id>', methods=['GET', 'DELETE', 'PATCH'])
     def get_employee(id):
