@@ -86,17 +86,18 @@ def create_app(test_config=None):
         returned_code = 201
         list_errors = []
         try:
-            if 'employee_id' not in request.form:
+            body = request.json
+            if 'employee_id' not in body:
                 list_errors.append('employee_id is required')
             else:
-                employee_id = request.form['employee_id']
+                employee_id = body['employee_id']
 
-            if 'image' not in request.files:
-                list_errors.append('image is required')
+            if 'filename' not in body:
+                list_errors.append('filename is required')
             else:
-                file = request.files['image']
+                file = body['filename']
 
-                if not allowed_file(file.filename):
+                if not allowed_file(file):
                     return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
 
             if len(list_errors) > 0:

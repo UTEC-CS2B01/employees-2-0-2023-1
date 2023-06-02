@@ -56,6 +56,10 @@ class File(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
 
+    def __init__(self, filename, employee_id):
+        self.filename = filename
+        self.employee_id = employee_id
+        self.created_at = datetime.utcnow()
 
 class Department(db.Model):
     __tablename__ = 'departments'
