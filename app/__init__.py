@@ -7,6 +7,7 @@ from .models import db, setup_db, Employee, Department
 from flask_cors import CORS
 from .utilities import allowed_file
 from datetime import datetime
+from sqlalchemy import or_
 
 import os
 import sys
@@ -106,10 +107,16 @@ def create_app(test_config=None):
         
         
     @app.route('/employees', methods=['GET'])
-    def get_employees():
+    def search_employees():
+        query = request.args.get('search', None)  
         try:
-            employees = Employee.query.all()
+            if query:
+                employees = Employee.query.filter(or_(Employee.firstname.ilike(f'%{query}%'), Employee.lastname.ilike(f'%{query}%'))).all()
+            else:
+                employees = Employee.query.all()
+
             return jsonify([employee.serialize() for employee in employees]), 200
+
         except Exception as e:
             print(e)
             return jsonify({'success': False, 'message': 'Error retrieving employees'}), 500
@@ -192,10 +199,16 @@ def create_app(test_config=None):
             returned_code = 500
         
     @app.route('/departments', methods=['GET'])
-    def get_departments():
+    def search_departments():
+        query = request.args.get('search', None)
         try:
-            departments = Department.query.all()
+            if query:
+                departments = Department.query.filter(Department.name.ilike(f'%{query}%')).all()
+            else:
+                departments = Department.query.all()
+
             return jsonify([department.serialize() for department in departments]), 200
+
         except Exception as e:
             print(e)
             return jsonify({'success': False, 'message': 'Error retrieving departments'}), 500
@@ -292,7 +305,36 @@ def create_app(test_config=None):
         finally:
             db.session.close()
 
+            
+    @app.route('/employees/<string:employee_id>/department', methods=['PATCH'])
+    def update_employee_department(employee_id):
+        try:
+            employee = Employee.query.get(employee_id)
 
+            if not employee:
+                return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+            body = request.get_json()
+            department_id = body.get('department_id')
+
+            department = Department.query.get(department_id)
+            if not department:
+                return jsonify({'success': False, 'message': 'Department not found'}), 404
+
+            employee.department = department
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Employee department updated successfully'}), 200
+
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return jsonify({'success': False, 'message': 'Error updating employee department'}), 500
+
+        finally:
+            db.session.close()
+
+            
     @app.route('/employees/<string:employee_id>/departments/<string:department_id>', methods=['DELETE'])
     def remove_department_from_employee(employee_id, department_id):
         try:
@@ -395,5 +437,6 @@ def create_app(test_config=None):
         except Exception as e:
             print(e)
             db.session
+        
         
     return app
