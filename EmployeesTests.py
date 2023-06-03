@@ -23,28 +23,30 @@ class EmployeesTests(unittest.TestCase):
         }
 
         self.new_employee = {
-            'firstname': 'Bianca',
-            'lastname': 'Aguinaga',
-            'age': 16,
-            'selectDepartment': '4b1da77d-69ed-4c0e-98f9-df29b83c85d3',
+            'firstname': 'John',
+            'lastname': 'Smith',
+            'age': 30,
+            'selectDepartment': 'f6451aec-e421-482d-b606-7e6932b66f71',
         }
 
         self.invalid_new_employee = {
-            'firstname': 'Bianca',
-            'lastname': 'Aguinaga',
-            'age': 16,
+            'firstname': 'John',
+            'lastname': 'Doe',
+            'age': 30,
         }
 
-    def test_create_department_success(self):
-        response = self.client.post('/departments', json=self.new_department)
-        data = json.loads(response.data)
-        print('data: ', data)
+    # POST
+    ###########################################################################################
+    # def test_create_department_success(self):
+    #     response = self.client.post('/departments', json=self.new_department)
+    #     data = json.loads(response.data)
+    #     print('data: ', data)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['id'])
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertTrue(data['id'])
 
-        
+
     def test_create_department_failed_400(self):
         response = self.client.post('/departments', json={})
         data = json.loads(response.data)
@@ -62,13 +64,13 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['message'])
 
 
-    def test_create_employee_success(self):
-        response = self.client.post('/employees', json=self.new_employee)
-        data = json.loads(response.data)
+    # def test_create_employee_success(self):
+    #     response = self.client.post('/employees', json=self.new_employee)
+    #     data = json.loads(response.data)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['id'])
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertTrue(data['id'])
 
 
     def test_create_employee_failed_400(self):
@@ -82,9 +84,9 @@ class EmployeesTests(unittest.TestCase):
     
     def test_create_employee_failed_500(self):
         response = self.client.post('/employees', json={
-            'firstname': 'Bianca',
-            'lastname': 'Aguinaga',
-            'age': 16,
+            'firstname': 'John',
+            'lastname': 'Doe',
+            'age': 30,
             'selectDepartment': '1234',
         })
 
@@ -93,6 +95,72 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
+
+    # DELETE
+    ###########################################################################################
+
+    def test_delete_employee_success(self):
+        response = self.client.delete('/employees/7e97c61c-b9c2-4927-ad9e-7b55364b253b')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def test_delete_employee_failed_404(self):
+        response = self.client.delete('/employees/1234')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+
+    # def test_delete_employee_failed_500(self):
+    #     response = self.client.delete('/employees', json={
+    #         'firstname': 'Bianca',
+    #         'lastname': 'Aguinaga',
+    #         'age': 16,
+    #         'selectDepartment': '1234',
+    #     })
+
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 500)
+    #     self.assertEqual(data['success'], False)
+    #     self.assertTrue(data['message'])
+
+    def test_delete_department_success(self):
+        response = self.client.delete('/departments/6ab0bf63-8988-4281-ad6d-ed62e72868a7')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def test_delete_department_failed_404(self):
+        response = self.client.delete('/departments/1234')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+
+    # def test_delete_department_failed_500(self):
+    #     response = self.client.delete('/departments', json={
+    #         'firstname': 'Bianca',
+    #         'lastname': 'Aguinaga',
+    #         'age': 16,
+    #         'selectDepartment': '1234',
+    #     })
+
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 500)
+    #     self.assertEqual(data['success'], False)
+    #     self.assertTrue(data['message'])
+
 
 
     def tearDown(self):

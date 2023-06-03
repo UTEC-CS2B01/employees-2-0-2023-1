@@ -277,8 +277,8 @@ def create_app(test_config=None):
 
         if returned_code != 200:
             abort(returned_code)
-
-        return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
 
     @app.route('/employees/<employee_id>', methods=['DELETE'])
     def delete_employee(employee_id):
@@ -295,8 +295,8 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            # print(e)
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -305,8 +305,8 @@ def create_app(test_config=None):
 
         if returned_code != 200:
             abort(returned_code)
-
-        return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
 
     # /employees/<employee_id>/departments
     ###########################################################################################
@@ -719,7 +719,7 @@ def create_app(test_config=None):
         return jsonify({
             'success': False,
             'message': 'Resource not found'
-        }) 
+        }), 404
     
     @app.errorhandler(500)
     def internal_server_error(error):
