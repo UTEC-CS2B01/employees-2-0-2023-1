@@ -222,7 +222,9 @@ def create_app(test_config=None):
             department = Department.query.get(department_id)
 
             if not department:
-                abort(404)
+                #abort(404) not working for some reason. Always return 500
+                returned_code = 404
+                return jsonify({'success': False, 'message': 'Department not found'}), returned_code
             else:
                 body = request.form
 
@@ -262,6 +264,7 @@ def create_app(test_config=None):
 
             if not department:
                 returned_code = 404
+                error_message = 'Department not found'
             else:
                 db.session.delete(department)
                 db.session.commit()
@@ -271,13 +274,15 @@ def create_app(test_config=None):
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
+            error_message = 'Error deleting department'
 
         finally:
             db.session.close()
 
         if returned_code != 200:
-            abort(returned_code)
-
+            #abort(returned_code) this is not working for some reason. Always return 200
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        
         return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
 
     @app.route('/employees/<employee_id>', methods=['DELETE'])
