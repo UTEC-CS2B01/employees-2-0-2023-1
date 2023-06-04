@@ -102,6 +102,7 @@ def create_app(test_config=None):
             if len(list_errors) > 0:
                 returned_code = 400
             else:
+
                 cwd = os.getcwd()
 
                 employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee_id)
@@ -110,17 +111,15 @@ def create_app(test_config=None):
                 upload_folder = os.path.join(cwd, employee_dir)
 
                 file.save(os.path.join(upload_folder, file.filename))
-
+                
                 file = File(file.filename, employee_id)
+
                 db.session.add(file)
                 db.session.commit()
 
         except Exception as e:
-        
-            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
-
         finally:
             db.session.close()
 

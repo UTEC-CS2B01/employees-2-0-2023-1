@@ -99,6 +99,30 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['message'])
 
 
+    # test of /files
+
+    def test_upload_file_success(self):
+        # Abre la imagen
+        with open('static/testImages/test.png', 'rb') as file:
+            file_content = file.read()
+
+        form_data = {
+            'employee_id': '508ec843-213b-47ec-9052-46154d4007c2',
+            'image': (io.BytesIO(file_content), 'test.png'),
+        }
+
+        response = self.client.post('/files', data=form_data, content_type='multipart/form-data')
+
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['message'])
+
+
+
+
+
     # test of /employees/<employee_id>
 
     def test_update_employee_success(self):
@@ -151,7 +175,6 @@ class EmployeesTests(unittest.TestCase):
 
 
     # test of /employees/<employee_id>
-
 
     def tearDown(self):
         pass
