@@ -30,7 +30,7 @@ def create_app(test_config=None):
 
     @app.route('/employees', methods=['POST'])
     def create_employee():
-        returned_code = 200
+        returned_code = 201
         list_errors = []
         try:
             body = request.json
@@ -38,7 +38,7 @@ def create_app(test_config=None):
             if 'firstname' not in body:
                 list_errors.append('firstname is required')
             else:
-                firstname = body('firstname')
+                firstname = body.get('firstname')
 
             if 'lastname' not in body:
                 list_errors.append('lastname is required')    
@@ -55,15 +55,6 @@ def create_app(test_config=None):
             else:
                 department_id = body['selectDepartment']
 
-            if 'image' not in request.files:
-                list_errors.append('image is required')
-            else:
-        
-                file = request.files['image']
-
-                if not allowed_file(file.filename):
-                    return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-
             if len(list_errors) > 0:
                 returned_code = 400
             else:
@@ -72,18 +63,6 @@ def create_app(test_config=None):
                 db.session.commit()
 
                 employee_id = employee.id
-
-                cwd = os.getcwd()
-
-                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
-                os.makedirs(employee_dir, exist_ok=True)
-
-                upload_folder = os.path.join(cwd, employee_dir)
-
-                file.save(os.path.join(upload_folder, file.filename))
-
-                employee.image = file.filename
-                db.session.commit()
 
         except Exception as e:
             print(e)
@@ -96,14 +75,14 @@ def create_app(test_config=None):
 
         if returned_code == 400:
             return jsonify({'success': False, 'message': 'Error creating employee', 'errors': list_errors}), returned_code
-        elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
+        elif returned_code != 201:
+            abort(returned_code)
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
     
     @app.route('/departments', methods=['POST'])
     def create_department():
-        returned_code = 200
+        returned_code = 201
         list_errors = []
         try:
             body = request.json
@@ -128,8 +107,8 @@ def create_app(test_config=None):
                 department_id = department.id
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            print('error: ', e)
+            print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -139,56 +118,59 @@ def create_app(test_config=None):
         if returned_code == 400:
             return jsonify({'success': False, 'message': 'Error creating department', 'errors': list_errors}), returned_code
         elif returned_code == 500:
-            return jsonify({'success': False, 'message': 'Error creating department'}), returned_code
+            abort(returned_code)
         else:
             return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
 
-    @app.route('/employees/<employee_id>/departments', methods=['POST'])
-    def assign_employee_department(employee_id):
-        returned_code = 200
-        error_message = ''
-
+    @app.route('/files', methods=['POST'])
+    def upload_image():
+        returned_code = 201
+        list_errors = []
         try:
-            employee = Employee.query.get(employee_id)
-
-            if not employee:
-                returned_code = 404
-                error_message = 'Employee not found'
+            if 'employee_id' not in request.form:
+                list_errors.append('employee_id is required')
             else:
-                body = request.form
+                employee_id = request.form['employee_id']
 
-                if 'name' not in body:
-                    returned_code = 400
-                    error_message = 'Department name is required'
-                elif 'short_name' not in body:
-                    returned_code = 400
-                    error_message = 'Department short_name is required'
-                else:
-                    name = request.form['name']
-                    short_name = request.form['short_name']
+            if 'image' not in request.files:
+                list_errors.append('image is required')
+            else:
+                file = request.files['image']
 
-                    department = Department(name, short_name)
-                    department.employees.append(employee)
+                if not allowed_file(file.filename):
+                    return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
 
-                    db.session.add(department)
-                    db.session.commit()
+            if len(list_errors) > 0:
+                returned_code = 400
+            else:
+                cwd = os.getcwd()
 
-                    department_id = department.id
+                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee_id)
+                os.makedirs(employee_dir, exist_ok=True)
+
+                upload_folder = os.path.join(cwd, employee_dir)
+
+                file.save(os.path.join(upload_folder, file.filename))
+
+                file = File(file.filename, employee_id)
+                db.session.add(file)
+                db.session.commit()
 
         except Exception as e:
             print(e)
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
-            error_message = 'Error assigning department to employee'
 
         finally:
             db.session.close()
 
-        if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'department_id': department_id, 'message': 'Department assigned to employee successfully!'}), returned_code    
+        if returned_code == 400:
+            return jsonify({'success': False, 'message': 'Error uploading file', 'errors': list_errors}), returned_code
+        elif returned_code != 201:
+            abort(returned_code)
+        else:
+            return jsonify({'success': True, 'message': 'File uploaded successfully!'}), returned_code  
     
     # GET Y SEARCH
     #######################################################################################
