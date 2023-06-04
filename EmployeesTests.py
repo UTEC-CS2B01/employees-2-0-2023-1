@@ -39,6 +39,13 @@ class EmployeesTests(unittest.TestCase):
             'id': '3abd80ff-6968-4b6a-848f-e77f497ee7ee'
         }
 
+        self.delete_not_found_department = {
+            'id': '1234'
+        }
+
+    # Test Create Department
+    ###########################################################################################
+
     def test_create_department_success(self):
         response = self.client.post('/departments', json=self.new_department)
         data = json.loads(response.data)
@@ -48,7 +55,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['id'])
 
-        
     def test_create_department_failed_400(self):
         response = self.client.post('/departments', json={})
         data = json.loads(response.data)
@@ -65,6 +71,8 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
+    # Test Create Employee
+    ###########################################################################################
 
     def test_create_employee_success(self):
         response = self.client.post('/employees', json=self.new_employee)
@@ -74,7 +82,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['id'])
 
-
     def test_create_employee_failed_400(self):
         response = self.client.post('/employees', json=self.invalid_new_employee)
         data = json.loads(response.data)
@@ -82,7 +89,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
-
     
     def test_create_employee_failed_500(self):
         response = self.client.post('/employees', json={
@@ -98,6 +104,8 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
+    # Test Delete Department
+    ###########################################################################################
 
     def test_delete_department_success(self):
         response = self.client.delete('departments/{}'.format(self.delete_department['id']), json=self.delete_department)
@@ -107,6 +115,13 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['message'])
 
+    def test_delete_department_failed_404(self):
+        response = self.client.delete('departments/{}'.format(self.delete_not_found_department['id']), json=self.delete_not_found_department)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
 
     def tearDown(self):
         pass

@@ -460,6 +460,7 @@ def create_app(test_config=None):
 
             if not department:
                 returned_code = 404
+                error_message = 'Department not found'
             else:
                 db.session.delete(department)
                 db.session.commit()
@@ -469,15 +470,19 @@ def create_app(test_config=None):
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
+            error_message = 'Error deleting department'
 
         finally:
             db.session.close()
 
-        if returned_code != 200:
-            abort(returned_code)
+        if returned_code == 404:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
 
-        return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
-
+    
     @app.route('/employees/<employee_id>', methods=['DELETE'])
     def delete_employee(employee_id):
         returned_code = 200
