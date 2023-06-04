@@ -96,6 +96,7 @@ def create_app(test_config=None):
                 list_errors.append('filename is required')
             else:
                 file = body['filename']
+                #guardar esto de forma bruta y despues añadirlo con un put
 
                 if not allowed_file(file):
                     return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
