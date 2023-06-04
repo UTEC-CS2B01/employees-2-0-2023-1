@@ -240,8 +240,8 @@ def create_app(test_config=None):
             db.session.rollback()
             returned_code = 500
             error_message = 'Error updating department'
+        finally: 
 
-        finally:
             db.session.close()
 
         if returned_code != 200:
