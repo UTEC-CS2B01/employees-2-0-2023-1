@@ -66,7 +66,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -117,7 +117,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -159,8 +159,8 @@ def create_app(test_config=None):
                 department_id = department.id
 
         except Exception as e:
-            print('error: ', e)
-            print('exc_info: ',sys.exc_info())
+            # print('error: ', e)
+            # print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -201,7 +201,7 @@ def create_app(test_config=None):
                 error_message = 'No employees found'
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             returned_code = 500
             error_message = 'Error retrieving employees'
 
@@ -215,7 +215,7 @@ def create_app(test_config=None):
     
     @app.route('/departments/<department_id>', methods=['PATCH'])
     def update_department(department_id):
-        returned_code = 200
+        returned_code = 201
         error_message = ''
 
         try:
@@ -236,7 +236,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
             error_message = 'Error updating department'
@@ -244,7 +244,7 @@ def create_app(test_config=None):
         finally:
             db.session.close()
 
-        if returned_code != 200:
+        if returned_code != 201:
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'message': 'Department updated successfully'}), returned_code
@@ -268,7 +268,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -286,7 +286,7 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
-            employee = Employee.query.get(employee_id)
+            employee = Employee.query.filter_by(id=employee_id).first()
 
             if not employee:
                 returned_code = 404
@@ -296,7 +296,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -318,7 +318,7 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
-            employee = Employee.query.get(employee_id)
+            employee = Employee.query.filter_by(id=employee_id).first()
 
             if not employee:
                 returned_code = 404
@@ -346,7 +346,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
             error_message = 'Error assigning department to employee'
@@ -368,7 +368,7 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
-            employee = Employee.query.get(employee_id)
+            employee = Employee.query.filter_by(id=employee_id).first()
 
             if not employee:
                 returned_code = 404
@@ -394,7 +394,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
             error_message = 'Error updating employee departments'
@@ -411,7 +411,7 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
-            employee = Employee.query.get(employee_id)
+            employee = Employee.query.filter_by(id=employee_id).first()
 
             if not employee:
                 returned_code = 404
@@ -426,7 +426,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
             error_message = 'Error removing employee departments'
@@ -441,7 +441,7 @@ def create_app(test_config=None):
         returned_code = 200
         list_errors = []
         try:
-            employee = Employee.query.get(employee_id)
+            employee = Employee.query.filter_by(id=employee_id).first()
 
             if employee is None:
                 list_errors.append('employee does not exist')
@@ -483,12 +483,13 @@ def create_app(test_config=None):
                     db.session.commit()
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
         finally:
             db.session.close()
         if len(list_errors) > 0:
+            returned_code = 400
             return jsonify({'success': False, 'message': 'Error updating employee', 'errors': list_errors}), returned_code
         elif returned_code != 200:
             abort(returned_code)
@@ -524,7 +525,7 @@ def create_app(test_config=None):
                 returned_code = 404
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             returned_code = 500
 
         if returned_code != 200:
@@ -537,7 +538,7 @@ def create_app(test_config=None):
         returned_code = 200
         list_errors = []
         try:
-            employee = Employee.query.get(employee_id)
+            employee = Employee.query.filter_by(id=employee_id).first()
             
             if employee is None:
                 list_errors.append('employee dont exist')
@@ -547,7 +548,7 @@ def create_app(test_config=None):
                 department = Department.query.get(employee.department_id)
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             returned_code = 500
         finally:
             db.session.close()
@@ -584,7 +585,7 @@ def create_app(test_config=None):
                         })
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             returned_code = 500
         finally:
             db.session.close()
@@ -640,7 +641,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             returned_code = 500
         finally:
             db.session.close()
@@ -694,7 +695,7 @@ def create_app(test_config=None):
 
         except Exception as e:
         
-            print(sys.exc_info())
+            # print(sys.exc_info())
             returned_code = 500
         finally:
             db.session.close()
