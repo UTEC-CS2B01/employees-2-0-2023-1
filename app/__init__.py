@@ -456,6 +456,7 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
+
             department = Department.query.get(department_id)
 
             if not department:
@@ -466,11 +467,10 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            print('error: ', e)
+            print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
-            error_message = 'Error deleting department'
 
         finally:
             db.session.close()
@@ -478,7 +478,7 @@ def create_app(test_config=None):
         if returned_code == 404:
             return jsonify({'success': False, 'message': error_message}), returned_code
         elif returned_code == 500:
-            return jsonify({'success': False, 'message': error_message}), returned_code
+            abort(returned_code)
         else:
             return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
 
@@ -493,54 +493,26 @@ def create_app(test_config=None):
 
             if not employee:
                 returned_code = 404
+                error_message = 'Employee not found'
             else:
                 db.session.delete(employee)
                 db.session.commit()
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            print('error: ', e)
+            print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
         finally:
             db.session.close()
 
-        if returned_code != 200:
-            abort(returned_code)
-
-        return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
-
-    @app.route('/employees/<employee_id>/departments', methods=['DELETE'])
-    def remove_employee_departments(employee_id):
-        returned_code = 200
-        error_message = ''
-
-        try:
-            employee = Employee.query.get(employee_id)
-
-            if not employee:
-                returned_code = 404
-                error_message = 'Employee not found'
-            else:
-                departments = Department.query.filter(Department.employees.any(id=employee_id)).all()
-
-                for department in departments:
-                    department.employees.remove(employee)
-
-                db.session.commit()
-
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            db.session.rollback()
-            returned_code = 500
-            error_message = 'Error removing employee departments'
-
-        if returned_code != 200:
+        if returned_code == 404:
             return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code        
+        elif returned_code == 500:
+            abort(returned_code)
+        else:
+            return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
 
     # ERROR HANDLERS
     ########################################################################################

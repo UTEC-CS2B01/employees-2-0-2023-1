@@ -26,7 +26,7 @@ class EmployeesTests(unittest.TestCase):
             'firstname': 'Bianca',
             'lastname': 'Aguinaga',
             'age': 16,
-            'selectDepartment': 'c735a6c2-738f-40c4-ba2d-29efae531d18',
+            'selectDepartment': '11fd9866-6cf3-4b33-b53e-d84482b3a432 ',
         }
 
         self.invalid_new_employee = {
@@ -36,10 +36,18 @@ class EmployeesTests(unittest.TestCase):
         }
 
         self.delete_department = {  
-            'id': '3abd80ff-6968-4b6a-848f-e77f497ee7ee'
+            'id': '1d352dae-3a66-4297-aa92-2dbc54ce78a5'
         }
 
         self.delete_not_found_department = {
+            'id': '1234'
+        }
+
+        self.delete_employee = {  
+            'id': 'd1a858ae-abc6-4e54-877e-f6e51d72f094'
+        }
+
+        self.delete_not_found_employee = {
             'id': '1234'
         }
 
@@ -117,6 +125,25 @@ class EmployeesTests(unittest.TestCase):
 
     def test_delete_department_failed_404(self):
         response = self.client.delete('departments/{}'.format(self.delete_not_found_department['id']), json=self.delete_not_found_department)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    # Test Delete Employee
+    ###########################################################################################
+
+    def test_delete_employee_success(self):
+        response = self.client.delete('employees/{}'.format(self.delete_employee['id']), json=self.delete_employee)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['message'])
+
+    def test_delete_employee_failed_404(self):
+        response = self.client.delete('employees/{}'.format(self.delete_not_found_employee['id']), json=self.delete_not_found_employee)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 404)
