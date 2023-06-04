@@ -26,13 +26,17 @@ class EmployeesTests(unittest.TestCase):
             'firstname': 'Bianca',
             'lastname': 'Aguinaga',
             'age': 16,
-            'selectDepartment': '4b1da77d-69ed-4c0e-98f9-df29b83c85d3',
+            'selectDepartment': 'c735a6c2-738f-40c4-ba2d-29efae531d18',
         }
 
         self.invalid_new_employee = {
             'firstname': 'Bianca',
             'lastname': 'Aguinaga',
             'age': 16,
+        }
+
+        self.delete_department = {  
+            'id': '3abd80ff-6968-4b6a-848f-e77f497ee7ee'
         }
 
     def test_create_department_success(self):
@@ -92,6 +96,15 @@ class EmployeesTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+
+    def test_delete_department_success(self):
+        response = self.client.delete('departments/{}'.format(self.delete_department['id']), json=self.delete_department)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
         self.assertTrue(data['message'])
 
 
