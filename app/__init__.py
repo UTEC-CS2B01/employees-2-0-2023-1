@@ -30,7 +30,7 @@ def create_app(test_config=None):
 
     @app.route('/employees', methods=['POST'])
     def create_employee():
-        returned_code = 201
+        returned_code = 200
         list_errors = []
         try:
             body = request.json
@@ -38,7 +38,7 @@ def create_app(test_config=None):
             if 'firstname' not in body:
                 list_errors.append('firstname is required')
             else:
-                firstname = body.get('firstname')
+                firstname = body('firstname')
 
             if 'lastname' not in body:
                 list_errors.append('lastname is required')    
@@ -55,6 +55,15 @@ def create_app(test_config=None):
             else:
                 department_id = body['selectDepartment']
 
+            if 'image' not in request.files:
+                list_errors.append('image is required')
+            else:
+        
+                file = request.files['image']
+
+                if not allowed_file(file.filename):
+                    return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
+
             if len(list_errors) > 0:
                 returned_code = 400
             else:
@@ -63,6 +72,18 @@ def create_app(test_config=None):
                 db.session.commit()
 
                 employee_id = employee.id
+
+                cwd = os.getcwd()
+
+                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+                os.makedirs(employee_dir, exist_ok=True)
+
+                upload_folder = os.path.join(cwd, employee_dir)
+
+                file.save(os.path.join(upload_folder, file.filename))
+
+                employee.image = file.filename
+                db.session.commit()
 
         except Exception as e:
             print(e)
@@ -75,8 +96,8 @@ def create_app(test_config=None):
 
         if returned_code == 400:
             return jsonify({'success': False, 'message': 'Error creating employee', 'errors': list_errors}), returned_code
-        elif returned_code != 201:
-            abort(returned_code)
+        elif returned_code == 500:
+            return jsonify({'success': False, 'message': 'Error creating employee'}), returned_code
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
     
