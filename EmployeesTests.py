@@ -114,13 +114,39 @@ class EmployeesTests(unittest.TestCase):
         response = self.client.post('/files', data=form_data, content_type='multipart/form-data')
 
         data = json.loads(response.data)
-        
+
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['message'])
 
 
 
+    def test_upload_file_failed_400(self):
+        response = self.client.post('/files', data={}, content_type='multipart/form-data')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+
+    def test_upload_file_failed_500(self):
+        # Abre la imagen
+        with open('static/testImages/test.png', 'rb') as file:
+            file_content = file.read()
+
+        form_data = {
+            'employee_id': '1234',
+            'image': (io.BytesIO(file_content), 'test.png'),
+        }
+
+        response = self.client.post('/files', data=form_data, content_type='multipart/form-data')
+
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
 
 
     # test of /employees/<employee_id>
