@@ -65,7 +65,7 @@ def create_app(test_config=None):
                 employee_id = employee.id
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -116,7 +116,7 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -200,7 +200,7 @@ def create_app(test_config=None):
                 returned_code = 404
                 error_message = 'No employees found'
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             returned_code = 500
             error_message = 'Error retrieving employees'
@@ -235,7 +235,7 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -267,7 +267,7 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -295,7 +295,7 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -345,7 +345,7 @@ def create_app(test_config=None):
                     department_id = department.id
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -393,7 +393,7 @@ def create_app(test_config=None):
                         db.session.commit()
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -425,7 +425,7 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -482,7 +482,7 @@ def create_app(test_config=None):
                     employee.image = file.filename
                     db.session.commit()
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -523,7 +523,7 @@ def create_app(test_config=None):
             if not department_list:
                 returned_code = 404
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             returned_code = 500
 
@@ -546,7 +546,7 @@ def create_app(test_config=None):
                 # como un empleado solo tiene un departamento
                 department = Department.query.get(employee.department_id)
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             returned_code = 500
         finally:
@@ -583,7 +583,7 @@ def create_app(test_config=None):
                             'lastname': employee.lastname,
                         })
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             returned_code = 500
         finally:
@@ -639,7 +639,7 @@ def create_app(test_config=None):
                     })
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             returned_code = 500
         finally:
@@ -693,7 +693,7 @@ def create_app(test_config=None):
                     })
 
         except Exception as e:
-            print(e)
+        
             print(sys.exc_info())
             returned_code = 500
         finally:

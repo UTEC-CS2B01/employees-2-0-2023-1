@@ -1,12 +1,13 @@
-import unittest
-from config.qa import config
-from app.models import Employee, Department
-from app import create_app
-from flask_sqlalchemy import SQLAlchemy
+import unittest #libreria de python para realizar test
+from config.qa import config #configuracion de la base de datos
+from app.models import Employee, Department #importamos los modelos de la base de datos
+from app import create_app #importamos la aplicacion
+from flask_sqlalchemy import SQLAlchemy #importamos la libreria de sqlalchemy
 import json
 
-class EmployeesTests(unittest.TestCase):
 
+class EmployeesTests(unittest.TestCase): #unittest.TestCase es una clase que nos permite realizar test
+#el test se corre con el comando python -m unittest discover -s . -p "EmployeesTests.py"
     def setUp(self):
         database_path = config['DATABASE_URI']
         self.app = create_app({'database_path': database_path})
@@ -34,6 +35,7 @@ class EmployeesTests(unittest.TestCase):
             'lastname': 'Aguinaga',
             'age': 16,
         }
+
 
     def test_create_department_success(self):
         response = self.client.post('/departments', json=self.new_department)
