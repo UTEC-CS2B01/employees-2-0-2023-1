@@ -24,7 +24,6 @@ class Employee(db.Model):
     modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
     files = db.relationship('File', backref='employee', lazy=True)
 
-
     def __init__(self, firstname, lastname, age, department_id):
         self.firstname = firstname
         self.lastname = lastname
@@ -56,6 +55,21 @@ class File(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
 
+    def __init__(self, filename, employee_id):
+        self.filename = filename
+        self.employee_id = employee_id
+        self.created_at = datetime.utcnow()
+
+    def __repr__(self):
+        return '<File %r>' % (self.filename)
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'filename': self.filename,
+            'created_at': self.created_at,
+            'modified_at': self.modified_at,
+        }
 
 class Department(db.Model):
     __tablename__ = 'departments'
@@ -65,7 +79,6 @@ class Department(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
     employees = db.relationship('Employee', backref='department', lazy=True)
-
 
     def __init__(self, name, short_name):
         self.name = name
