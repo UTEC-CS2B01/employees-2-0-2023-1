@@ -187,17 +187,16 @@ def create_app(test_config=None):
             if search_query:
                 employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
 
-                serialized_employees = [employee.serialize() for employee in employees]
+                employees_list = [employee.serialize() for employee in employees]
 
-                return jsonify({'employees': serialized_employees}), returned_code
-
-
-            employees = Employee.query.all()
-            employee_list = [employee.serialize() for employee in employees]
+            else:
+                employees = Employee.query.all()
+                employee_list = [employee.serialize() for employee in employees]
 
             if not employee_list:
                 returned_code = 404
                 error_message = 'No employees found'
+
         except Exception as e:
         
             # print(sys.exc_info())
@@ -218,7 +217,7 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
-            department = Department.query.get(department_id)
+            department = Department.query.filter_by(id=department_id).first()
 
             if not department:
                 abort(404)
@@ -257,7 +256,7 @@ def create_app(test_config=None):
         error_message = ''
 
         try:
-            department = Department.query.get(department_id)
+            department = Department.query.filter_by(id=department_id).first()
 
             if not department:
                 returned_code = 404
@@ -380,7 +379,7 @@ def create_app(test_config=None):
                     error_message = 'Department ID is required'
                 else:
                     department_id = request.form['department_id']
-                    department = Department.query.get(department_id)
+                    department = Department.query.filter_by(id=department_id).first()
 
                     if not department:
                         returned_code = 404
@@ -506,26 +505,25 @@ def create_app(test_config=None):
             if search_query:
                 departments = Department.query.filter(
                     db.or_(
-                        Department.name.ilike(f'%{search_query}%'),
-                        Department.short_name.ilike(f'%{search_query}%')
+                        Department.name.like(f'%{search_query}%'),
+                        Department.short_name.like(f'%{search_query}%')
                     )
                 ).all()
-                serialized_departments = [department.serialize() for department in departments]
+                department_list = [department.serialize() for department in departments]
+            else:
+                departments = Department.query.all()
+                department_list = [department.serialize() for department in departments]
 
-                return jsonify({'success': True, 'departments': serialized_departments, \
-                                'total': len(serialized_departments)}), returned_code
 
-
-
-            departments = Department.query.all()
-            department_list = [department.serialize() for department in departments]
 
             if not department_list:
                 returned_code = 404
+
         except Exception as e:
         
             # print(sys.exc_info())
             returned_code = 500
+
 
         if returned_code != 200:
             abort(returned_code)
@@ -544,7 +542,7 @@ def create_app(test_config=None):
                 returned_code = 404
             else:
                 # como un empleado solo tiene un departamento
-                department = Department.query.get(employee.department_id)
+                department = Department.query.filter_by(id=employee.department_id).first()
         except Exception as e:
         
             # print(sys.exc_info())
@@ -564,7 +562,7 @@ def create_app(test_config=None):
         returned_code = 200
         list_errors = []
         try:
-            department = Department.query.get(department_id)
+            department = Department.query.filter_by(id=department_id).first()
             
             if department is None:
                 list_errors.append('department does not exist')
@@ -719,7 +717,7 @@ def create_app(test_config=None):
         return jsonify({
             'success': False,
             'message': 'Resource not found'
-        }) 
+        }), 404
     
     @app.errorhandler(500)
     def internal_server_error(error):

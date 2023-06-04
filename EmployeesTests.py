@@ -38,6 +38,9 @@ class EmployeesTests(unittest.TestCase):
         }
 
 
+
+    # POST ------------------------------------------------
+
     # test of /departments
 
     def test_create_department_success(self):
@@ -119,8 +122,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['message'])
 
-
-
     def test_upload_file_failed_400(self):
         response = self.client.post('/files', data={}, content_type='multipart/form-data')
         data = json.loads(response.data)
@@ -128,7 +129,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
-
 
     def test_upload_file_failed_500(self):
         # Abre la imagen
@@ -143,10 +143,97 @@ class EmployeesTests(unittest.TestCase):
         response = self.client.post('/files', data=form_data, content_type='multipart/form-data')
 
         data = json.loads(response.data)
-        
+
         self.assertEqual(response.status_code, 500)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
+
+
+
+    # GET ------------------------------------------------
+
+    # test of /employees
+
+    def test_get_employees_success(self):
+        response = self.client.get('/employees')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['data'])
+
+    def test_get_employees_failed_404(self):
+
+        response = self.client.get('/employees?search=*')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+
+
+    # test of /departments
+
+    def test_get_departments_success(self):
+        response = self.client.get('/departments')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['data'])
+
+    def test_get_departments_failed_404(self):
+        response = self.client.get('/departments?search=nnnjb/*')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+
+    # /employees/<employee_id>/department
+
+    def test_get_employee_department_success(self):
+        response = self.client.get('/employees/508ec843-213b-47ec-9052-46154d4007c2/department')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['department'])
+        self.assertTrue(data['employee'])
+
+
+    def test_get_employee_department_failed_404(self):
+        response = self.client.get('/employees/1234/department')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+
+    # test of /departments/<department_id>/employees
+
+    def test_get_department_employees_success(self):
+        response = self.client.get('/departments/7cf0cb5d-c255-4bd2-b98f-23aae79952cf/employees')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['employees'])
+
+
+    def test_get_department_employees_failed_404(self):
+        response = self.client.get('/departments/1234/employees')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+
+    # test of /employees/search
+
+    def test_search_employees_success(self):
+        pass
+
 
 
     # test of /employees/<employee_id>
