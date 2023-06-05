@@ -174,6 +174,14 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['message'])
 
+    def test_update_employee_failed_404(self):
+        response = self.client.patch('employees/{}'.format(self.delete_not_found_employee['id']), json=self.delete_not_found_employee)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
     # Test Update Department
     ###########################################################################################
 
@@ -185,5 +193,15 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['message'])
 
+    def test_update_department_failed_404(self):
+        response = self.client.patch('departments/{}'.format(self.delete_not_found_department['id']), json=self.delete_not_found_department)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])    
+
+    
+    
     def tearDown(self):
         pass
