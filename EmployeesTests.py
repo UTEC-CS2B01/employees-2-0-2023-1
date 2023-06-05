@@ -36,7 +36,7 @@ class EmployeesTests(unittest.TestCase):
         }
 
         self.delete_department = {  
-            'id': '1d352dae-3a66-4297-aa92-2dbc54ce78a5'
+            'id': '08b442b9-0cd7-4197-b540-04b1156a5d17'
         }
 
         self.delete_not_found_department = {
@@ -44,12 +44,27 @@ class EmployeesTests(unittest.TestCase):
         }
 
         self.delete_employee = {  
-            'id': 'd1a858ae-abc6-4e54-877e-f6e51d72f094'
+            'id': '85c1fd57-b58b-403d-9e1f-c6c148072eec'
         }
 
         self.delete_not_found_employee = {
             'id': '1234'
         }
+
+        self.update_department = {
+            'id': 'fce853ef-3c70-41db-a3e9-e1ae404db942',
+            'name': 'Cleaning Department', 
+            'short_name': 'CD'
+        }
+
+        self.update_employee = {
+            'id': '4755e3cd-2b6d-4910-9677-d19103693856',
+            'firstname': 'Marvin',
+            'lastname': 'Abisrror',
+            'age': 36,
+            'selectDepartment': '11fd9866-6cf3-4b33-b53e-d84482b3a432'
+        }
+
 
     # Test Create Department
     ###########################################################################################
@@ -148,6 +163,28 @@ class EmployeesTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    # Test Update Employee
+    ###########################################################################################
+
+    def test_update_employee_success(self):
+        response = self.client.patch('employees/{}'.format(self.update_employee['id']), json=self.update_employee)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['message'])
+
+    # Test Update Department
+    ###########################################################################################
+
+    def test_update_department_success(self):
+        response = self.client.patch('departments/{}'.format(self.update_department['id']), json=self.update_department)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
         self.assertTrue(data['message'])
 
     def tearDown(self):

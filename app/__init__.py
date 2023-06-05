@@ -65,8 +65,8 @@ def create_app(test_config=None):
                 employee_id = employee.id
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            print('error: ', e)
+            print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -313,38 +313,44 @@ def create_app(test_config=None):
     @app.route('/departments/<department_id>', methods=['PATCH'])
     def update_department(department_id):
         returned_code = 200
-        error_message = ''
+        list_errors = []
 
         try:
             department = Department.query.get(department_id)
 
-            if not department:
-                abort(404)
+            if department is None:
+                list_errors.append('department does not exist')
+                returned_code = 404
             else:
-                body = request.form
+                body = request.json
 
-                if 'name' in body:
+                if 'name' not in body:
+                    list_errors.append('name is required')
+                else:
                     department.name = request.form['name']
 
-                if 'short_name' in body:
+                if 'short_name' not in body:
+                    list_errors.append('short_name is required')
+                else:
                     department.short_name = request.form['short_name']
 
-                db.session.commit()
+            db.session.commit()
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            print('error: ', e)
+            print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
-            error_message = 'Error updating department'
 
         finally:
             db.session.close()
 
-        if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'message': 'Department updated successfully'}), returned_code
+        if returned_code == 404:
+            return jsonify({'success': False, 'message': 'Error updating department', 'errors': list_errors}), returned_code
+        elif returned_code != 200:
+            return jsonify({'success': False, 'message': list_errors}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Department updated successfully'}), returned_code
     
     @app.route('/employees/<employee_id>', methods=['PATCH'])
     def update_employee(employee_id):
@@ -357,51 +363,32 @@ def create_app(test_config=None):
                 list_errors.append('employee does not exist')
                 returned_code = 404
             else:
-                body = request.form
+                body = request.json
 
-                if 'age' not in body:
-                    list_errors.append('age is required')
+                if 'is_active' not in body:
+                    list_errors.append('status is required')
                 else:
-                    employee.age = request.form['age']    
+                    employee.is_active = body.get['is_active']    
 
                 if 'selectDepartment' not in body:
                     list_errors.append('selectDepartment is required')
                 else:
-                    employee.department_id = request.form['selectDepartment']
+                    employee.department_id = body.get['selectDepartment']
 
-                if 'image' not in request.files:
-                    list_errors.append('image is required')
-                else:
-                    file = request.files['image']
-
-                    if file.filename == '':
-                        return jsonify({'success': False, 'message': 'No image selected'}), 400
-            
-                    if not allowed_file(file.filename):
-                        return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-                    
-                    cwd = os.getcwd()
-
-                    employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
-                    os.makedirs(employee_dir, exist_ok=True)
-
-                    upload_folder = os.path.join(cwd, employee_dir)
-
-                    file.save(os.path.join(upload_folder, file.filename))
-
-                    employee.image = file.filename
-                    db.session.commit()
+                db.session.commit()
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            print('error: ', e)
+            print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
+
         finally:
             db.session.close()
-        if len(list_errors) > 0:
+
+        if returned_code == 404:
             return jsonify({'success': False, 'message': 'Error updating employee', 'errors': list_errors}), returned_code
         elif returned_code != 200:
-            abort(returned_code)
+            return jsonify({'success': False, 'message': list_errors}), returned_code
         else:
             return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code
 
@@ -477,7 +464,7 @@ def create_app(test_config=None):
 
         if returned_code == 404:
             return jsonify({'success': False, 'message': error_message}), returned_code
-        elif returned_code == 500:
+        elif returned_code != 200:
             abort(returned_code)
         else:
             return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
@@ -509,7 +496,7 @@ def create_app(test_config=None):
 
         if returned_code == 404:
             return jsonify({'success': False, 'message': error_message}), returned_code
-        elif returned_code == 500:
+        elif returned_code != 200:
             abort(returned_code)
         else:
             return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
