@@ -86,10 +86,10 @@ def create_app(test_config=None):
         returned_code = 201
         list_errors = []
         try:
-            if 'employee_id' not in request.form:
+            if 'employee_id' not in request.json:
                 list_errors.append('employee_id is required')
             else:
-                employee_id = request.form['employee_id']
+                employee_id = request.json['employee_id']
 
             if 'image' not in request.files:
                 list_errors.append('image is required')
@@ -97,7 +97,8 @@ def create_app(test_config=None):
                 file = request.files['image']
 
                 if not allowed_file(file.filename):
-                    return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
+                    list_errors.append('image format not allowed')
+                    returned_code = 400
 
             if len(list_errors) > 0:
                 returned_code = 400
@@ -125,7 +126,9 @@ def create_app(test_config=None):
             db.session.close()
 
         if returned_code == 400:
-            return jsonify({'success': False, 'message': 'Error uploading file', 'errors': list_errors}), returned_code
+            return jsonify({'success': False,
+                            'message': 'Error uploading file',
+                            'errors': list_errors}), returned_code
         elif returned_code != 201:
             abort(returned_code)
         else:

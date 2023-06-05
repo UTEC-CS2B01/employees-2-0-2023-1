@@ -93,7 +93,28 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
-    # DELETE
+    def test_create_image_success(self):
+        response = self.client.post('/files', json={
+            'employee_id': 'e02268b7-9a5d-47c1-87fa-a92c6451cb61',
+        }, data={"image": (open(image, "jpeg"})
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['success'], True)
+
+    def test_create_image_failed_400(self):
+        response = self.client.post('/files', json={
+            'employee_id': 'e02268b7-9a5d-47c1-87fa-a92c6451cb61',
+        })
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    # GET
     ###########################################################################################
 
     def test_get_department_success(self):
