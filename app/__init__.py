@@ -213,28 +213,24 @@ def create_app(test_config=None):
     
     @app.route('/departments/<department_id>', methods=['PATCH'])
     def update_department(department_id):
-        returned_code = 201
+        returned_code = 200
         error_message = ''
-
+        department = Department.query.filter_by(id=department_id).first()
+        if not department:
+            abort(404)
         try:
-            department = Department.query.filter_by(id=department_id).first()
+            body = request.form
 
-            if not department:
-                abort(404)
-            else:
-                body = request.form
+            if 'name' in body:
+                department.name = request.form['name']
 
-                if 'name' in body:
-                    department.name = request.form['name']
+            if 'short_name' in body:
+                department.short_name = request.form['short_name']
 
-                if 'short_name' in body:
-                    department.short_name = request.form['short_name']
-
-                db.session.commit()
+            db.session.commit()
 
         except Exception as e:
-        
-            # print(sys.exc_info())
+            print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
             error_message = 'Error updating department'
@@ -312,7 +308,7 @@ def create_app(test_config=None):
     # POST Method
     @app.route('/employees/<employee_id>/departments', methods=['POST'])
     def assign_employee_department(employee_id):
-        returned_code = 200
+        returned_code = 201
         error_message = ''
 
         try:
@@ -352,7 +348,7 @@ def create_app(test_config=None):
         finally:
             db.session.close()
 
-        if returned_code != 200:
+        if returned_code != 201:
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'department_id': department_id, 'message': 'Department assigned to employee successfully!'}), returned_code

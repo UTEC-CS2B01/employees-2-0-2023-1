@@ -40,6 +40,8 @@ class EmployeesTests(unittest.TestCase):
 
 
     # POST ------------------------------------------------
+    # =====================================================
+
 
     # test of /departments
 
@@ -149,8 +151,50 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['message'])
 
 
+    # test of /employees/<employee_id>/departments
+
+    def test_add_department_to_employee_success(self):
+        data = {
+            'name': 'Information Technology',
+            'short_name': 'IT',
+        }
+        response = self.client.post('/employees/508ec843-213b-47ec-9052-46154d4007c2/departments', content_type='multipart/form-data', data=data)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['message'])
+
+
+    def test_add_department_to_employee_failed_400(self):
+        data = {
+            'name': 'Information Technology',
+        }
+        response = self.client.post('/employees/508ec843-213b-47ec-9052-46154d4007c2/departments', content_type='multipart/form-data', data=data)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    def test_add_department_to_employee_failed_500(self):
+        data = {
+            'name': 'Casur Agency',
+            'short_name': 'ASLDBASKLDNLKSADNLSKANDLKSNDLSNDLKNA', #Un nombre muy largo
+        }
+        response = self.client.post('/employees/91d1b904-7583-4af1-a833-5c260fd586f6/departments', content_type='multipart/form-data', data=data)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
 
     # GET ------------------------------------------------
+    # ====================================================
 
     # test of /employees
 
@@ -213,7 +257,7 @@ class EmployeesTests(unittest.TestCase):
     # test of /departments/<department_id>/employees
 
     def test_get_department_employees_success(self):
-        response = self.client.get('/departments/7cf0cb5d-c255-4bd2-b98f-23aae79952cf/employees')
+        response = self.client.get('/departments/c8d29a66-f718-45fe-9a4c-d70013d7fdc6/employees')
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -232,9 +276,83 @@ class EmployeesTests(unittest.TestCase):
     # test of /employees/search
 
     def test_search_employees_success(self):
-        pass
+        args = {
+            'firstname': 'Bianca',
+            'lastname': 'Aguinaga',
+            'age': 16,
+        }
+
+        response = self.client.get('/employees/search', query_string=args)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['employees'])
+    
+    def test_search_employees_failed_400(self):
+
+        response = self.client.get('/employees/search')
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+
+    def test_search_employees_failed_404(self):
+        args = {
+            'firstname': 'NoUsuarioNombre',
+            'lastname': 'NoUsuarioApellido',
+            'age': 0
+        }
+
+        response = self.client.get('/employees/search', query_string=args);
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
 
 
+    # test of /departments/search
+
+    def test_search_departments_success(self):
+        args = {
+            'short_name': 'IT',
+        }
+
+        response = self.client.get('/departments/search', query_string=args)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['departments'])
+
+    def test_search_departments_failed_400(self): 
+        response = self.client.get('/departments/search')
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+
+    def test_search_departments_failed_404(self):
+        args = {
+            'short_name': 'NoDepartamento',
+        }
+
+        response = self.client.get('/departments/search', query_string=args)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+
+
+    # PATCH ---------------------------------------------
+    # ===================================================
 
     # test of /employees/<employee_id>
 
@@ -287,7 +405,99 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['message'])
 
 
+    # test of /departments/<department_id>
+
+    def test_update_department_success(self):
+        form_data = {
+            'name': 'Casur Agency 2',
+        }
+
+        response = self.client.patch('/departments/2c495a2a-d223-4e61-b716-43e3a3f5a9c9', content_type = 'multipart/form-data', data=form_data)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_update_department_404(self):
+        response = self.client.patch('/departments/234567')
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+
+
+    # test of /employees/<employee_id>/departments
+
+    def test_update_employee_department_success(self):
+        form_data = {
+            'department_id': '7cf0cb5d-c255-4bd2-b98f-23aae79952cf',
+        }
+
+        response = self.client.patch('/employees/508ec843-213b-47ec-9052-46154d4007c2/departments', content_type = 'multipart/form-data', data=form_data)
+
+        data = json.loads(response.data)
+    
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_employee_department_400(self):
+
+        response = self.client.patch('/employees/508ec843-213b-47ec-9052-46154d4007c2/departments')
+
+        data = json.loads(response.data)
+    
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_employee_department_404(self):
+        form_data = {
+            'department_id': '7cf0cb5d-c255-4bd2-b98f-23aae79952cf',
+        }
+
+        response = self.client.patch('/employees/1234/departments', content_type = 'multipart/form-data', data=form_data)
+
+        data = json.loads(response.data)
+    
+        self.assertEqual(response.status_code, 404)
+
+    
     # test of /employees/<employee_id>
+
+    def test_delete_employee_success(self):
+        with open('static/testImages/test.png', 'rb') as file:
+            file_content = file.read()
+
+        form_data = {
+            'age': '20',
+            'selectDepartment': '7cf0cb5d-c255-4bd2-b98f-23aae79952cf',
+            'image': (io.BytesIO(file_content), 'test.png')
+        }
+        response = self.client.patch('/employees/d366bab5-2973-4ff5-ba25-c2df425596c7', content_type = 'multipart/form-data', data=form_data)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def test_delete_employee_failed_400(self):
+        response = self.client.patch('/employees/d366bab5-2973-4ff5-ba25-c2df425596c7')
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+
+
+    def test_delete_employee_failed_500(self):
+        with open('static/testImages/test.png', 'rb') as file:
+            file_content = file.read()
+
+        form_data = {
+            'age': '20',
+            'selectDepartment': '1234',
+            'image': (io.BytesIO(file_content), 'test.png')
+        }
+        response = self.client.patch('/employees/d366bab5-2973-4ff5-ba25-c2df425596c7', content_type = 'multipart/form-data', data=form_data)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
 
     def tearDown(self):
         pass
