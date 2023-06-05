@@ -51,16 +51,30 @@ class EmployeesTests(unittest.TestCase):
             'id': '1234'
         }
 
-        self.update_department = {
+        self.update_department_s = {
             'id': '0cecb8c3-9b7c-4fab-9915-70f9ad90bcf1',
             'name': 'Cleaning Department', 
             'short_name': 'CD'
         }
 
-        self.update_employee = {
+        self.update_employee_s = {
             'id': 'a188896c-a9a7-4a38-885a-8034fcc0aca2',
             'is_active': False,
             'selectDepartment': '11fd9866-6cf3-4b33-b53e-d84482b3a432'
+        }
+
+        self.update_department_500 = {
+            'id' : '0cecb8c3-9b7c-4fab-9915-70f9ad90bcf1',
+            'name' : 'asdasdfsdafasjkhksdjfhajfhkadjfhakjdhfakjshdalksdjlckashndlashdklasdlak',
+            'short_name': 'Caosjbijsdfnaijdfnk<jdfvkjdzsbldvkjzdjkbvzsjkdfbdsjkfbsdkjfbsdkfbsdkfsdkfsdjbfsdjf'
+        }
+
+        self.update_employee_500 = {
+            'id': 'a188896c-a9a7-4a38-885a-8034fcc0aca2',
+            'firstname': 'Marvin',
+            'lastname': 'Abisrror',
+            'is_active': False,
+            'selectDepartment': '1234',
         }
 
 
@@ -167,7 +181,7 @@ class EmployeesTests(unittest.TestCase):
     ###########################################################################################
 
     def test_update_employee_success(self):
-        response = self.client.patch('employees/{}'.format(self.update_employee['id']), json=self.update_employee)
+        response = self.client.patch('employees/{}'.format(self.update_employee_s['id']), json=self.update_employee_s)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -182,11 +196,20 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
+    def test_update_employee_failed_500(self):
+        response = self.client.patch('employees/{}'.format(self.update_employee_500['id']), json=self.update_employee_500)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
     # Test Update Department
     ###########################################################################################
 
     def test_update_department_success(self):
-        response = self.client.patch('departments/{}'.format(self.update_department['id']), json=self.update_department)
+        response = self.client.patch('departments/{}'.format(self.update_department_s['id']), json=self.update_department_s)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -201,7 +224,14 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])    
 
-    
-    
+    def test_update_department_failed_500(self):
+        response = self.client.patch('departments/{}'.format(self.update_department_500['id']),json = self.update_department_500)
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
     def tearDown(self):
         pass

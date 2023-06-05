@@ -341,6 +341,7 @@ def create_app(test_config=None):
             print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
+            list_errors.append('Error updating department')
 
         finally:
             db.session.close()
@@ -381,6 +382,7 @@ def create_app(test_config=None):
             print('exc_info: ',sys.exc_info())
             db.session.rollback()
             returned_code = 500
+            list_errors.append('Error updating employee')
 
         finally:
             db.session.close()
