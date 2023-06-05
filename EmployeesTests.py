@@ -37,15 +37,15 @@ class EmployeesTests(unittest.TestCase):
 
     # POST
     ###########################################################################################
-    # def test_create_department_success(self):
-    #     response = self.client.post('/departments', json=self.new_department)
-    #     data = json.loads(response.data)
-    #     print('data: ', data)
 
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertTrue(data['id'])
+    def test_create_department_success(self):
+        response = self.client.post('/departments', json=self.new_department)
+        data = json.loads(response.data)
+        print('data: ', data)
 
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['id'])
 
     def test_create_department_failed_400(self):
         response = self.client.post('/departments', json={})
@@ -63,15 +63,13 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
+    def test_create_employee_success(self):
+        response = self.client.post('/employees', json=self.new_employee)
+        data = json.loads(response.data)
 
-    # def test_create_employee_success(self):
-    #     response = self.client.post('/employees', json=self.new_employee)
-    #     data = json.loads(response.data)
-
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertTrue(data['id'])
-
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['id'])
 
     def test_create_employee_failed_400(self):
         response = self.client.post('/employees', json=self.invalid_new_employee)
@@ -81,7 +79,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
-    
     def test_create_employee_failed_500(self):
         response = self.client.post('/employees', json={
             'firstname': 'John',
@@ -95,6 +92,59 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
+
+    # DELETE
+    ###########################################################################################
+
+    def test_get_department_success(self):
+        response = self.client.get('/departments')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_get_department_failed_404(self):
+        response = self.client.get('/departments?search=nothing_at_all')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    # def test_get_department_failed_500(self):
+    #     response = self.client.get('/departments/')
+
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 500)
+    #     self.assertEqual(data['success'], False)
+    #     self.assertTrue(data['message'])
+
+    def test_get_employee_success(self):
+        response = self.client.get('/employees')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_get_employee_failed_404(self):
+        response = self.client.get('/employees?search=nothing_at_all')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    # def test_get_employee_failed_500(self):
+    #     response = self.client.get('/employees/')
+
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 500)
+    #     self.assertEqual(data['success'], False)
+    #     self.assertTrue(data['message'])
+
+
 
     # DELETE
     ###########################################################################################
@@ -136,7 +186,6 @@ class EmployeesTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
-
 
     def test_delete_department_failed_404(self):
         response = self.client.delete('/departments/1234')

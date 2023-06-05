@@ -180,35 +180,29 @@ def create_app(test_config=None):
     @app.route('/employees', methods=['GET'])
     def get_employees():
         returned_code = 200
-        error_message = ''
         employee_list = []
 
         try:
             search_query = request.args.get('search', None)
+            employees = Employee.query
             if search_query:
-                employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
+                employees = employees.filter(Employee.firstname.like('%{}%'.format(search_query)))
 
-                serialized_employees = [employee.serialize() for employee in employees]
-
-                return jsonify({'employees': serialized_employees}), returned_code
-
-
-            employees = Employee.query.all()
+            employees = employees.all()
             employee_list = [employee.serialize() for employee in employees]
 
             if not employee_list:
                 returned_code = 404
-                error_message = 'No employees found'
         except Exception as e:
+            print("\n\n\n\n\n\n", returned_code)
             print(e)
             print(sys.exc_info())
             returned_code = 500
-            error_message = 'Error retrieving employees'
 
         if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'data': employee_list}), returned_code
+            abort(returned_code)
+        else:
+            return jsonify({'success': True, 'data': employee_list}), returned_code
     
     # PATCH
     ###########################################################################################
@@ -222,21 +216,21 @@ def create_app(test_config=None):
             department = Department.query.get(department_id)
 
             if not department:
-                abort(404)
+                returned_code = 404
             else:
-                body = request.form
+                body = request.json
 
                 if 'name' in body:
-                    department.name = request.form['name']
+                    department.name = request.json['name']
 
                 if 'short_name' in body:
-                    department.short_name = request.form['short_name']
+                    department.short_name = request.json['short_name']
 
                 db.session.commit()
 
         except Exception as e:
-            print(e)
-            print(sys.exc_info())
+            # print(e)
+            # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
             error_message = 'Error updating department'
