@@ -57,6 +57,11 @@ class File(db.Model):
     modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
 
 
+    def __init__(self, filename, employee_id ):
+        self.filename = filename 
+        self.employee_id = employee_id
+        self.created_at = datetime.utcnow()
+
 class Department(db.Model):
     __tablename__ = 'departments'
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
