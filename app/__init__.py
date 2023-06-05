@@ -239,9 +239,9 @@ def create_app(test_config=None):
             db.session.close()
 
         if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'message': 'Department updated successfully'}), returned_code
+            abort(returned_code)
+        else:
+            return jsonify({'success': True, 'message': 'Department updated successfully'}), returned_code
     
     # DELETE
     ########################################################################################
@@ -433,29 +433,27 @@ def create_app(test_config=None):
     @app.route('/employees/<employee_id>', methods=['PATCH'])
     def update_employee(employee_id):
         returned_code = 200
-        list_errors = []
         try:
             employee = Employee.query.get(employee_id)
 
             if employee is None:
-                list_errors.append('employee does not exist')
                 returned_code = 404
             else:
-                body = request.form
+                body = request.json
 
-                if 'age' not in body:
-                    list_errors.append('age is required')
-                else:
-                    employee.age = request.form['age']    
+                if 'firstname' in body:
+                    employee.firstname = request.json['firstname']
 
-                if 'selectDepartment' not in body:
-                    list_errors.append('selectDepartment is required')
-                else:
-                    employee.department_id = request.form['selectDepartment']
+                if 'lastname' in body:
+                    employee.lastname = request.json['lastname']
 
-                if 'image' not in request.files:
-                    list_errors.append('image is required')
-                else:
+                if 'age' in body:
+                    employee.age = request.json['age']
+
+                if 'selectDepartment' in body:
+                    employee.department_id = request.json['selectDepartment']
+
+                if 'image' in request.files:
                     file = request.files['image']
 
                     if file.filename == '':
@@ -474,7 +472,7 @@ def create_app(test_config=None):
                     file.save(os.path.join(upload_folder, file.filename))
 
                     employee.image = file.filename
-                    db.session.commit()
+                db.session.commit()
         except Exception as e:
             print(e)
             print(sys.exc_info())
@@ -482,9 +480,7 @@ def create_app(test_config=None):
             returned_code = 500
         finally:
             db.session.close()
-        if len(list_errors) > 0:
-            return jsonify({'success': False, 'message': 'Error updating employee', 'errors': list_errors}), returned_code
-        elif returned_code != 200:
+        if returned_code != 200:
             abort(returned_code)
         else:
             return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code        
@@ -492,7 +488,6 @@ def create_app(test_config=None):
     @app.route('/departments', methods=['GET'])
     def get_departments():
         returned_code = 200
-        error_message = ''
         department_list = []
 
         try:
@@ -503,15 +498,11 @@ def create_app(test_config=None):
                         Department.name.ilike(f'%{search_query}%'),
                         Department.short_name.ilike(f'%{search_query}%')
                     )
-                ).all()
-                serialized_departments = [department.serialize() for department in departments]
+                )
+            else:
+                departments = Department.query
 
-                return jsonify({'success': True, 'departments': serialized_departments, \
-                                'total': len(serialized_departments)}), returned_code
-
-
-
-            departments = Department.query.all()
+            departments = departments.all()
             department_list = [department.serialize() for department in departments]
 
             if not department_list:
@@ -523,8 +514,9 @@ def create_app(test_config=None):
 
         if returned_code != 200:
             abort(returned_code)
-
-        return jsonify({'success': True, 'data': department_list}), returned_code                 
+        else:
+            return jsonify({'success': True, 'data': department_list,
+                            'total': len(department_list)}), returned_code
 
     @app.route('/employees/<employee_id>/department', methods=['GET'])
     def get_employee_departments(employee_id):
@@ -589,118 +581,6 @@ def create_app(test_config=None):
         else:
             return jsonify({'employees': employee_list, 'success': True}), returned_code
 
-    @app.route('/employees/search', methods=['GET'])
-    def search_employees():
-        returned_code = 200
-        list_errors = []
-        try:
-            # Obtener los parámetros de la solicitud GET
-            search_query_firstname = request.args.get('firstname')
-            search_query_lastname = request.args.get('lastname')
-            search_query_age = request.args.get('age')
-
-            # Crear una lista de filtros vacía
-            filters = []
-
-            # Agregar filtros a la lista si se proporcionan los parámetros correspondientes
-            if search_query_firstname:
-                filters.append(Employee.firstname.ilike(f'%{search_query_firstname}%'))
-
-            if search_query_lastname:
-                filters.append(Employee.lastname.ilike(f'%{search_query_lastname}%'))
-
-            if search_query_age:
-                filters.append(Employee.age == search_query_age)
-
-            # Verificar si se proporcionó al menos un parámetro de búsqueda
-            if not filters:
-                list_errors.append('at least one search query is required')
-                returned_code = 400
-
-            # Realizar la consulta a la base de datos utilizando los filtros
-            employees = Employee.query.filter(*filters).all()
-
-            if len(employees) == 0:
-                list_errors.append('no employee found')
-                returned_code = 404
-            else:
-                employee_list = []
-                for employee in employees:
-                    employee_list.append({
-                        'id': employee.id,
-                        'firstname': employee.firstname,
-                        'lastname': employee.lastname,
-                    })
-
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            returned_code = 500
-        finally:
-            db.session.close()
-
-        if len(list_errors) > 0:
-            return jsonify({'success': False, 'message': 'Error searching employees', 'errors': list_errors}), returned_code
-        elif returned_code != 200:
-            abort(returned_code)
-        else: 
-            return jsonify({'employees':employee_list, 'success':True}), returned_code 
-
-    @app.route('/departments/search', methods=['GET'])
-    def search_departments():
-        returned_code = 200
-        list_errors = []
-        try:
-            # Obtener los parámetros de la solicitud GET
-            # se busca por los URL query parameters
-            search_query_name = request.args.get('name')
-            search_query_short_name = request.args.get('short_name')
-
-            # Crear una lista de filtros vacía
-            filters = []
-
-            # Agregar filtros a la lista si se proporcionan los parámetros correspondientes
-            if search_query_name:
-                filters.append(Department.name.ilike(f'%{search_query_name}%'))
-
-            if search_query_short_name:
-                filters.append(Department.short_name.ilike(f'%{search_query_short_name}%'))
-
-            # Verificar si se proporcionó al menos un parámetro de búsqueda
-            if not filters:
-                list_errors.append('at least one search query is required')
-                returned_code = 400
-
-            # Realizar la consulta a la base de datos utilizando los filtros
-            departments = Department.query.filter(*filters).all()
-
-            if len(departments) == 0:
-                list_errors.append('no department found')
-                returned_code = 404
-            else:
-                department_list = []
-                for department in departments:
-                    department_list.append({
-                        'id': department.id,
-                        'name': department.name,
-                        'short_name': department.short_name,
-                    })
-
-        except Exception as e:
-            print(e)
-            print(sys.exc_info())
-            returned_code = 500
-        finally:
-            db.session.close()
-
-        if len(list_errors) > 0:
-            return jsonify({'success': False, 'message': 'Error searching departments', 'errors': list_errors}), returned_code
-        elif returned_code != 200:
-            abort(returned_code)
-        else: 
-            return jsonify({'departments':department_list, 'success':True}), returned_code 
-        
-
     @app.errorhandler(405)
     def method_not_allowed(error):
         return jsonify({
@@ -721,7 +601,5 @@ def create_app(test_config=None):
             'success': False,
             'message': 'Internal Server error'
         }), 500
-    
 
     return app
-

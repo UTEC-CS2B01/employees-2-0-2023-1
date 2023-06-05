@@ -210,6 +210,81 @@ class EmployeesTests(unittest.TestCase):
     #     self.assertEqual(data['success'], False)
     #     self.assertTrue(data['message'])
 
+    # PATCH
+    ###########################################################################################
+
+    def test_change_department_success(self):
+        response = self.client.patch('/departments/0d625df7-e618-4057-bc17-849a7f155f1d', json={
+            'name': 'Intelligence and development',
+            'short_name': 'I+D',
+        })
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def test_change_department_failed_404(self):
+        response = self.client.patch('/departments/1234', json={
+            'short_name': 'I+D',
+        })
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+
+    def test_change_department_failed_500(self):
+        response = self.client.patch('/departments/b25b36e2-90b7-4cca-b04b-fb4e77ad1048', json={
+            'name': 'Human resources',
+            'short_name': 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq',
+        })
+
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    def test_change_employee_success(self):
+        response = self.client.patch('/employees/64aa2f9a-2eb9-4b2e-8c2f-d17c84ed04ae', json={
+            'firstname': 'James',
+            'lastname': 'Bond',
+            'age': 25,
+        })
+        data = json.loads(response.data)
+        print("\n\n\n\n\n\n", data["message"])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def test_change_employee_failed_404(self):
+        response = self.client.patch('/employees/1234', json={
+            'firstname': 'James',
+            'lastname': 'Bond',
+        })
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+
+    # def test_change_employee_failed_500(self):
+    #     response = self.client.patch('/employees/b25b36e2-90b7-4cca-b04b-fb4e77ad1048', json={
+    #         'firstname': 'James',
+    #         'lastname': 'Bond',
+    #         'age': 'ssfas25',
+    #     })
+
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 500)
+    #     self.assertEqual(data['success'], False)
+    #     self.assertTrue(data['message'])
+
 
 
     def tearDown(self):
