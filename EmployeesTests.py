@@ -52,16 +52,14 @@ class EmployeesTests(unittest.TestCase):
         }
 
         self.update_department = {
-            'id': 'fce853ef-3c70-41db-a3e9-e1ae404db942',
+            'id': '0cecb8c3-9b7c-4fab-9915-70f9ad90bcf1',
             'name': 'Cleaning Department', 
             'short_name': 'CD'
         }
 
         self.update_employee = {
-            'id': '4755e3cd-2b6d-4910-9677-d19103693856',
-            'firstname': 'Marvin',
-            'lastname': 'Abisrror',
-            'age': 36,
+            'id': 'a188896c-a9a7-4a38-885a-8034fcc0aca2',
+            'is_active': False,
             'selectDepartment': '11fd9866-6cf3-4b33-b53e-d84482b3a432'
         }
 

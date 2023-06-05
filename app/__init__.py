@@ -327,12 +327,12 @@ def create_app(test_config=None):
                 if 'name' not in body:
                     list_errors.append('name is required')
                 else:
-                    department.name = request.form['name']
+                    department.name = body.get('name')
 
                 if 'short_name' not in body:
                     list_errors.append('short_name is required')
                 else:
-                    department.short_name = request.form['short_name']
+                    department.short_name = body.get('short_name')
 
             db.session.commit()
 
@@ -368,12 +368,12 @@ def create_app(test_config=None):
                 if 'is_active' not in body:
                     list_errors.append('status is required')
                 else:
-                    employee.is_active = body.get['is_active']    
+                    employee.is_active = body.get('is_active')    
 
                 if 'selectDepartment' not in body:
                     list_errors.append('selectDepartment is required')
                 else:
-                    employee.department_id = body.get['selectDepartment']
+                    employee.department_id = body.get('selectDepartment')
 
                 db.session.commit()
         except Exception as e:
