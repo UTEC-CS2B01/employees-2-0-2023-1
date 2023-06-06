@@ -26,7 +26,7 @@ class EmployeesTests(unittest.TestCase):
             'firstname': 'Bianca',
             'lastname': 'Aguinaga',
             'age': 16,
-            'selectDepartment': '11fd9866-6cf3-4b33-b53e-d84482b3a432 ',
+            'selectDepartment': '093c3f30-3854-416a-82ee-9ba5474ea64a',
         }
 
         self.invalid_new_employee = {
@@ -232,6 +232,29 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
+
+    # Test Get Employees
+    ###########################################################################################
+
+    def test_get_employees_success(self):
+        response = self.client.get('/employees')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['data'])
+        
+    # Test Get Departments
+    ###########################################################################################
+
+    def test_get_departments_success(self):
+        response = self.client.get('/departments')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['data'])
+
 
     def tearDown(self):
         pass

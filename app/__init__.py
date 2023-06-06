@@ -205,8 +205,8 @@ def create_app(test_config=None):
 
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'data': employee_list}), returned_code
+        else: 
+            return jsonify({'success': True, 'data': employee_list}), returned_code
     
     @app.route('/departments', methods=['GET'])
     def get_departments():
@@ -239,11 +239,12 @@ def create_app(test_config=None):
             print(e)
             print(sys.exc_info())
             returned_code = 500
+            error_message = 'Error retrieving departments'
 
         if returned_code != 200:
-            abort(returned_code)
-
-        return jsonify({'success': True, 'data': department_list}), returned_code 
+            return jsonify({'success': False, 'message': error_message}), returned_code
+        else: 
+            return jsonify({'success': True, 'data': department_list}), returned_code
 
     @app.route('/employees/<employee_id>/department', methods=['GET'])
     def get_employee_departments(employee_id):
