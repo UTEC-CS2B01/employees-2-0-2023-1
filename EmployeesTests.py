@@ -174,7 +174,7 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['message'])
 
 
-    """
+    
     # PATCH
 
     # test /departments/<department_id>
@@ -284,8 +284,9 @@ class EmployeesTests(unittest.TestCase):
     # POST
 
     # test /employees/<employee_id>/departments
+    
     def test_assign_employee_department_success(self):
-        existing_employee_id = 'f3e592eb-53b1-4a85-bda8-e99ef5c418ae'  # un id valido 
+        existing_employee_id = 'f3e592eb-53b1-4a85-bda8-e99ef5c418ae'  \
         response = self.client.post(f'/employees/{existing_employee_id}/departments', data={'name': 'New Department', 'short_name': 'ND'})
         data = json.loads(response.data)
 
@@ -295,7 +296,7 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['message'], 'Department assigned to employee successfully!')
 
     def test_assign_employee_department_error_404(self):
-        non_existent_employee_id = 'fcf909ff-1793-4e02-acd6-e12f604e345'  # id no valido
+        non_existent_employee_id = 'fcf909ff-1793-4e02-acd6-e12f604e345'  
         response = self.client.post(f'/employees/{non_existent_employee_id}/departments', data={'name': 'New Department', 'short_name': 'ND'})
         data = json.loads(response.data)
 
@@ -306,7 +307,7 @@ class EmployeesTests(unittest.TestCase):
     @patch('app.db.session.commit')
     def test_assign_employee_department_error_500(self, mock_db_commit):
         mock_db_commit.side_effect = Exception("Database Error")
-        existing_employee_id = 'f3e592eb-53b1-4a85-bda8-e99ef5c418ae'  # un id valido 
+        existing_employee_id = 'f3e592eb-53b1-4a85-bda8-e99ef5c418ae'  
         response = self.client.post(f'/employees/{existing_employee_id}/departments', data={'name': 'New Department', 'short_name': 'ND'})
         data = json.loads(response.data)
 
@@ -319,8 +320,8 @@ class EmployeesTests(unittest.TestCase):
     # test /employees/<employee_id>/departments
 
     def test_update_employee_departments_success(self):
-        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'  # un id valido 
-        existing_department_id = '0a0181ff-9d98-41c5-a83f-5e53ced8e9a1'  # un id valido 
+        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'   
+        existing_department_id = '0a0181ff-9d98-41c5-a83f-5e53ced8e9a1'  
         response = self.client.patch(f'/employees/{existing_employee_id}/departments', data={'department_id': existing_department_id})
         data = json.loads(response.data)
 
@@ -329,8 +330,8 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['message'], 'Employee departments updated successfully!')
 
     def test_update_employee_departments_error_404_employee(self):
-        non_existent_employee_id = 'f7b132bd-ofb7-47f9-8db9-5a5b1da82697'  # id no valido
-        existing_department_id = '0a0181ff-9d98-41c5-a83f-5e53ced8e9a1'  # un id valido 
+        non_existent_employee_id = 'f7b132bd-ofb7-47f9-8db9-5a5b1da82697'  
+        existing_department_id = '0a0181ff-9d98-41c5-a83f-5e53ced8e9a1' 
         response = self.client.patch(f'/employees/{non_existent_employee_id}/departments', data={'department_id': existing_department_id})
         data = json.loads(response.data)
 
@@ -339,7 +340,7 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['message'], 'Employee not found')
 
     def test_update_employee_departments_error_400_no_department_id(self):
-        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'  # un id valido 
+        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'  
         response = self.client.patch(f'/employees/{existing_employee_id}/departments', data={})
         data = json.loads(response.data)
 
@@ -348,8 +349,8 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['message'], 'Department ID is required')
     
     def test_update_employee_departments_error_404_department(self):
-        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'  # un id valido 
-        non_existent_department_id = '0a0181ff-9d58-41c5-a83f-5e53ced8e9a1'  # id no valido
+        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'  
+        non_existent_department_id = '0a0181ff-9d58-41c5-a83f-5e53ced8e9a1'  
         response = self.client.patch(f'/employees/{existing_employee_id}/departments', data={'department_id': non_existent_department_id})
         data = json.loads(response.data)
 
@@ -360,8 +361,8 @@ class EmployeesTests(unittest.TestCase):
     @patch('app.db.session.commit')
     def test_update_employee_departments_error_500(self, mock_db_commit):
         mock_db_commit.side_effect = Exception("Database Error")
-        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'  # un id valido 
-        existing_department_id = '0a0181ff-9d98-41c5-a83f-5e53ced8e9a1'  # un id valido 
+        existing_employee_id = 'f086540a-a9eb-4e36-a499-33a753c3db9b'  
+        existing_department_id = '0a0181ff-9d98-41c5-a83f-5e53ced8e9a1'   
         response = self.client.patch(f'/employees/{existing_employee_id}/departments', data={'department_id': existing_department_id})
         data = json.loads(response.data)
 
@@ -376,7 +377,7 @@ class EmployeesTests(unittest.TestCase):
     
 
     def test_remove_employee_departments_success(self):
-        existing_employee_id = 'c29e9331-f125-47ec-9c81-e2a08e9f8671'  # un id valido 
+        existing_employee_id = 'c29e9331-f125-47ec-9c81-e2a08e9f8671'  
         response = self.client.delete(f'/employees/{existing_employee_id}/departments')
         data = json.loads(response.data)
 
@@ -385,7 +386,7 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['message'])
 
     def test_remove_employee_departments_error_404(self):
-        non_existent_employee_id = 'ebb4k456-9775-451f-bb27-81b5a87be85f'  # id no valido
+        non_existent_employee_id = 'ebb4k456-9775-451f-bb27-81b5a87be85f' 
         response = self.client.delete(f'/employees/{non_existent_employee_id}/departments')
         data = json.loads(response.data)
 
@@ -396,7 +397,7 @@ class EmployeesTests(unittest.TestCase):
     @patch('app.db.session.commit')
     def test_remove_employee_departments_error_500(self, mock_db_commit):
         mock_db_commit.side_effect = Exception("Database Error")
-        existing_employee_id = 'c29e9331-f125-47ec-9c81-e2a08e9f8671'  # un id valido 
+        existing_employee_id = 'c29e9331-f125-47ec-9c81-e2a08e9f8671'   
         response = self.client.delete(f'/employees/{existing_employee_id}/departments')
         data = json.loads(response.data)
 
@@ -485,34 +486,32 @@ class EmployeesTests(unittest.TestCase):
                 data = json.loads(response.data)
                 self.assertEqual(response.status_code, 500)
                 self.assertEqual(data['success'], False)
-    """
+    
     
     # test /departments/<department_id>/employees
 
     def test_get_department_employees_success(self):
-        response = self.client.get('/departments/9976f6a6-3264-47ce-8ae3-bc88ec307a7demployees')  # Replace '1' with an id of a department that exists and has employees
-        data = json.loads(response.data)
+        response = self.client.get('/departments/9976f6a6-3264-47ce-8ae3-bc88ec307a7demployees')  
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
 
     def test_get_department_employees_error_404_no_department(self):
-        response = self.client.get('/departments/1234/employees')  # Replace '9999' with an id of a department that does not exist
+        response = self.client.get('/departments/1234/employees')  
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
 
     def test_get_department_employees_error_404_no_employees(self):
-        response = self.client.get('/departments/22d4bf6d-fc84-4281-ad7b-75d935a41027/employees')  # Replace '2' with an id of a department that exists but has no employees
-        data = json.loads(response.data)
+        response = self.client.get('/departments/22d4bf6d-fc84-4281-ad7b-75d935a41027/employees')  
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
 
     def test_get_department_employees_error_500(self):
         with mock.patch('sqlalchemy.orm.Query.all', side_effect=Exception):
-            response = self.client.get('/departments/22d4bf6d-fc84-4281-ad7b-75d935a41027/employees')  # Replace '1' with an id of a department that exists
+            response = self.client.get('/departments/22d4bf6d-fc84-4281-ad7b-75d935a41027/employees')  
             data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 500)
