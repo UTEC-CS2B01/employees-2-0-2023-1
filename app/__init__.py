@@ -222,7 +222,8 @@ def create_app(test_config=None):
             department = Department.query.get(department_id)
 
             if not department:
-                abort(404)
+                returned_code = 404
+                error_message = 'Department not found'
             else:
                 body = request.form
 
@@ -262,6 +263,7 @@ def create_app(test_config=None):
 
             if not department:
                 returned_code = 404
+                return jsonify({'success': False, 'message': 'Department not found'}), returned_code
             else:
                 db.session.delete(department)
                 db.session.commit()
@@ -290,6 +292,7 @@ def create_app(test_config=None):
 
             if not employee:
                 returned_code = 404
+                return jsonify({'success': False, 'message': 'Employee not found'}), returned_code
             else:
                 db.session.delete(employee)
                 db.session.commit()
@@ -436,6 +439,8 @@ def create_app(test_config=None):
 
         return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
 
+    # PATCH 
+
     @app.route('/employees/<employee_id>', methods=['PATCH'])
     def update_employee(employee_id):
         returned_code = 200
@@ -495,6 +500,8 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code        
 
+    # GET
+    
     @app.route('/departments', methods=['GET'])
     def get_departments():
         returned_code = 200
