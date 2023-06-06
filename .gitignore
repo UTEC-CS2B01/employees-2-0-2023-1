@@ -5,15 +5,9 @@ __pycache__/
 app/__pycache__/
 *.py[cod]
 *$py.class
-config/local.py
-config/production.py
-config/development.py
+app/__pycache__/
+
 config/__pycache__/
-config/settings/__pycache__/
-config/settings/local.py
-config/settings/production.py
-config/settings/development.py
-config/settings/__init__.py 
 
 # C extensions
 *.so

@@ -3,12 +3,12 @@ from config.local import config
 import uuid
 from datetime import datetime
 
-database_url = config['DATABASE_URI']
+database_uri = config['DATABASE_URI']
 
 db = SQLAlchemy()
 
-def setup_db(app, database_path=database_url):
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_path
+def setup_db(app, database_path):
+    app.config["SQLALCHEMY_DATABASE_URI"] = config['DATABASE_URI'] if database_path is None else database_path
     db.app = app
     db.init_app(app)
     db.create_all()
@@ -24,6 +24,8 @@ class Employee(db.Model):
     department_id = db.Column(db.String(36), db.ForeignKey('departments.id'), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    files = db.relationship('File', backref='employee', lazy=True)
+
 
     def __init__(self, firstname, lastname, age, department_id):
         self.firstname = firstname
@@ -48,6 +50,15 @@ class Employee(db.Model):
             'modified_at': self.modified_at,
         }
     
+class File(db.Model):
+    __tablename__ = 'files'
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    filename = db.Column(db.String(120), nullable=False)
+    employee_id = db.Column(db.String(36), db.ForeignKey('employees.id'), nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+
+
 class Department(db.Model):
     __tablename__ = 'departments'
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))

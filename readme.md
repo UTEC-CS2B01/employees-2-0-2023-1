@@ -165,10 +165,6 @@ $ curl http://localhost:5002/departments?search=z
 5.- Search - /employees?search=<q>
 6.- Search - /departments?search=<q>
 
-```
-
-```
-
 ### Create Branch
 
 git checkout -b feature/tarea-1-23-05-2021-<username de gitbhub>
@@ -177,4 +173,11 @@ git checkout -b feature/tarea-1-23-05-2021-mabisrror
 
 
 ### Testing: Crear PR with rules
-- DO NOT merge until 3 approvals
+- Not merge until 3 approvals
+
+
+### Tarea 4
+- Crear Rama: fix/UTEC-O004-username-tests-endpoints-unnittest
+- Donde username es el usuario de github
+- Crear los tests para todos los endpoints (16)
+- success, failed_400, failed_500
