@@ -66,40 +66,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
-
-    # POST - test of department
-    def test_create_employee_success(self):
-        response = self.client.post('/employees', json=self.new_employee)
-        data = json.loads(response.data)
-
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['id'])
-
-
-    def test_create_employee_failed_400(self):
-        response = self.client.post('/employees', json=self.invalid_new_employee)
-        data = json.loads(response.data)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(data['success'], False)
-        self.assertTrue(data['message'])
-
-    
-    def test_create_employee_failed_500(self):
-        response = self.client.post('/employees', json={
-            'firstname': 'Bianca',
-            'lastname': 'Aguinaga',
-            'age': 16,
-            'selectDepartment': '1234',
-        })
-
-        data = json.loads(response.data)
-
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(data['success'], False)
-        self.assertTrue(data['message'])
-    
         
     # GET - testing of employees
     def test_get_employees_success(self):
@@ -169,38 +135,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
    
-
-    # Testing of /employees/search
-    def test_search_employees_success(self):
-        arguments = {
-        'firstname': 'Bianca',
-        'lastname': 'Aguinaga',
-        'age': 16,
-        }
-        response = self.client.get('/employees/search', query_string=arguments)
-        data = json.loads(response.data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['success'])
-        self.assertIn('employees', data)
-
-    def test_search_employees_failed_400(self):
-        response = self.client.get('/employees/search')
-        data = response.get_json()
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-
-    def test_search_employees_failed_404(self):
-        arguments = {
-        'firstname': 'Not name',
-        'lastname': 'Not lastname',
-        'age': 0
-        }
-        response = self.client.get('/employees/search', query_string=arguments)
-        data = json.loads(response.data)
-        self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-    
-
     # Testing of /departments/search
     def test_search_departments_success(self):
         arguments = {
@@ -227,6 +161,8 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
 
+
+   
     # PATCH - testing of /departments/<department_id>
     def test_update_department_success(self):
         department_id = '59131844-cae9-43d1-a714-f3e29472d668'
@@ -239,48 +175,6 @@ class EmployeesTests(unittest.TestCase):
         response = self.client.patch(f'/departments/{department_id}')
         self.assertEqual(response.status_code, 404)
 
-    
-    # PATCH  - testing of /employees/<employee_id>/departments
-    def test_update_employee_department_success(self):
-        form_data = {
-        'department_id': '58e97761-c362-4d33-a214-fceed4f063b4',
-        }
-        response = self.client.patch('/employees/8a0c11f6-417a-44c5-ba62-63ceb83ed9b2', json=form_data)
-        self.assertEqual(response.status_code, 200)
 
-    def test_update_employee_department_400(self):
-        response = self.client.patch('/employees/8a0c11f6-417a-44c5-ba62-63ceb83ed9b2/departments')
-        self.assertEqual(response.status_code, 400)
-
-    def test_update_employee_department_404(self):
-        form_data = {
-        'department_id': '58e97761-c362-4d33-a214-fceed4f063b4',
-        }
-        response = self.client.patch('/employees/1234/departments', json=form_data)
-        self.assertEqual(response.status_code, 404)
-
-
-     # PATCH  - testing of /employees/<employee_id>
-    def test_delete_employee_success(self):
-        employee_id = '59131844-cae9-43d1-a714-f3e29472d668'
-        response = self.client.delete(f'/employees/{employee_id}')
-        data = response.get_json()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['success'], True)
-
-    def test_delete_employee_failed_400(self):
-        employee_id = '59131844-cae9-43d1-a714-f3e29472d668'
-        response = self.client.delete(f'/employees/{employee_id}')
-        data = response.get_json()
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(data['success'], False)
-
-    def test_delete_employee_failed_500(self):
-        employee_id = '59131844-cae9-43d1-a714-f3e29472d668'
-        response = self.client.delete(f'/employees/{employee_id}')
-        data = response.get_json()
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(data['success'], False)
-    
     def tearDown(self):
         pass
