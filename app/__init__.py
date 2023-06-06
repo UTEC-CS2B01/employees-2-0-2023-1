@@ -85,11 +85,12 @@ def create_app(test_config=None):
     def upload_image():
         returned_code = 201
         list_errors = []
+        employee_id = 0
         try:
-            if 'employee_id' not in request.json:
+            if 'employee_id' not in request.form:
                 list_errors.append('employee_id is required')
             else:
-                employee_id = request.json['employee_id']
+                employee_id = request.form['employee_id']
 
             if 'image' not in request.files:
                 list_errors.append('image is required')
@@ -103,9 +104,13 @@ def create_app(test_config=None):
             if len(list_errors) > 0:
                 returned_code = 400
             else:
+                employee = Employee.query.get(employee_id)
+                employee.image = file.filename
+
                 cwd = os.getcwd()
 
-                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee_id)
+                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'],
+                                            employee_id)
                 os.makedirs(employee_dir, exist_ok=True)
 
                 upload_folder = os.path.join(cwd, employee_dir)

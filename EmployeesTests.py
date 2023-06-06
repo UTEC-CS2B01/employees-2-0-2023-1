@@ -94,14 +94,14 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['message'])
 
     def test_create_image_success(self):
-        response = self.client.post('/files', json={
-            'employee_id': 'e02268b7-9a5d-47c1-87fa-a92c6451cb61',
-        }, data={"image": (open(image, "jpeg"})
-
-        data = json.loads(response.data)
+        response = self.client.post('/files',
+                                    data={"image": (open("james_bond.jpg", "rb"),
+                                                    "james_bond.jpg"),
+                                          'employee_id': '64aa2f9a-2eb9-4b2e-8c2f-d17c84ed04ae',
+                                          })
 
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(data['success'], True)
+        self.assertEqual(response.json['success'], True)
 
     def test_create_image_failed_400(self):
         response = self.client.post('/files', json={
@@ -113,6 +113,16 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
+
+    def test_create_image_failed_500(self):
+        response = self.client.post('/files',
+                                    data={"image": (open("james_bond.jpg", "rb"),
+                                                    "james_bond.jpg"),
+                                          'employee_id': '1234',
+                                          })
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json['success'], False)
 
     # GET
     ###########################################################################################
