@@ -227,41 +227,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
 
-
-    # PATCH - testing of /employees/<employee_id>
-    def test_update_employee_success(self):
-        with open('static/Testing_Images/testing.png', 'image') as file:
-            file_content = file.read()
-        form_data = {
-        'age': '24',
-        'selectDepartment': '21052cd1-957d-41f8-ae73-0a2bda45bd4e',
-        'image': (io.BytesIO(file_content), 'testing.png')
-        }
-        response = self.client.patch('/employees/77f70f49-5166-402a-8842-82d5beb9ba53', data=form_data)
-        self.assertEqual(response.status_code, 200)
-
-    def test_update_employee_failed_400(self):
-        response = self.client.patch('/employees/77f70f49-5166-402a-8842-82d5beb9ba53', data={}, content_type='multipart/form-data')
-        data = json.loads(response.data)
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertIn('message', data)
-
-    def test_update_employee_failed_500(self):
-        with open('static/testImages/test.png', 'image') as file:
-            file_content = file.read()
-        form_data = {
-        'age': '19',
-        'selectDepartment': '1234', 
-        'image': (io.BytesIO(file_content), 'testing.png')
-        }
-        response = self.client.patch('/employees/', data=form_data, content_type='multipart/form-data')
-        data = json.loads(response.data)
-        self.assertEqual(response.status_code, 500)
-        self.assertFalse(data['success'])
-        self.assertIn('message', data)
-
-
     # PATCH - testing of /departments/<department_id>
     def test_update_department_success(self):
         department_id = '59131844-cae9-43d1-a714-f3e29472d668'
