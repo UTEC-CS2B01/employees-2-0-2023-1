@@ -94,6 +94,244 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
+##GETS:
+    def test_get_departments(self):
+        res = self.client().get('/departments')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['departments'])
+        self.assertTrue(len(data['departments']) > 0)
+
+    def test_get_department_by_id(self):
+        department = Department(name='IT', short_name='IT')
+        department.insert()
+
+        res = self.client().get(f'/departments/{department.id}')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['department']['name'], 'IT')
+        self.assertEqual(data['department']['short_name'], 'IT')
+
+    def test_get_department_not_found(self):
+        res = self.client().get('/departments/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Department not found')
+
+    def test_get_employees(self):
+        res = self.client().get('/employees')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['employees'])
+        self.assertTrue(len(data['employees']) > 0)
+
+    def test_get_employee_by_id(self):
+        employee = Employee(firstname='Pepito', lastname='Perales', age=30, department_id=1)
+        employee.insert()
+
+        res = self.client().get(f'/employees/{employee.id}')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['employee']['firstname'], 'Pepito')
+        self.assertEqual(data['employee']['lastname'], 'Perales')
+        self.assertEqual(data['employee']['age'], 30)
+        self.assertEqual(data['employee']['department_id'], 1)
+
+    def test_get_employee_not_found(self):
+        res = self.client().get('/employees/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Employee not found')
+
+    def test_get_departments_error(self):
+        res = self.client().get('/departments/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Invalid endpoint')
+
+    def test_get_employees_error(self):
+        res = self.client().get('/employees/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Invalid endpoint')
+
+    def test_get_departments_internal_server_error(self):
+        def mock_get_departments():
+            raise Exception('Something went wrong')
+
+        self.app.get_departments = mock_get_departments
+
+        res = self.client().get('/departments')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Internal Server Error')
+
+    def test_get_employees_internal_server_error(self):
+        def mock_get_employees():
+            raise Exception('Something went wrong')
+        self.app.get_employees = mock_get_employees
+
+        res = self.client().get('/employees')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Internal Server Error')
+
+##PATCH:
+    def test_patch_department(self):
+        department = Department(name='IT', short_name='IT')
+        department.insert()
+
+        res = self.client().patch(f'/departments/{department.id}', json={'name': 'HR'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['department']['name'], 'HR')
+        self.assertEqual(data['department']['short_name'], 'IT')
+
+    def test_patch_department_not_found(self):
+        res = self.client().patch('/departments/1000', json={'name': 'HR'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Department not found')
+
+    def test_patch_department_invalid_fields(self):
+        department = Department(name='IT', short_name='IT')
+        department.insert()
+
+        res = self.client().patch(f'/departments/{department.id}', json={'invalid_field': 'Invalid'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Invalid fields')
+
+    def test_patch_employee(self):
+        employee = Employee(firstname='Pepito', lastname='Perales', age=30, department_id=1)
+        employee.insert()
+
+        res = self.client().patch(f'/employees/{employee.id}', json={'age': 35})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['employee']['age'], 35)
+
+    def test_patch_employee_not_found(self):
+        res = self.client().patch('/employees/1000', json={'age': 35})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Employee not found')
+
+    def test_patch_employee_invalid_fields(self):
+        employee = Employee(firstname='Pepito', lastname='Perales', age=30, department_id=1)
+        employee.insert()
+
+        res = self.client().patch(f'/employees/{employee.id}', json={'invalid_field': 'Invalid'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Invalid fields')
+
+    def test_patch_department_internal_server_error(self):
+        def mock_patch_department(department_id, data):
+            raise Exception('Something went wrong')
+        self.app.patch_department = mock_patch_department
+
+        department = Department(name='IT', short_name='IT')
+        department.insert()
+
+        res = self.client().patch(f'/departments/{department.id}', json={'name': 'HR'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Internal Server Error')
+
+    def test_patch_employee_internal_server_error(self):
+        def mock_patch_employee(employee_id, data):
+            raise Exception('Something went wrong')
+        self.app.patch_employee = mock_patch_employee
+
+        employee = Employee(firstname='Pepito', lastname='Perales', age=30, department_id=1)
+        employee.insert()
+
+        res = self.client().patch(f'/employees/{employee.id}', json={'age': 35})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Internal Server Error')
+
+##DELETE:
+    def test_delete_department(self):
+        department = Department(name='IT', short_name='IT')
+        department.insert()
+
+        res = self.client().delete(f'/departments/{department.id}')
+        data = json.loads(res.data)
+
+        deleted_department = Department.query.get(department.id)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['message'], 'Department deleted successfully')
+        self.assertEqual(deleted_department, None)
+
+    def test_delete_department_not_found(self):
+        res = self.client().delete('/departments/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Department not found')
+
+    def test_delete_employee(self):
+        employee = Employee(firstname='Pepito', lastname='Perales', age=30, department_id=1)
+        employee.insert()
+
+        res = self.client().delete(f'/employees/{employee.id}')
+        data = json.loads(res.data)
+
+        deleted_employee = Employee.query.get(employee.id)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['message'], 'Employee deleted successfully')
+        self.assertEqual(deleted_employee, None)
+
+    def test_delete_employee_not_found(self):
+        res = self.client().delete('/employees/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Employee not found')
 
     def tearDown(self):
         pass

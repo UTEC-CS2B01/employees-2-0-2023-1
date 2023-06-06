@@ -3,6 +3,8 @@ from config.local import config
 import uuid
 from datetime import datetime
 
+database_uri = config['DATABASE_URI']
+
 db = SQLAlchemy()
 
 def setup_db(app, database_path):
