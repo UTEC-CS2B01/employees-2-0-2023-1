@@ -1,4 +1,5 @@
 import unittest
+import io
 from config.qa import config
 from app.models import Employee, Department
 from app import create_app
@@ -6,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 
 class EmployeesTests(unittest.TestCase):
+    
 
     def setUp(self):
         database_path = config['DATABASE_URI']
@@ -77,7 +79,6 @@ class EmployeesTests(unittest.TestCase):
             'selectDepartment': '1234',
         }
 
-
     # Test Create Department
     ###########################################################################################
 
@@ -138,6 +139,30 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
+
+    # Test Upload File
+    # #########################################################################################
+
+    def test_upload_image_success(self):
+    # open the image file as binary data
+        with open("static/test/terra.jpg", "rb") as f:
+            image_data = f.read()
+        # create a mock file object with the image data and filename
+        mock_file = io.BytesIO(image_data)
+        mock_file.filename = "terra.jpg"
+        # create a mock form data with employee_id and image
+        mock_data = {
+            "employee_id": "a188896c-a9a7-4a38-885a-8034fcc0aca2",
+            "image": (mock_file, mock_file.filename)
+        }
+        # send a post request with the mock data
+        response = self.client.post('/files', data=mock_data)
+        data = json.loads(response.data)
+        # check the response status code and data
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['message'], 'File uploaded successfully!')
+
 
     # Test Delete Department
     ###########################################################################################
