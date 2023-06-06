@@ -56,6 +56,23 @@ class File(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
 
+    def __init__(self, filename, employee_id):
+        self.filename = filename
+        self.employee_id = employee_id
+        self.created_at = datetime.utcnow()
+    
+    def __repr__(self):
+        return '<File %r>' % (self.filename)
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'filename': self.filename,
+            'employee_id': self.employee_id,
+            'created_at': self.created_at,
+            'modified_at': self.modified_at,
+        }
+
 
 class Department(db.Model):
     __tablename__ = 'departments'
