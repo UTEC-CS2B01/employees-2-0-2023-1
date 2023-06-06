@@ -45,6 +45,7 @@ class Employee(db.Model):
             'image': self.image,
             'is_active': self.is_active,
             'created_at': self.created_at,
+            'department_id': self.department_id,
             'modified_at': self.modified_at,
         }
     

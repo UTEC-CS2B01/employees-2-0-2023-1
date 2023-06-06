@@ -49,7 +49,6 @@ class EmployeesTests(unittest.TestCase):
         response = self.client.post('/departments', json=self.new_department)
         data = json.loads(response.data)
 
-
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['id'])
@@ -499,9 +498,121 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(data['success'], False)
 
+
+    # DELETE -----------------------------------------------
+    # ======================================================
+
+    # test of /departments/<department_id>
+
+    def test_delete_department_success(self):
+        myId = "";
+
+        #obtener todos los departamentos
+        response = self.client.get('/departments')
+        data = json.loads(response.data)
+
+
+        #obtener el id de un departamento cualquiera
+        myId = data['data'][-1]['id']
+        response = self.client.delete('/departments/' + str(myId))
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_delete_department_404(self):
+        response = self.client.delete('/departments/1234')
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+    def test_delete_department_500(self):
+        #obtener todos los employees
+        response = self.client.get('/employees')
+        data = json.loads(response.data)
+
+        #buscar uno que tenga department_id
+        myId = ""
+        for employee in data['data']:
+            if 'department_id' in employee:
+                myId = employee['department_id']
+                break
+
+        #ahora si intentamos borrar el departamento, no podrá puesto que viola la FK de employees
+        # por lo que dará error 500
+        response = self.client.delete('/departments/' + str(myId))
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+
+
+    # test of /employees/<employee_id>
+
+    def test_delete_employee_success(self):
+        myId = "";
+
+        #obtener todos los employees
+        response = self.client.get('/employees')
+        data = json.loads(response.data)
+
+        #obtener el id de un employee cualquiera
+        myId = data['data'][-1]['id']
+        response = self.client.delete('/employees/' + str(myId))
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def test_delete_employee_404(self):
+        response = self.client.delete('/employees/1234')
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+
+    def test_delete_employee_500(self):
+        # 508ec843-213b-47ec-9052-46154d4007c2 es un id de un empleado con un file
+        # da error puesto que no se ha borrado el file (no hay una ruta para ello)
+        response = self.client.delete('/employees/508ec843-213b-47ec-9052-46154d4007c2')
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+
+
+    # test of /employees/<employee_id>/departments
+
+    def test_delete_employee_department_success(self):
+        myId = "";
+
+        #obtener todos los employees
+        response = self.client.get('/employees')
+        data = json.loads(response.data)
+
+        #obtener el id de un employee cualquiera
+        myId = data['data'][-1]['id']
+        response = self.client.delete('/employees/' + str(myId) + '/departments')
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def test_delete_employee_department_404(self):
+        response = self.client.delete('/employees/1234/departments')
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
     def tearDown(self):
         pass
 
 
 
     #test para la ruta 1
+
