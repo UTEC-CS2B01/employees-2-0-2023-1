@@ -316,7 +316,7 @@ def create_app(test_config=None):
     # POST Method
     @app.route('/employees/<employee_id>/departments', methods=['POST'])
     def assign_employee_department(employee_id):
-        returned_code = 200
+        returned_code = 201
         error_message = ''
 
         try:
@@ -326,7 +326,7 @@ def create_app(test_config=None):
                 returned_code = 404
                 error_message = 'Employee not found'
             else:
-                body = request.form
+                body = request.json
 
                 if 'name' not in body:
                     returned_code = 400
@@ -335,8 +335,8 @@ def create_app(test_config=None):
                     returned_code = 400
                     error_message = 'Department short_name is required'
                 else:
-                    name = request.form['name']
-                    short_name = request.form['short_name']
+                    name = request.json['name']
+                    short_name = request.json['short_name']
 
                     department = Department(name, short_name)
                     department.employees.append(employee)
@@ -356,12 +356,16 @@ def create_app(test_config=None):
         finally:
             db.session.close()
 
-        if returned_code != 200:
-            return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'department_id': department_id, 'message': 'Department assigned to employee successfully!'}), returned_code
-
-    # GET Method
+        if returned_code == 400:
+            return jsonify({'success': False,
+                            'message': 'Error creating department',
+                            'error': error_message}), returned_code
+        elif returned_code != 201:
+            abort(returned_code)
+        else:
+            return jsonify({'id': department_id,
+                            'success': True,
+                            'message': 'Employee Created successfully!'}), returned_code
 
     # PATCH Method
     @app.route('/employees/<employee_id>/departments', methods=['PATCH'])

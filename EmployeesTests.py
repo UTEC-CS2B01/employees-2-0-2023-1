@@ -93,6 +93,44 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
 
+    def test_create_department_from_employee_success(self):
+        response = self.client.post('/employees/9c969220-3338-421d-9e0d-0b0e9b4fb474/departments',
+                                    json={
+                                        "name": "Servicio",
+                                        "short_name": "ss"})
+        data = json.loads(response.data)
+        print('data: ', data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['id'])
+
+    def test_create_department_from_employee_failed_404(self):
+        response = self.client.post('/employees/1234/departments', json={})
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    def test_create_department_from_employee_failed_400(self):
+        response = self.client.post('/employees/39c6d33f-62ff-4740-b712-aedc4f98f7e2/departments',
+                                    json={
+                                        "short_name": "ss"})
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    # def test_create_department_from_employee_failed_500(self):
+    #     response = self.client.post('/departments', json=self.invalid_new_department)
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 500)
+    #     self.assertEqual(data['success'], False)
+    #     self.assertTrue(data['message'])
+
     def test_create_image_success(self):
         response = self.client.post('/files',
                                     data={"image": (open("james_bond.jpg", "rb"),
