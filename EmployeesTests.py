@@ -354,6 +354,31 @@ class EmployeesTests(unittest.TestCase):
     #     self.assertEqual(data['success'], False)
     #     self.assertTrue(data['message'])
 
+    def test_change_department_from_employee_success(self):
+        response = self.client.post('/departments', json=self.new_department)
+        data_department = json.loads(response.data)
+        department_id = data_department['id']
+
+        response = self.client.post('/employees', json=self.new_employee)
+        data_employee = json.loads(response.data)
+        employee_id = data_employee['id']
+
+        response = self.client.patch('/employees/' + employee_id + "/departments",
+                                    json={
+                                        "department_id": department_id})
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_change_department_from_employee_failed_404(self):
+        response = self.client.post('/departments', json=self.new_department)
+        data_department = json.loads(response.data)
+        department_id = data_department['id']
+
+        response = self.client.patch("/employees/1234/departments",
+                                    json={})
+        data = json.loads(response.data)
 
 
     def tearDown(self):
