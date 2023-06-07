@@ -213,13 +213,57 @@ class EmployeesTests(unittest.TestCase):
     #     self.assertEqual(data['success'], False)
     #     self.assertTrue(data['message'])
 
+    def test_get_department_from_employee_success(self):
+        response = self.client.post('/departments', json=self.new_department)
+        data_department = json.loads(response.data)
+        department_id = data_department['id']
 
+        response = self.client.post('/employees', json={
+            'firstname': 'Rick',
+            'lastname': 'Blaine',
+            'age': 42,
+            'selectDepartment': department_id
+        })
+
+        data_employee = json.loads(response.data)
+        employee_id = data_employee['id']
+
+        response = self.client.get('/employees/' + employee_id + "/departments")
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_get_department_from_employee_failed_404(self):
+        response = self.client.post('/departments', json=self.new_department)
+        data_department = json.loads(response.data)
+        department_id = data_department['id']
+
+        response = self.client.get("/employees/1234/departments",
+                                    json={})
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+    def test_get_department_from_employee_failed_500(self):
+        response = self.client.patch('/employees/9d0d68a7-979e-4c95-98d0-863964555250/departments')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
 
     # DELETE
     ###########################################################################################
 
     def test_delete_employee_success(self):
-        response = self.client.delete('/employees/7e97c61c-b9c2-4927-ad9e-7b55364b253b')
+        response = self.client.post('/employees', json=self.new_employee)
+        data = json.loads(response.data)
+        employee_id = data["id"]
+
+        path = '/employees/' + employee_id
+        response = self.client.delete(path)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
