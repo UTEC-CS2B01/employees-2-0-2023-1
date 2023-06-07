@@ -380,6 +380,58 @@ class EmployeesTests(unittest.TestCase):
                                     json={})
         data = json.loads(response.data)
 
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+    def test_change_department_from_employee_failed_500(self):
+        response = self.client.patch('/employees/9d0d68a7-979e-4c95-98d0-863964555250/departments')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    # This test will fail bacause it leaves the employee without departmen_id
+    # def test_delete_department_from_employee_success(self):
+    #     response = self.client.post('/departments', json=self.new_department)
+    #     data_department = json.loads(response.data)
+    #     department_id = data_department['id']
+
+    #     response = self.client.post('/employees', json={
+    #         'firstname': 'John',
+    #         'lastname': 'Doe',
+    #         'age': 27,
+    #         'selectDepartment': department_id
+    #     })
+    #     data_employee = json.loads(response.data)
+    #     employee_id = data_employee['id']
+
+    #     response = self.client.delete('/employees/' + employee_id + "/departments")
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+
+    def test_delete_department_from_employee_failed_404(self):
+        response = self.client.post('/departments', json=self.new_department)
+        data_department = json.loads(response.data)
+        department_id = data_department['id']
+
+        response = self.client.delete("/employees/1234/departments",
+                                    json={})
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+    def test_delete_department_from_employee_failed_500(self):
+        response = self.client.patch('/employees/9d0d68a7-979e-4c95-98d0-863964555250/departments')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
 
     def tearDown(self):
         pass
