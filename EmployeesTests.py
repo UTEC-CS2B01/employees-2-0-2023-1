@@ -115,7 +115,6 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
 
-
      # GET - testing of departments
     def test_get_departments_success(self):
         response = self.client.get('/departments')
@@ -131,25 +130,28 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
     
+    # PATCH - 
 
     # Testing of /employees/<employee_id>/department
-    def test_get_employee_department_success(self):
-        employee_id = '...'
-        response = self.client.get(f'/employees/{employee_id}/department')
-        data = json.loads(response.data)
+    def test_update_department_success(self):
+        data = {'name': 'Updated Department Name'}
+        response = self.client.patch(f'/departments/{self.department_id}', data=data)
+
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['success'])
-        self.assertIn('department', data)
-        self.assertIn('employee', data)
+        self.assertIn(b'"success": true', response.data)
+        self.assertIn(b'"message": "Department updated successfully"', response.data)
 
-    def test_get_employee_department_failed_404(self):
-        employee_id = '1234'
-        response = self.client.get(f'/employees/{employee_id}/department')
-        data = json.loads(response.data)
+        department = Department.query.get(self.department_id)
+        self.assertEqual(department.name, 'Updated Department Name')
+
+    def test_update_nonexistent_department_failure(self):
+       
+        response = self.client.patch('/departments/999', data={'name': 'Updated Department'})
+
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
+        self.assertIn(b'"success": false', response.data)
+        self.assertIn(b'"message": "Not Found"', response.data)
 
-    
     # Testing of /departments/<department_id>/employees
     def test_get_department_employees_success(self):
         department_id = '...'
