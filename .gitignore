@@ -10,6 +10,7 @@ config/__pycache__/
 
 # C extensions
 *.so
+.DS_Stores
 
 # Distribution / packaging
 .Python
