@@ -202,7 +202,6 @@ def create_app(test_config=None):
             if not employee_list:
                 returned_code = 404
         except Exception as e:
-            print("\n\n\n\n\n\n", returned_code)
             print(e)
             print(sys.exc_info())
             returned_code = 500
@@ -380,13 +379,13 @@ def create_app(test_config=None):
                 returned_code = 404
                 error_message = 'Employee not found'
             else:
-                body = request.form
+                body = request.json
 
                 if 'department_id' not in body:
                     returned_code = 400
                     error_message = 'Department ID is required'
                 else:
-                    department_id = request.form['department_id']
+                    department_id = request.json['department_id']
                     department = Department.query.get(department_id)
 
                     if not department:
@@ -407,8 +406,8 @@ def create_app(test_config=None):
 
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'message': 'Employee departments updated successfully!'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee departments updated successfully!'}), returned_code
 
     # DELETE Method
     @app.route('/employees/<employee_id>/departments', methods=['DELETE'])
@@ -439,8 +438,8 @@ def create_app(test_config=None):
 
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
-
-        return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
+        else:
+            return jsonify({'success': True, 'message': 'Employee departments removed successfully!'}), returned_code
 
     @app.route('/employees/<employee_id>', methods=['PATCH'])
     def update_employee(employee_id):
@@ -549,13 +548,13 @@ def create_app(test_config=None):
             returned_code = 500
         finally:
             db.session.close()
+
         if len(list_errors) > 0:
             return jsonify({'success': False, 'message': 'Error getting employee department', 'errors': list_errors}), returned_code 
         elif returned_code != 200:
             abort(returned_code)
-        
-        
-        return jsonify({'employee':employee.firstname,'department': department.name, 'success': True}), returned_code                  
+        else:
+            return jsonify({'employee': employee.firstname,'department': department.name, 'success': True}), returned_code
 
     @app.route('/departments/<department_id>/employees', methods=['GET'])
     def get_department_employees(department_id):
