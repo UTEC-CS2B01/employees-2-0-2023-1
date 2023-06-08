@@ -13,15 +13,15 @@ def setup_db(app, database_path):
 
 class Employee(db.Model):
     __tablename__ = 'employees'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     firstname = db.Column(db.String(80), nullable=False)
     lastname = db.Column(db.String(120), unique=False, nullable=False)
     age = db.Column(db.Integer, unique=False, nullable=False)
     image = db.Column(db.String(500), nullable=True)
     is_active = db.Column(db.Boolean(), nullable=False, default=True)
     department_id = db.Column(db.String(36), db.ForeignKey('departments.id'), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True)
     files = db.relationship('File', backref='employee', lazy=True)
 
 
@@ -45,16 +45,22 @@ class Employee(db.Model):
             'image': self.image,
             'is_active': self.is_active,
             'created_at': self.created_at,
+            'department_id': self.department_id,
             'modified_at': self.modified_at,
         }
     
 class File(db.Model):
     __tablename__ = 'files'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     filename = db.Column(db.String(120), nullable=False)
     employee_id = db.Column(db.String(36), db.ForeignKey('employees.id'), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    def __init__(self, filename, employee_id):
+        self.filename = filename
+        self.employee_id = employee_id
+        self.created_at = datetime.utcnow()
 
     def __init__(self, filename, employee_id):
         self.filename = filename
@@ -76,11 +82,11 @@ class File(db.Model):
 
 class Department(db.Model):
     __tablename__ = 'departments'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(120), nullable=False)
     short_name = db.Column(db.String(20), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True)
     employees = db.relationship('Employee', backref='department', lazy=True)
 
 
