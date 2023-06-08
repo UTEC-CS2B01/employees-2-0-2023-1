@@ -20,8 +20,8 @@ class Employee(db.Model):
     image = db.Column(db.String(500), nullable=True)
     is_active = db.Column(db.Boolean(), nullable=False, default=True)
     department_id = db.Column(db.String(36), db.ForeignKey('departments.id'), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True)
     files = db.relationship('File', backref='employee', lazy=True)
 
 
@@ -45,6 +45,7 @@ class Employee(db.Model):
             'image': self.image,
             'is_active': self.is_active,
             'created_at': self.created_at,
+            'department_id': self.department_id,
             'modified_at': self.modified_at,
         }
     
@@ -53,17 +54,22 @@ class File(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     filename = db.Column(db.String(120), nullable=False)
     employee_id = db.Column(db.String(36), db.ForeignKey('employees.id'), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    def __init__(self, filename, employee_id):
+        self.filename = filename
+        self.employee_id = employee_id
+        self.created_at = datetime.utcnow()
 
 
 class Department(db.Model):
     __tablename__ = 'departments'
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(120), nullable=False)
     short_name = db.Column(db.String(20), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
-    modified_at = db.Column(db.DateTime(timezone=True), nullable=True, server_default=db.text("now()"))
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True)
     employees = db.relationship('Employee', backref='department', lazy=True)
 
 
