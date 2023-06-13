@@ -1,18 +1,26 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <p>The counter is: {{ count }}</p>
+    <button @click="increment">Increment count</button>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
-
 export default {
   name: "HomeView",
-  components: {
-    HelloWorld,
+  components: {},
+  data() {
+    return {
+      count: 0,
+      name: "",
+      lastname: "",
+    };
+  },
+  methods: {
+    increment() {
+      this.count++;
+    },
   },
 };
 </script>
