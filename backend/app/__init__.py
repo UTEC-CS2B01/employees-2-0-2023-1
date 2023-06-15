@@ -22,7 +22,7 @@ def create_app(test_config=None):
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
-        response.headers.add(' Access-Control-Max-Age', '10')
+        response.headers.add('Access-Control-Max-Age', '10')
         return response
     
     # Post
@@ -250,10 +250,8 @@ def create_app(test_config=None):
     @app.route('/departments/<department_id>', methods=['DELETE'])
     def delete_department(department_id):
         returned_code = 200
-        error_message = ''
-
         try:
-            department = Department.query.filter_by(id=department_id).first()
+            department = Department.query.get(department_id)
 
             if not department:
                 returned_code = 404

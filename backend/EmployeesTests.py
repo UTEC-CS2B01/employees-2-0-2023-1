@@ -403,15 +403,16 @@ class EmployeesTests(unittest.TestCase):
     # test of /employees/<employee_id>
 
     def test_delete_employee_success(self):
-        myId = "";
+        response_dpto_tmp = self.client.post('/departments', json=self.new_department)
+        data_tmp = json.loads(response_dpto_tmp.data)
+        dpto_tmp_id = data_tmp['id']
 
-        #obtener todos los employees
-        response = self.client.get('/employees')
-        data = json.loads(response.data)
-
-        #obtener el id de un employee cualquiera
-        myId = data['data'][-1]['id']
-        response = self.client.delete('/employees/' + str(myId))
+        self.new_employee['selectDepartment'] = str(dpto_tmp_id)
+        response_employee = self.client.post('/employees', json=self.new_employee)
+        data_employee = json.loads(response_employee.data)
+        employee_id_tmp = data_employee['id']
+        
+        response = self.client.delete('/employees/' + str(employee_id_tmp))
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
