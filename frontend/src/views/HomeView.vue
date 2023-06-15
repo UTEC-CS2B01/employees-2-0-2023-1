@@ -1,26 +1,21 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <p>The counter is: {{ count }}</p>
-    <button @click="increment">Increment count</button>
+    <CreateDepartment />
   </div>
 </template>
 
 <script>
+import CreateDepartment from "@/components/CreateDepartment.vue";
 export default {
   name: "HomeView",
-  components: {},
+  components: {
+    CreateDepartment,
+  },
   data() {
-    return {
-      count: 0,
-      name: "",
-      lastname: "",
-    };
+    return {};
   },
-  methods: {
-    increment() {
-      this.count++;
-    },
-  },
+  methods: {},
 };
 </script>
+
+<style></style>
