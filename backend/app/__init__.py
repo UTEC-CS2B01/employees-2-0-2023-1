@@ -380,7 +380,7 @@ def create_app(test_config=None):
                 ).all()
                 department_list = [department.serialize() for department in departments]
             else:
-                departments = Department.query.all()
+                departments = Department.query.order_by(Department.name).all()
                 department_list = [department.serialize() for department in departments]
 
 
@@ -397,7 +397,7 @@ def create_app(test_config=None):
         if returned_code != 200:
             abort(returned_code)
 
-        return jsonify({'success': True, 'data': department_list}), returned_code
+        return jsonify({'success': True, 'departments': department_list}), returned_code
 
     
     
