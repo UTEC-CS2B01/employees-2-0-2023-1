@@ -1,5 +1,22 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <CreateEmployee />
   </div>
 </template>
+
+<script>
+import CreateEmployee from "@/components/CreateEmployee.vue";
+
+export default {
+  name: "AboutView",
+  components: {
+    CreateEmployee,
+  },
+  data() {
+    return {};
+  },
+  methods: {},
+};
+</script>
+
+<style></style>
