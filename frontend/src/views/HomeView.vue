@@ -1,17 +1,5 @@
 <template>
   <div class="home">
-    <select v-model="selectedOption">
-      <option
-        v-for="option in optionsLists"
-        :key="option.id"
-        :value="option.id"
-      >
-        {{ option.value }}
-      </option>
-    </select>
-
-    {{ selectedOption }}
-
     <CreateDepartment />
     <ListDepartments />
   </div>
