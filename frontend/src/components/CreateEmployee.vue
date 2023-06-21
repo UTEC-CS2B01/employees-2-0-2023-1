@@ -15,8 +15,12 @@
         <input type="text" v-model.number="employee.age" />
       </div>
       <div class="form-group">
-        <select v-model="employee.selectedDepartment">
-          <option v-for="department in departments" :key="department.id">
+        <select v-model="employee.selectDepartment">
+          <option
+            v-for="department in departments"
+            :key="department.id"
+            :value="department.id"
+          >
             {{ department.name }}
           </option>
         </select>
@@ -42,7 +46,7 @@ export default {
         firstname: "",
         lastname: "",
         age: 0,
-        selectedDepartment: null,
+        selectDepartment: null,
       },
       departments: [],
     };
