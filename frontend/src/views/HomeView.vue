@@ -1,18 +1,28 @@
 <template>
-  <div class="home">
-    <CreateDepartment />
-    <ListDepartments />
+  <div class="container">
+    <div class="home">
+      <CreateDepartment />
+      <ListDepartments />
+    </div>
+    <div class="employee">
+      <CreateEmployee />
+      <ListEmployees />
+    </div>
   </div>
 </template>
 
 <script>
 import CreateDepartment from "@/components/CreateDepartment.vue";
 import ListDepartments from "@/components/ListDepartments.vue";
+import CreateEmployee from "@/components/CreateEmployee.vue";
+import ListEmployees from "@/components/ListEmployees.vue";
 export default {
   name: "HomeView",
   components: {
     CreateDepartment,
     ListDepartments,
+    CreateEmployee,
+    ListEmployees,
   },
   data() {
     return {
@@ -49,4 +59,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 30px;
+}
+</style>
