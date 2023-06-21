@@ -3,7 +3,7 @@
       <h1>List of Employees</h1>
       <ul>
         <li v-for="employee in employees" :key="employee.id">
-          {{ employee.name }}
+          {{ employee.firstname }} {{ employee.lastname }}
         </li>
       </ul>
     </div>

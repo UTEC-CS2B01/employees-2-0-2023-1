@@ -1,19 +1,23 @@
 <template>
-    <div class="employee-creation-form">
-      <h1>Create Employee</h1>
-      <form @submit.prevent.stop="createEmployee">
-        <div class="form-group">
-          <label for="name">Name:</label>
-          <input type="text" id="name" v-model.lazy.trim="employee.name" />
-        </div>
-        <div class="form-group">
-          <label for="short-name">Short Name:</label>
-          <input type="text" id="short-name" v-model="employee.shortName" />
-        </div>
-        <button class="submit-button" type="submit">Submit</button>
-      </form>
-    </div>
-  </template>
+  <div class="employee-creation-form">
+    <h1>Create Employee</h1>
+    <form @submit.prevent.stop="createEmployee">
+      <div class="form-group">
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" v-model.lazy.trim="employee.firstname" />
+      </div>
+      <div class="form-group">
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" v-model="employee.lastName" />
+      </div>
+      <div class="form-group">
+        <label for="age">Age:</label>
+        <input type="number" id="age" v-model="employee.age" />
+      </div>
+      <button class="submit-button" type="submit">Submit</button>
+    </form>
+  </div>
+</template>
   
   <script>
   import { createEmployee } from "@/services/employees.api";

@@ -14,17 +14,24 @@
 
     <CreateDepartment />
     <ListDepartments />
+    <CreateEmployee />
+    <ListEmployees />
   </div>
 </template>
 
 <script>
 import CreateDepartment from "@/components/CreateDepartment.vue";
 import ListDepartments from "@/components/ListDepartments.vue";
+import CreateEmployee from "@/components/CreateEmployee.vue";
+import ListEmployees from "@/components/ListEmployees.vue";
+
 export default {
   name: "HomeView",
   components: {
     CreateDepartment,
     ListDepartments,
+    CreateEmployee,
+    ListEmployees,
   },
   data() {
     return {
