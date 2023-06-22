@@ -7,6 +7,7 @@
 </template>
 
 <script>
+// LLAMA A LOS COMPONENTES
 import CreateDepartment from "@/components/CreateDepartment.vue";
 import ListDepartments from "@/components/ListDepartments.vue";
 import CreateEmployee from "@/components/CreateEmployee.vue";

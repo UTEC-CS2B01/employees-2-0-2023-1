@@ -14,7 +14,7 @@ export default {
   name: "ListDepartments",
   data() {
     return {
-      departments: [],
+      departments: [], // propiedad
     };
   },
   async mounted() {
