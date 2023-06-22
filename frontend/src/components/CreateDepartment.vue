@@ -1,7 +1,7 @@
 <template>
   <div class="department-creation-form">
     <h1>Create Department</h1>
-    <form v-on:submit.prevent.stop="createDepartment">
+    <form @submit.prevent.stop="createDepartment">
       <div class="form-group">
         <label>Name:</label>
         <input type="text" v-model.lazy.trim="department.name" />
