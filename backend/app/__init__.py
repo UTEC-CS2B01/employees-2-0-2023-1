@@ -16,7 +16,7 @@ def create_app(test_config=None):
     with app.app_context():
         app.config['UPLOAD_FOLDER'] = 'static/employees'
         setup_db(app, test_config['database_path'] if test_config else None)
-        CORS(app, origins='*')
+        CORS(app, origins=['http://localhost:8081'])
 
     @app.after_request
     def after_request(response):
@@ -65,8 +65,7 @@ def create_app(test_config=None):
                 employee_id = employee.id
 
         except Exception as e:
-        
-            # print(sys.exc_info())
+            print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -206,7 +205,7 @@ def create_app(test_config=None):
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
 
-        return jsonify({'success': True, 'data': employee_list}), returned_code
+        return jsonify({'success': True, 'employees': employee_list}), returned_code
     
     # PATCH
     ###########################################################################################

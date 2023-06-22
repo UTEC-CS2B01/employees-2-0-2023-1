@@ -9,17 +9,13 @@
 </template>
 
 <script>
-import { getAllDepartments } from "@/services/departments.api";
 export default {
   name: "ListDepartments",
-  data() {
-    return {
-      departments: [],
-    };
-  },
-  async mounted() {
-    const { departments } = await getAllDepartments();
-    this.departments = departments;
+  props: {
+    departments: {
+      type: [],
+      required: true,
+    },
   },
 };
 </script>

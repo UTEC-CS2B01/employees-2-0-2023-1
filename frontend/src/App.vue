@@ -1,14 +1,19 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view />
+  <div class="app-container">
+    <div class="menu">
+      <TheNavigation />
+    </div>
+    <router-view />
+  </div>
 </template>
 
 <script>
+import TheNavigation from "@/views/TheNavigation.vue";
 export default {
   name: "App",
+  components: {
+    TheNavigation,
+  },
 };
 </script>
 
@@ -32,5 +37,18 @@ nav a {
 
 nav a.router-link-exact-active {
   color: #42b983;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0px;
 }
 </style>
