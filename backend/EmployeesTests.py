@@ -43,7 +43,7 @@ class EmployeesTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data['success'], True)
-        self.assertTrue(data['id'])
+        self.assertTrue(data['department']['id'])
         
 
     def test_create_department_failed_400(self):
@@ -67,7 +67,7 @@ class EmployeesTests(unittest.TestCase):
     def test_create_employee_success(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
         response = self.client.post('/employees', json=self.new_employee)
@@ -105,7 +105,7 @@ class EmployeesTests(unittest.TestCase):
     def test_upload_file_success(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
         response = self.client.post('/employees', json=self.new_employee)
@@ -163,7 +163,7 @@ class EmployeesTests(unittest.TestCase):
     def test_update_department_success(self):
         response_temp = self.client.post('/departments', json=self.new_department)
         data_temp = json.loads(response_temp.data)
-        id_temp = data_temp['id']
+        id_temp = data_temp['department']['id']
 
         response = self.client.patch('/departments/{}'.format(id_temp), json=self.new_department)
 
@@ -292,7 +292,7 @@ class EmployeesTests(unittest.TestCase):
     def test_update_employee_success(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
@@ -320,7 +320,7 @@ class EmployeesTests(unittest.TestCase):
     def test_update_employee_failed_400(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
@@ -339,7 +339,7 @@ class EmployeesTests(unittest.TestCase):
     def test_update_employee_failed_500(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
@@ -367,7 +367,7 @@ class EmployeesTests(unittest.TestCase):
     def test_delete_department_success(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
         response = self.client.delete('/departments/' + str(dpto_tmp_id))
 
         data = json.loads(response.data)
@@ -387,7 +387,7 @@ class EmployeesTests(unittest.TestCase):
     def test_delete_department_500(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
@@ -405,7 +405,7 @@ class EmployeesTests(unittest.TestCase):
     def test_delete_employee_success(self):
         response_dpto_tmp = self.client.post('/departments', json=self.new_department)
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
         response_employee = self.client.post('/employees', json=self.new_employee)
