@@ -16,8 +16,6 @@
 </template>
 
 <script>
-import { createDepartment } from "@/services/departments.api";
-
 export default {
   name: "CreateDepartment",
   components: {},
@@ -30,10 +28,8 @@ export default {
     };
   },
   methods: {
-    async createDepartment() {
-      console.log(this.department);
-      const data = await createDepartment(this.department);
-      console.log(data);
+    createDepartment() {
+      this.$emit("new-department", this.department);
     },
   },
 };

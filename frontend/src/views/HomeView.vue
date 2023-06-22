@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <CreateDepartment />
+    <CreateDepartment @new-department="createDepartmentEvent" />
     <ListDepartments :departments="allDepartments" />
     <CreateEmployee />
     <ListEmployees />
@@ -13,7 +13,10 @@ import ListDepartments from "@/components/ListDepartments.vue";
 import CreateEmployee from "@/components/CreateEmployee.vue";
 import ListEmployees from "@/components/ListEmployees.vue";
 
-import { getAllDepartments } from "@/services/departments.api";
+import {
+  createDepartment,
+  getAllDepartments,
+} from "@/services/departments.api";
 export default {
   name: "HomeView",
   components: {
@@ -37,6 +40,10 @@ export default {
       console.log("departments: ", departments);
       this.allDepartments = departments;
       console.log("this.allDepartments: ", this.allDepartments);
+    },
+    async createDepartmentEvent(department) {
+      const data = await createDepartment(department);
+      console.log("data: ", data);
     },
   },
 };

@@ -170,7 +170,7 @@ def create_app(test_config=None):
         elif returned_code == 500:
             abort(returned_code)
         else:
-            return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
+            return jsonify({'department': department.serialize(), 'success': True, 'message': 'Department created successfully!'}), returned_code
         
     # GET
     #######################################################################################
