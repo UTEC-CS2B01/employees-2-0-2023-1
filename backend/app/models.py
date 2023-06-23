@@ -2,6 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 from config.local import config
 import uuid
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 db = SQLAlchemy()
 
@@ -89,3 +91,40 @@ class Department(db.Model):
             'created_at': self.created_at,
             'modified_at': self.modified_at,
         }
+    
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    username = db.Column(db.String(60), unique=True, nullable=False)
+    password_hash = db.Column(db.String(400), nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    @property
+    def password(self):
+        raise AttributeError('Password is not readable')
+    
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def __repr__(self):
+        return 'User: {}, {}'.format(self.id, self.username)
+    
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+        self.created_at = datetime.utcnow()
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'username': self.username
+        }
+
+    
