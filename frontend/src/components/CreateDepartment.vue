@@ -10,6 +10,7 @@
         <label>Short Name:</label>
         <input type="text" v-model="department.short_name" />
       </div>
+
       <button class="submit-button" type="submit">Submit</button>
     </form>
   </div>
@@ -59,6 +60,7 @@ input[type="text"] {
 }
 
 .submit-button {
+  margin-top: 10px;
   background-color: #4caf50;
   color: white;
   padding: 10px 20px;

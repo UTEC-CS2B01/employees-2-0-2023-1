@@ -42,8 +42,12 @@ export default {
       console.log("this.allDepartments: ", this.allDepartments);
     },
     async createDepartmentEvent(department) {
-      const data = await createDepartment(department);
-      console.log("data: ", data);
+      const { department: { id, name } = {}, success } = await createDepartment(
+        department
+      );
+      if (success) {
+        this.allDepartments.push({ id, name });
+      }
     },
   },
 };

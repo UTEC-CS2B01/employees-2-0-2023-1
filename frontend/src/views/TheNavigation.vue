@@ -13,7 +13,7 @@
         <li>Contact us</li>
         <li>Sign In</li>
         <li>Sign Out</li>
-        <li>Sign up</li>
+        <li><router-link to="/sign-up">Sign up</router-link></li>
       </ul>
     </div>
   </nav>
