@@ -58,15 +58,27 @@ export default {
       const response = await signUp(this.user);
       console.log("response: ", response);
 <<<<<<< HEAD
+<<<<<<< HEAD
       const response = await signUp(this.user);
       console.log("response: ", response);
 =======
+=======
+>>>>>>> afc068a (UTEC-0013 - decorator)
 <<<<<<< HEAD
 >>>>>>> e4941db (UTEC-0013 - decorator)
 =======
 >>>>>>> 2264a0b (UTEC-0013 - decorator)
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
+<<<<<<< HEAD
 >>>>>>> ff2be9a (UTEC-0013 - decorator)
+=======
+=======
+>>>>>>> 2264a0b (UTEC-0013 - decorator)
+=======
+>>>>>>> e4941db (UTEC-0013 - decorator)
+>>>>>>> 0dd38b8 (UTEC-0013 - decorator)
+>>>>>>> 3240eb4 (UTEC-0013 - decorator)
+>>>>>>> afc068a (UTEC-0013 - decorator)
     },
   },
 };

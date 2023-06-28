@@ -11,6 +11,11 @@ export const signUp = async (user) => {
   } catch (error) {
     console.log("error here: ", error);
   }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> afc068a (UTEC-0013 - decorator)
   const { data } = await axios.post(BASE_URL, user);
 
   return data;
@@ -21,5 +26,10 @@ export const signUp = async (user) => {
 =======
 >>>>>>> 2264a0b (UTEC-0013 - decorator)
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
+<<<<<<< HEAD
 >>>>>>> ff2be9a (UTEC-0013 - decorator)
+=======
+=======
+>>>>>>> 3240eb4 (UTEC-0013 - decorator)
+>>>>>>> afc068a (UTEC-0013 - decorator)
 };
