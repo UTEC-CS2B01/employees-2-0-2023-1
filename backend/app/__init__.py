@@ -7,6 +7,8 @@ from flask import (
 from .models import db, setup_db, Employee, Department, File
 from flask_cors import CORS
 from .utilities import allowed_file
+from .users_controller import users_bp
+from .authentication import authorize
 
 import os
 import sys
@@ -15,8 +17,9 @@ def create_app(test_config=None):
     app = Flask(__name__)
     with app.app_context():
         app.config['UPLOAD_FOLDER'] = 'static/employees'
+        app.register_blueprint(users_bp)
         setup_db(app, test_config['database_path'] if test_config else None)
-        CORS(app, origins=['http://localhost:8081'])
+        CORS(app, origins=['http://localhost:8080'])
 
     @app.after_request
     def after_request(response):
@@ -24,11 +27,13 @@ def create_app(test_config=None):
         response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
         response.headers.add('Access-Control-Max-Age', '10')
         return response
+
     
     # Post
     #########################################################
 
     @app.route('/employees', methods=['POST'])
+    @authorize
     def create_employee():
         returned_code = 201
         list_errors = []
@@ -81,6 +86,7 @@ def create_app(test_config=None):
     
 
     @app.route('/files', methods=['POST'])
+    @authorize
     def upload_image():
         returned_code = 201
         list_errors = []
@@ -131,6 +137,7 @@ def create_app(test_config=None):
 
 
     @app.route('/departments', methods=['POST'])
+    @authorize
     def create_department():
         returned_code = 201
         list_errors = []
@@ -176,6 +183,7 @@ def create_app(test_config=None):
     #######################################################################################
     
     @app.route('/employees', methods=['GET'])
+    @authorize
     def get_employees():
         returned_code = 200
         error_message = ''
@@ -211,6 +219,7 @@ def create_app(test_config=None):
     ###########################################################################################
     
     @app.route('/departments/<department_id>', methods=['PATCH'])
+    @authorize
     def update_department(department_id):
         returned_code = 200
         
@@ -247,6 +256,7 @@ def create_app(test_config=None):
     ########################################################################################
     
     @app.route('/departments/<department_id>', methods=['DELETE'])
+    @authorize
     def delete_department(department_id):
         returned_code = 200
         try:
@@ -274,6 +284,7 @@ def create_app(test_config=None):
 
 
     @app.route('/employees/<employee_id>', methods=['DELETE'])
+    @authorize
     def delete_employee(employee_id):
         returned_code = 200
         error_message = ''
@@ -304,6 +315,7 @@ def create_app(test_config=None):
     
 
     @app.route('/employees/<employee_id>', methods=['PATCH'])
+    @authorize
     def update_employee(employee_id):
         returned_code = 200
         list_errors = []
@@ -364,6 +376,7 @@ def create_app(test_config=None):
             return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code        
 
     @app.route('/departments', methods=['GET'])
+    @authorize
     def get_departments():
         returned_code = 200
         department_list = []
@@ -398,8 +411,6 @@ def create_app(test_config=None):
 
         return jsonify({'success': True, 'departments': department_list}), returned_code
 
-    
-    
 
     @app.errorhandler(405)
     def method_not_allowed(error):

@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { signUp } from "@/services/users.api";
 export default {
   name: "SignUp",
   data() {
@@ -32,7 +33,10 @@ export default {
     };
   },
   methods: {
-    signUpEvent() {},
+    async signUpEvent() {
+      const response = await signUp(this.user);
+      console.log("response: ", response);
+    },
   },
 };
 </script>
