@@ -7,6 +7,8 @@ from flask import (
 from .models import db, setup_db, Employee, Department, File
 from flask_cors import CORS
 from .utilities import allowed_file
+from .users_controller import users_bp
+from .authentication import authorize
 
 import os
 import sys
@@ -15,20 +17,23 @@ def create_app(test_config=None):
     app = Flask(__name__)
     with app.app_context():
         app.config['UPLOAD_FOLDER'] = 'static/employees'
+        app.register_blueprint(users_bp)
         setup_db(app, test_config['database_path'] if test_config else None)
-        CORS(app, origins='*')
+        CORS(app, origins=['http://localhost:8080'])
 
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
-        response.headers.add(' Access-Control-Max-Age', '10')
+        response.headers.add('Access-Control-Max-Age', '10')
         return response
+
     
     # Post
     #########################################################
 
     @app.route('/employees', methods=['POST'])
+    @authorize
     def create_employee():
         returned_code = 201
         list_errors = []
@@ -65,8 +70,7 @@ def create_app(test_config=None):
                 employee_id = employee.id
 
         except Exception as e:
-        
-            # print(sys.exc_info())
+            print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -82,6 +86,7 @@ def create_app(test_config=None):
     
 
     @app.route('/files', methods=['POST'])
+    @authorize
     def upload_image():
         returned_code = 201
         list_errors = []
@@ -171,12 +176,13 @@ def create_app(test_config=None):
         elif returned_code == 500:
             abort(returned_code)
         else:
-            return jsonify({'id': department_id, 'success': True, 'message': 'Department created successfully!'}), returned_code
+            return jsonify({'department': department.serialize(), 'success': True, 'message': 'Department created successfully!'}), returned_code
         
     # GET
     #######################################################################################
     
     @app.route('/employees', methods=['GET'])
+    @authorize
     def get_employees():
         returned_code = 200
         error_message = ''
@@ -206,12 +212,13 @@ def create_app(test_config=None):
         if returned_code != 200:
             return jsonify({'success': False, 'message': error_message}), returned_code
 
-        return jsonify({'success': True, 'data': employee_list}), returned_code
+        return jsonify({'success': True, 'employees': employee_list}), returned_code
     
     # PATCH
     ###########################################################################################
     
     @app.route('/departments/<department_id>', methods=['PATCH'])
+    @authorize
     def update_department(department_id):
         returned_code = 200
         
@@ -248,12 +255,11 @@ def create_app(test_config=None):
     ########################################################################################
     
     @app.route('/departments/<department_id>', methods=['DELETE'])
+    @authorize
     def delete_department(department_id):
         returned_code = 200
-        error_message = ''
-
         try:
-            department = Department.query.filter_by(id=department_id).first()
+            department = Department.query.get(department_id)
 
             if not department:
                 returned_code = 404
@@ -277,6 +283,7 @@ def create_app(test_config=None):
 
 
     @app.route('/employees/<employee_id>', methods=['DELETE'])
+    @authorize
     def delete_employee(employee_id):
         returned_code = 200
         error_message = ''
@@ -307,6 +314,7 @@ def create_app(test_config=None):
     
 
     @app.route('/employees/<employee_id>', methods=['PATCH'])
+    @authorize
     def update_employee(employee_id):
         returned_code = 200
         list_errors = []
@@ -367,6 +375,7 @@ def create_app(test_config=None):
             return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code        
 
     @app.route('/departments', methods=['GET'])
+    @authorize
     def get_departments():
         returned_code = 200
         department_list = []
@@ -382,7 +391,7 @@ def create_app(test_config=None):
                 ).all()
                 department_list = [department.serialize() for department in departments]
             else:
-                departments = Department.query.all()
+                departments = Department.query.order_by(Department.name).all()
                 department_list = [department.serialize() for department in departments]
 
 
@@ -399,10 +408,8 @@ def create_app(test_config=None):
         if returned_code != 200:
             abort(returned_code)
 
-        return jsonify({'success': True, 'data': department_list}), returned_code
+        return jsonify({'success': True, 'departments': department_list}), returned_code
 
-    
-    
 
     @app.errorhandler(405)
     def method_not_allowed(error):
