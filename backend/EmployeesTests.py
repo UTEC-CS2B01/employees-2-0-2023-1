@@ -4,10 +4,10 @@ from app.models import Employee, Department, User
 from app.authentication import authorize
 from app import create_app
 from flask_sqlalchemy import SQLAlchemy
-import random
 import json
-import string
 import io as io
+import random
+import string
 
 
 def random_username(char_num):
@@ -22,8 +22,8 @@ class EmployeesTests(unittest.TestCase):
         self.client = self.app.test_client()
 
         self.new_department = {
-            'name': 'Information Technology',
-            'short_name': 'IT'
+            'name': 'DepPrueba',
+            'short_name': 'DP'
         }
 
         self.invalid_new_department = {
@@ -46,39 +46,20 @@ class EmployeesTests(unittest.TestCase):
 
         self.new_authenticated_user = {
             'username': random_username(10),
-            'password': 'admin12345',
-            'confirmationPassword': 'admin12345'
+            'password': '147258369',
+            'confirmationPassword': '147258369'
         }
 
-        response_test = self.client.post(
-            '/departments', json=self.new_department)
-        data_test = json.loads(response_test.data)
-        self.department_id_test = data_test['department']['id']
-
-        # Nuevo usuario autenticado
         response_user = self.client.post(
             '/users', json=self.new_authenticated_user)
         data_user = json.loads(response_user.data)
         self.user_valid_token = data_user['token']
-
-    # /users
-    def test_create_user_success(self):
-        response = self.client.post('/users', json=self.new_authenticated_user)
-        data = json.loads(response.data)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['token'])
-        self.assertTrue(data['user_created_id'])
 
     # /departments
-    def test_create_department_success(self):
-        response_user = self.client.post(
-            '/users', json=self.new_authenticated_user)
-        data_user = json.loads(response_user.data)
-        self.user_valid_token = data_user['token']
 
+    def test_create_department_success(self):
         response = self.client.post('/departments', json=self.new_department, headers={
-                                    'Authorization': f'Bearer {self.user_valid_token}'})
+                                    'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 201)
@@ -86,7 +67,8 @@ class EmployeesTests(unittest.TestCase):
         self.assertTrue(data['department']['id'])
 
     def test_create_department_failed_400(self):
-        response = self.client.post('/departments', json={})
+        response = self.client.post('/departments', json={}, headers={
+                                    'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 400)
@@ -95,7 +77,8 @@ class EmployeesTests(unittest.TestCase):
 
     def test_create_department_failed_500(self):
         response = self.client.post(
-            '/departments', json=self.invalid_new_department)
+            '/departments', json=self.invalid_new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 500)
@@ -104,12 +87,14 @@ class EmployeesTests(unittest.TestCase):
 
     def test_create_employee_success(self):
         response_dpto_tmp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_tmp = json.loads(response_dpto_tmp.data)
         dpto_tmp_id = data_tmp['department']['id']
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
-        response = self.client.post('/employees', json=self.new_employee)
+        response = self.client.post('/employees', json=self.new_employee, headers={
+                                    'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 201)
@@ -118,7 +103,8 @@ class EmployeesTests(unittest.TestCase):
 
     def test_create_employee_failed_400(self):
         response = self.client.post(
-            '/employees', json=self.invalid_new_employee)
+            '/employees', json=self.invalid_new_employee, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 400)
@@ -131,7 +117,8 @@ class EmployeesTests(unittest.TestCase):
             'lastname': 'Aguinaga',
             'age': 16,
             'selectDepartment': '1234',
-        })
+        }, headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
 
@@ -143,12 +130,14 @@ class EmployeesTests(unittest.TestCase):
 
     def test_upload_file_success(self):
         response_dpto_tmp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_tmp = json.loads(response_dpto_tmp.data)
         dpto_tmp_id = data_tmp['department']['id']
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
-        response = self.client.post('/employees', json=self.new_employee)
+        response = self.client.post('/employees', json=self.new_employee, headers={
+                                    'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
         emp_tmp_id = data['id']
 
@@ -162,7 +151,8 @@ class EmployeesTests(unittest.TestCase):
         }
 
         response = self.client.post(
-            '/files', data=form_data, content_type='multipart/form-data')
+            '/files', data=form_data, content_type='multipart/form-data', headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
 
@@ -172,7 +162,8 @@ class EmployeesTests(unittest.TestCase):
 
     def test_upload_file_failed_400(self):
         response = self.client.post(
-            '/files', data={}, content_type='multipart/form-data')
+            '/files', data={}, content_type='multipart/form-data', headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 400)
@@ -190,7 +181,8 @@ class EmployeesTests(unittest.TestCase):
         }
 
         response = self.client.post(
-            '/files', data=form_data, content_type='multipart/form-data')
+            '/files', data=form_data, content_type='multipart/form-data', headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
 
@@ -200,19 +192,22 @@ class EmployeesTests(unittest.TestCase):
 
     def test_update_department_success(self):
         response_temp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_temp = json.loads(response_temp.data)
         id_temp = data_temp['department']['id']
 
         response = self.client.patch(
-            '/departments/{}'.format(id_temp), json=self.new_department)
+            '/departments/{}'.format(id_temp), json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
 
     def test_update_department_404(self):
-        response = self.client.patch('/departments/234567')
+        response = self.client.patch('/departments/234567', headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
 
@@ -220,7 +215,8 @@ class EmployeesTests(unittest.TestCase):
         self.assertEqual(data['success'], False)
 
     def test_get_departments_success(self):
-        response = self.client.get('/departments')
+        response = self.client.get('/departments', headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -230,7 +226,8 @@ class EmployeesTests(unittest.TestCase):
     # /employees
 
     def test_get_employees_success(self):
-        response = self.client.get('/employees')
+        response = self.client.get('/employees', headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -239,14 +236,16 @@ class EmployeesTests(unittest.TestCase):
 
     def test_update_employee_success(self):
         response_dpto_tmp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['id']
+        dpto_tmp_id = data_tmp['department']['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
         response_empl_tmp = self.client.post(
-            '/employees', json=self.new_employee)
+            '/employees', json=self.new_employee, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_empl_tmp = json.loads(response_empl_tmp.data)
 
         employee_id_tmp = data_empl_tmp['id']
@@ -263,7 +262,8 @@ class EmployeesTests(unittest.TestCase):
         }
 
         response = self.client.patch(
-            '/employees/{}'.format(employee_id_tmp), data=form_data)
+            '/employees/{}'.format(employee_id_tmp), data=form_data, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -271,20 +271,23 @@ class EmployeesTests(unittest.TestCase):
 
     def test_update_employee_failed_400(self):
         response_dpto_tmp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_tmp = json.loads(response_dpto_tmp.data)
         dpto_tmp_id = data_tmp['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
         response_empl_tmp = self.client.post(
-            '/employees', json=self.new_employee)
+            '/employees', json=self.new_employee, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_empl_tmp = json.loads(response_empl_tmp.data)
 
         employee_id_tmp = data_empl_tmp['id']
 
         response = self.client.patch(
-            '/employees/{}'.format(employee_id_tmp), data={}, content_type='multipart/form-data')
+            '/employees/{}'.format(employee_id_tmp), data={}, content_type='multipart/form-data', headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 400)
@@ -293,14 +296,16 @@ class EmployeesTests(unittest.TestCase):
 
     def test_update_employee_failed_500(self):
         response_dpto_tmp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_tmp = json.loads(response_dpto_tmp.data)
         dpto_tmp_id = data_tmp['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
         response_empl_tmp = self.client.post(
-            '/employees', json=self.new_employee)
+            '/employees', json=self.new_employee, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_empl_tmp = json.loads(response_empl_tmp.data)
 
         employee_id_tmp = data_empl_tmp['id']
@@ -316,7 +321,8 @@ class EmployeesTests(unittest.TestCase):
         }
 
         response = self.client.patch(
-            '/employees/{}'.format(employee_id_tmp), data=form_data, content_type='multipart/form-data')
+            '/employees/{}'.format(employee_id_tmp), data=form_data, content_type='multipart/form-data', headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
 
@@ -326,14 +332,16 @@ class EmployeesTests(unittest.TestCase):
 
     def test_update_employee_success(self):
         response_dpto_tmp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_tmp = json.loads(response_dpto_tmp.data)
         dpto_tmp_id = data_tmp['department']['id']
 
         self.new_employee['selectDepartment'] = str(dpto_tmp_id)
 
         response_empl_tmp = self.client.post(
-            '/employees', json=self.new_employee)
+            '/employees', json=self.new_employee, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_empl_tmp = json.loads(response_empl_tmp.data)
 
         employee_id_tmp = data_empl_tmp['id']
@@ -347,7 +355,8 @@ class EmployeesTests(unittest.TestCase):
             'image': (io.BytesIO(file_content), 'test.png')
         }
         response = self.client.patch(
-            '/employees/{}'.format(employee_id_tmp), content_type='multipart/form-data', data=form_data)
+            '/employees/{}'.format(employee_id_tmp), content_type='multipart/form-data', data=form_data, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
@@ -358,12 +367,14 @@ class EmployeesTests(unittest.TestCase):
         self.new_employee['selectDepartment'] = str(self.department_id_test)
 
         response_empl_tmp = self.client.post(
-            '/employees', json=self.new_employee)
+            '/employees', json=self.new_employee, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_empl_tmp = json.loads(response_empl_tmp.data)
 
         employee_id_tmp = data_empl_tmp['id']
 
-        response = self.client.patch('/employees/{}'.format(employee_id_tmp))
+        response = self.client.patch('/employees/{}'.format(employee_id_tmp), headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 400)
@@ -374,7 +385,8 @@ class EmployeesTests(unittest.TestCase):
         self.new_employee['selectDepartment'] = str(self.department_id_test)
 
         response_empl_tmp = self.client.post(
-            '/employees', json=self.new_employee)
+            '/employees', json=self.new_employee, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_empl_tmp = json.loads(response_empl_tmp.data)
 
         employee_id_tmp = data_empl_tmp['id']
@@ -388,7 +400,8 @@ class EmployeesTests(unittest.TestCase):
             'image': (io.BytesIO(file_content), 'test.png')
         }
         response = self.client.patch(
-            '/employees/{}'.format(employee_id_tmp), content_type='multipart/form-data', data=form_data)
+            '/employees/{}'.format(employee_id_tmp), content_type='multipart/form-data', data=form_data, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 500)
@@ -396,14 +409,16 @@ class EmployeesTests(unittest.TestCase):
 
     def test_delete_department_success(self):
         response = self.client.delete(
-            '/departments/' + str(self.department_id_test))
+            '/departments/' + str(self.department_id_test), headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
 
     def test_delete_department_404(self):
-        response = self.client.delete('/departments/1234')
+        response = self.client.delete('/departments/1234', headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 404)
@@ -413,10 +428,12 @@ class EmployeesTests(unittest.TestCase):
 
         self.new_employee['selectDepartment'] = str(self.department_id_test)
 
-        self.client.post('/employees', json=self.new_employee)
+        self.client.post('/employees', json=self.new_employee, headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
 
         response = self.client.delete(
-            '/departments/' + str(self.department_id_test))
+            '/departments/' + str(self.department_id_test), headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 500)
@@ -426,7 +443,8 @@ class EmployeesTests(unittest.TestCase):
 
     def test_delete_employee_success(self):
         response_dpto_tmp = self.client.post(
-            '/departments', json=self.new_department)
+            '/departments', json=self.new_department, headers={
+                'X-ACCESS-TOKEN': self.user_valid_token})
         data_tmp = json.loads(response_dpto_tmp.data)
         dpto_tmp_id = data_tmp['department']['id']
 
@@ -436,18 +454,20 @@ class EmployeesTests(unittest.TestCase):
         data_employee = json.loads(response_employee.data)
         employee_id_tmp = data_employee['id']
 
-        response = self.client.delete('/employees/' + str(employee_id_tmp))
+        response = self.client.delete('/employees/' + str(employee_id_tmp), headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
 
     def test_delete_employee_404(self):
-        response = self.client.delete('/employees/1234')
+        response = self.client.delete('/employees/1234', headers={
+            'X-ACCESS-TOKEN': self.user_valid_token})
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
 
     def tearDown(self):
-        self.client.delete('/departments/{}'.format(self.department_id_test))
+        pass
