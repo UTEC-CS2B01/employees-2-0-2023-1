@@ -128,6 +128,9 @@ class User(db.Model):
             'username': self.username
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e171a95 (UTEC-0013 - decorator)
     
     def insert(self):
         try:
@@ -142,8 +145,29 @@ class User(db.Model):
             db.session.close()
         
         return user_created_id
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+    
+
+    def delete(self):
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except Exception as e:
+            print(sys.exc_info())
+            print('e: ', e)
+            db.session.rollback()
+
+=======
+>>>>>>> e4941db (UTEC-0013 - decorator)
+>>>>>>> 3944c9d (UTEC-0013 - decorator)
 
 =======
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
+=======
+
+>>>>>>> e171a95 (UTEC-0013 - decorator)
 
     

@@ -30,10 +30,18 @@ def create_app(test_config=None):
         response.headers.add('Access-Control-Max-Age', '10')
         return response
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
+=======
+
+>>>>>>> e171a95 (UTEC-0013 - decorator)
+    
+>>>>>>> 3944c9d (UTEC-0013 - decorator)
 >>>>>>> e4941db (UTEC-0013 - decorator)
 =======
     
@@ -425,12 +433,15 @@ def create_app(test_config=None):
 =======
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> e4941db (UTEC-0013 - decorator)
 =======
     
     
+=======
+>>>>>>> e171a95 (UTEC-0013 - decorator)
 
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
 >>>>>>> ff2be9a (UTEC-0013 - decorator)

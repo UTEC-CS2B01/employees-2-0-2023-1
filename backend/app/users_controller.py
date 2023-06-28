@@ -2,6 +2,7 @@ from flask import (
     Blueprint,
     request,
 <<<<<<< HEAD
+<<<<<<< HEAD
     jsonify,
     abort,
 <<<<<<< HEAD
@@ -12,7 +13,14 @@ from flask import (
 >>>>>>> e4941db (UTEC-0013 - decorator)
 =======
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
+<<<<<<< HEAD
 >>>>>>> ff2be9a (UTEC-0013 - decorator)
+=======
+=======
+    jsonify,
+    abort,
+>>>>>>> e171a95 (UTEC-0013 - decorator)
+>>>>>>> 3944c9d (UTEC-0013 - decorator)
 )
 
 import jwt
@@ -24,13 +32,20 @@ from config.local import config
 =======
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from config.local import config
 =======
 from config.local import config  
 >>>>>>> e4941db (UTEC-0013 - decorator)
 =======
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
+<<<<<<< HEAD
 >>>>>>> ff2be9a (UTEC-0013 - decorator)
+=======
+=======
+from config.local import config  
+>>>>>>> e171a95 (UTEC-0013 - decorator)
+>>>>>>> 3944c9d (UTEC-0013 - decorator)
 
 users_bp = Blueprint('/users', __name__)
 
@@ -61,9 +76,12 @@ def create_user():
 =======
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         user_db = User.query.filter(User.username == username).first()
 =======
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
+=======
+>>>>>>> e171a95 (UTEC-0013 - decorator)
 
         if user_db is not None:
             #... 
@@ -92,6 +110,7 @@ def create_user():
             if len(password) < 8:
                 error_lists.append('Password must have at least 8 characters')
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             if password != confirmationPassword:
 <<<<<<< HEAD
@@ -122,11 +141,36 @@ def create_user():
             user = User(username=username, password=password)
             user_created_id = user.insert()
 
+=======
+=======
+>>>>>>> 2264a0b (UTEC-0013 - decorator)
+        
+        user_db = User.query.filter(User.username==username).first()
+
+        if user_db is not None :
+            if user_db.username == username:
+                error_lists.append('An account with this username already exists')
+        else:
+            if len(password) < 8:
+                error_lists.append('Password must have at least 8 characters')
+
+            if password != confirmationPassword:
+                error_lists.append('password and confirmationPassword does not match')
+
+
+        if len(error_lists) > 0:
+            returned_code = 400
+        else:
+            user = User(username=username, password=password)
+            user_created_id = user.insert()
+
+>>>>>>> e171a95 (UTEC-0013 - decorator)
             token = jwt.encode({
                 'user_created_id': user_created_id,
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
             }, config['SECRET_KEY'], config['ALGORYTHM'])
     except Exception as e:
+<<<<<<< HEAD
 <<<<<<< HEAD
         print('e: ', e)
         returned_code = 500
@@ -154,4 +198,28 @@ def create_user():
 
     finally:
 >>>>>>> ddd02cd (UTEC-0013 - decorator)
+<<<<<<< HEAD
 >>>>>>> ff2be9a (UTEC-0013 - decorator)
+=======
+=======
+        print('e: ', e)
+        returned_code = 500
+
+    
+    if returned_code == 400:
+        return jsonify({
+            'success': False,
+            'errors': error_lists,
+            'message': 'Error creating a new user'
+        })
+    elif returned_code != 201:
+        abort(returned_code)
+    else:
+        return jsonify({
+            'success': True,
+            'token': token,
+            'user_created_id': user_created_id,
+        })
+    
+>>>>>>> e171a95 (UTEC-0013 - decorator)
+>>>>>>> 3944c9d (UTEC-0013 - decorator)
