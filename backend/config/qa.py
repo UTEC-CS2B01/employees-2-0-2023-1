@@ -1,3 +1,3 @@
 config = {
-    'DATABASE_URI': 'postgresql://marvin@localhost:5432/mainlocaltest20db',
+    'DATABASE_URI': 'postgresql://postgres@localhost:5432/mainlocaltest20db',
 }

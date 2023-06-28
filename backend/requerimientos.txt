@@ -12,12 +12,16 @@ importlib-metadata==6.1.0
 importlib-resources==5.12.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
+linecache2==1.0.0
 Mako==1.2.4
 MarkupSafe==2.1.2
 psycopg2-binary==2.9.5
+PyJWT==2.7.0
 six==1.16.0
 SQLAlchemy==2.0.7
-typing-extensions==4.5.0
+traceback2==1.4.0
+typing_extensions==4.5.0
+unittest2==1.1.0
 urllib3==1.26.15
 uuid==1.30
 Werkzeug==2.2.3
