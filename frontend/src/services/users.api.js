@@ -12,9 +12,4 @@ export const signUp = async (user) => {
   } catch (error) {
     console.log("error here: ", error);
   }
-=======
-  const { data } = await axios.post(BASE_URL, user);
-
-  return data;
->>>>>>> 2264a0b (UTEC-0013 - decorator)
 };
