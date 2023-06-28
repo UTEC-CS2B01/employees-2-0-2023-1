@@ -13,6 +13,7 @@ from .authentication import authorize
 import os
 import sys
 
+
 def create_app(test_config=None):
     app = Flask(__name__)
     with app.app_context():
@@ -24,11 +25,11 @@ def create_app(test_config=None):
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET,PATCH,POST,DELETE,OPTIONS')
         response.headers.add('Access-Control-Max-Age', '10')
         return response
 
-    
     # Post
     #########################################################
 
@@ -46,12 +47,12 @@ def create_app(test_config=None):
                 firstname = body.get('firstname')
 
             if 'lastname' not in body:
-                list_errors.append('lastname is required')    
+                list_errors.append('lastname is required')
             else:
                 lastname = body['lastname']
 
             if 'age' not in body:
-                list_errors.append('age is required')    
+                list_errors.append('age is required')
             else:
                 age = body['age']
 
@@ -83,7 +84,6 @@ def create_app(test_config=None):
             abort(returned_code)
         else:
             return jsonify({'id': employee_id, 'success': True, 'message': 'Employee Created successfully!'}), returned_code
-    
 
     @app.route('/files', methods=['POST'])
     @authorize
@@ -110,13 +110,14 @@ def create_app(test_config=None):
 
                 cwd = os.getcwd()
 
-                employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee_id)
+                employee_dir = os.path.join(
+                    app.config['UPLOAD_FOLDER'], employee_id)
                 os.makedirs(employee_dir, exist_ok=True)
 
                 upload_folder = os.path.join(cwd, employee_dir)
 
                 file.save(os.path.join(upload_folder, file.filename))
-                
+
                 file = File(file.filename, employee_id)
 
                 db.session.add(file)
@@ -135,13 +136,13 @@ def create_app(test_config=None):
         else:
             return jsonify({'success': True, 'message': 'File uploaded successfully!'}), returned_code
 
-
     @app.route('/departments', methods=['POST'])
+    @authorize
     def create_department():
         returned_code = 201
         list_errors = []
         try:
-            body = request.json
+            body = request.get_json()
 
             if 'name' not in body:
                 list_errors.append('name is required')
@@ -163,8 +164,8 @@ def create_app(test_config=None):
                 department_id = department.id
 
         except Exception as e:
-            # print('error: ', e)
-            # print('exc_info: ',sys.exc_info())
+            print('error: ', e)
+            print('exc_info: ', sys.exc_info())
             db.session.rollback()
             returned_code = 500
 
@@ -177,10 +178,10 @@ def create_app(test_config=None):
             abort(returned_code)
         else:
             return jsonify({'department': department.serialize(), 'success': True, 'message': 'Department created successfully!'}), returned_code
-        
+
     # GET
     #######################################################################################
-    
+
     @app.route('/employees', methods=['GET'])
     @authorize
     def get_employees():
@@ -191,20 +192,23 @@ def create_app(test_config=None):
         try:
             search_query = request.args.get('search', None)
             if search_query:
-                employees = Employee.query.filter(Employee.firstname.like('%{}%'.format(search_query))).all()
+                employees = Employee.query.filter(
+                    Employee.firstname.like('%{}%'.format(search_query))).all()
 
-                employees_list = [employee.serialize() for employee in employees]
+                employees_list = [employee.serialize()
+                                  for employee in employees]
 
             else:
                 employees = Employee.query.all()
-                employee_list = [employee.serialize() for employee in employees]
+                employee_list = [employee.serialize()
+                                 for employee in employees]
 
             if not employee_list:
                 returned_code = 404
                 error_message = 'No employees found'
 
         except Exception as e:
-        
+
             # print(sys.exc_info())
             returned_code = 500
             error_message = 'Error retrieving employees'
@@ -213,15 +217,15 @@ def create_app(test_config=None):
             return jsonify({'success': False, 'message': error_message}), returned_code
 
         return jsonify({'success': True, 'employees': employee_list}), returned_code
-    
+
     # PATCH
     ###########################################################################################
-    
+
     @app.route('/departments/<department_id>', methods=['PATCH'])
     @authorize
     def update_department(department_id):
         returned_code = 200
-        
+
         try:
             department = Department.query.filter_by(id=department_id).first()
 
@@ -250,10 +254,10 @@ def create_app(test_config=None):
             abort(returned_code)
 
         return jsonify({'success': True, 'message': 'Department updated successfully'}), returned_code
-    
+
     # DELETE
     ########################################################################################
-    
+
     @app.route('/departments/<department_id>', methods=['DELETE'])
     @authorize
     def delete_department(department_id):
@@ -268,7 +272,7 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-        
+
             # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -280,7 +284,6 @@ def create_app(test_config=None):
             abort(returned_code)
 
         return jsonify({'success': True, 'message': 'Department deleted successfully'}), returned_code
-
 
     @app.route('/employees/<employee_id>', methods=['DELETE'])
     @authorize
@@ -298,7 +301,7 @@ def create_app(test_config=None):
                 db.session.commit()
 
         except Exception as e:
-        
+
             # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -310,8 +313,6 @@ def create_app(test_config=None):
             abort(returned_code)
 
         return jsonify({'success': True, 'message': 'Employee deleted successfully'}), returned_code
-
-    
 
     @app.route('/employees/<employee_id>', methods=['PATCH'])
     @authorize
@@ -330,7 +331,7 @@ def create_app(test_config=None):
                 if 'age' not in body:
                     list_errors.append('age is required')
                 else:
-                    employee.age = request.form['age']    
+                    employee.age = request.form['age']
 
                 if 'selectDepartment' not in body:
                     list_errors.append('selectDepartment is required')
@@ -344,13 +345,14 @@ def create_app(test_config=None):
 
                     if file.filename == '':
                         return jsonify({'success': False, 'message': 'No image selected'}), 400
-            
+
                     if not allowed_file(file.filename):
                         return jsonify({'success': False, 'message': 'Image format not allowed'}), 400
-                    
+
                     cwd = os.getcwd()
 
-                    employee_dir = os.path.join(app.config['UPLOAD_FOLDER'], employee.id)
+                    employee_dir = os.path.join(
+                        app.config['UPLOAD_FOLDER'], employee.id)
                     os.makedirs(employee_dir, exist_ok=True)
 
                     upload_folder = os.path.join(cwd, employee_dir)
@@ -360,7 +362,7 @@ def create_app(test_config=None):
                     employee.image = file.filename
                     db.session.commit()
         except Exception as e:
-        
+
             # print(sys.exc_info())
             db.session.rollback()
             returned_code = 500
@@ -372,7 +374,7 @@ def create_app(test_config=None):
         elif returned_code != 200:
             abort(returned_code)
         else:
-            return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code        
+            return jsonify({'success': True, 'message': 'Employee updated successfully!'}), returned_code
 
     @app.route('/departments', methods=['GET'])
     @authorize
@@ -381,7 +383,7 @@ def create_app(test_config=None):
         department_list = []
 
         try:
-            search_query = request.args.get('search', None)  
+            search_query = request.args.get('search', None)
             if search_query:
                 departments = Department.query.filter(
                     db.or_(
@@ -389,34 +391,32 @@ def create_app(test_config=None):
                         Department.short_name.like(f'%{search_query}%')
                     )
                 ).all()
-                department_list = [department.serialize() for department in departments]
+                department_list = [department.serialize()
+                                   for department in departments]
             else:
                 departments = Department.query.order_by(Department.name).all()
-                department_list = [department.serialize() for department in departments]
-
-
+                department_list = [department.serialize()
+                                   for department in departments]
 
             if not department_list:
                 returned_code = 404
 
         except Exception as e:
-        
+
             # print(sys.exc_info())
             returned_code = 500
-
 
         if returned_code != 200:
             abort(returned_code)
 
         return jsonify({'success': True, 'departments': department_list}), returned_code
 
-
     @app.errorhandler(405)
     def method_not_allowed(error):
         return jsonify({
             'success': False,
             'message': 'Method not allowed'
-        }), 405   
+        }), 405
 
     @app.errorhandler(404)
     def not_found(error):
@@ -424,14 +424,12 @@ def create_app(test_config=None):
             'success': False,
             'message': 'Resource not found'
         }), 404
-    
+
     @app.errorhandler(500)
     def internal_server_error(error):
         return jsonify({
             'success': False,
             'message': 'Internal Server error'
         }), 500
-    
 
     return app
-
