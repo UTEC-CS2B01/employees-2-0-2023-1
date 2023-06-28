@@ -29,7 +29,7 @@ def create_app(test_config=None):
                              'GET,PATCH,POST,DELETE,OPTIONS')
         response.headers.add('Access-Control-Max-Age', '10')
         return response
-
+    
     # Post
     #########################################################
 
@@ -410,6 +410,9 @@ def create_app(test_config=None):
             abort(returned_code)
 
         return jsonify({'success': True, 'departments': department_list}), returned_code
+
+    
+    
 
     @app.errorhandler(405)
     def method_not_allowed(error):

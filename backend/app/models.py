@@ -127,31 +127,5 @@ class User(db.Model):
             'id': self.id,
             'username': self.username
         }
-    
-    def insert(self):
-        try:
-            db.session.add(self)
-            db.session.commit()
-            user_created_id = self.id
-        except Exception as e:
-            print(sys.exc_info())
-            print('e: ', e)
-            db.session.rollback()
-        finally:
-            db.session.close()
-        
-        return user_created_id
-    
-
-    def delete(self):
-        try:
-            db.session.delete(self)
-            db.session.commit()
-        except Exception as e:
-            print(sys.exc_info())
-            print('e: ', e)
-            db.session.rollback()
-
-
 
     
