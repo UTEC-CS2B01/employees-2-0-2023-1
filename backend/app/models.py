@@ -141,6 +141,17 @@ class User(db.Model):
             db.session.close()
         
         return user_created_id
+    
+
+    def delete(self):
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except Exception as e:
+            print(sys.exc_info())
+            print('e: ', e)
+            db.session.rollback()
+
 
 
     
