@@ -49,21 +49,16 @@ export default {
   },
   methods: {
     async signUpEvent() {
-<<<<<<< HEAD
       const { success, errors = [] } = await signUp(this.user);
       if (success) {
         this.isUserSubmitted = true;
       } else {
         this.errorLists = errors;
       }
-=======
       const response = await signUp(this.user);
       console.log("response: ", response);
-<<<<<<< HEAD
->>>>>>> 2264a0b (UTEC-0013 - decorator)
-=======
->>>>>>> e4941db (UTEC-0013 - decorator)
->>>>>>> 0dd38b8 (UTEC-0013 - decorator)
+      const response = await signUp(this.user);
+      console.log("response: ", response);
     },
   },
 };
