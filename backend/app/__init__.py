@@ -38,7 +38,7 @@ def create_app(test_config=None):
         returned_code = 201
         list_errors = []
         try:
-            body = request.json
+            body = request.get_json
 
             if 'firstname' not in body:
                 list_errors.append('firstname is required')
