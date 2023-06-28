@@ -1,10 +1,18 @@
 import unittest  # libreria de python para realizar test
 from config.qa import config
 from app.models import Employee, Department, User
+from app.authentication import authorize
 from app import create_app
 from flask_sqlalchemy import SQLAlchemy
+import random
 import json
+import string
 import io as io
+
+
+def random_username(char_num):
+    return ''.join(random.choice(string.ascii_lowercase)
+                   for _ in range(char_num))
 
 
 class EmployeesTests(unittest.TestCase):
@@ -37,7 +45,7 @@ class EmployeesTests(unittest.TestCase):
         }
 
         self.new_authenticated_user = {
-            'username': 'adminEmployees',
+            'username': random_username(10),
             'password': 'admin12345',
             'confirmationPassword': 'admin12345'
         }
@@ -47,11 +55,16 @@ class EmployeesTests(unittest.TestCase):
         data_test = json.loads(response_test.data)
         self.department_id_test = data_test['department']['id']
 
+        # Nuevo usuario autenticado
+        response_user = self.client.post(
+            '/users', json=self.new_authenticated_user)
+        data_user = json.loads(response_user.data)
+        self.user_valid_token = data_user['token']
+
     # /users
     def test_create_user_success(self):
         response = self.client.post('/users', json=self.new_authenticated_user)
         data = json.loads(response.data)
-
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['token'])
@@ -59,7 +72,13 @@ class EmployeesTests(unittest.TestCase):
 
     # /departments
     def test_create_department_success(self):
-        response = self.client.post('/departments', json=self.new_department)
+        response_user = self.client.post(
+            '/users', json=self.new_authenticated_user)
+        data_user = json.loads(response_user.data)
+        self.user_valid_token = data_user['token']
+
+        response = self.client.post('/departments', json=self.new_department, headers={
+                                    'Authorization': f'Bearer {self.user_valid_token}'})
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 201)
