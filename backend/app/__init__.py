@@ -137,7 +137,6 @@ def create_app(test_config=None):
 
 
     @app.route('/departments', methods=['POST'])
-    @authorize
     def create_department():
         returned_code = 201
         list_errors = []

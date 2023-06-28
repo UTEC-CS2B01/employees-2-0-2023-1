@@ -36,6 +36,11 @@ class EmployeesTests(unittest.TestCase):
             'age': 16,
         }
 
+        response_test = self.client.post('/departments', json=self.new_department)
+        data_test = json.loads(response_test.data)
+        self.department_id_test = data_test['department']['id']
+    
+
     # /departments
     def test_create_department_success(self):
         response = self.client.post('/departments', json=self.new_department)
@@ -318,11 +323,9 @@ class EmployeesTests(unittest.TestCase):
 
 
     def test_update_employee_failed_400(self):
-        response_dpto_tmp = self.client.post('/departments', json=self.new_department)
-        data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['department']['id']
+    
 
-        self.new_employee['selectDepartment'] = str(dpto_tmp_id)
+        self.new_employee['selectDepartment'] = str(self.department_id_test)
 
         response_empl_tmp = self.client.post('/employees', json=self.new_employee)
         data_empl_tmp = json.loads(response_empl_tmp.data)
@@ -337,11 +340,8 @@ class EmployeesTests(unittest.TestCase):
 
 
     def test_update_employee_failed_500(self):
-        response_dpto_tmp = self.client.post('/departments', json=self.new_department)
-        data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['department']['id']
 
-        self.new_employee['selectDepartment'] = str(dpto_tmp_id)
+        self.new_employee['selectDepartment'] = str(self.department_id_test)
 
         response_empl_tmp = self.client.post('/employees', json=self.new_employee)
         data_empl_tmp = json.loads(response_empl_tmp.data)
@@ -365,10 +365,7 @@ class EmployeesTests(unittest.TestCase):
 
 
     def test_delete_department_success(self):
-        response_dpto_tmp = self.client.post('/departments', json=self.new_department)
-        data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['department']['id']
-        response = self.client.delete('/departments/' + str(dpto_tmp_id))
+        response = self.client.delete('/departments/' + str(self.department_id_test))
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
@@ -385,15 +382,12 @@ class EmployeesTests(unittest.TestCase):
 
 
     def test_delete_department_500(self):
-        response_dpto_tmp = self.client.post('/departments', json=self.new_department)
-        data_tmp = json.loads(response_dpto_tmp.data)
-        dpto_tmp_id = data_tmp['department']['id']
 
-        self.new_employee['selectDepartment'] = str(dpto_tmp_id)
+        self.new_employee['selectDepartment'] = str(self.department_id_test)
 
         self.client.post('/employees', json=self.new_employee)
 
-        response = self.client.delete('/departments/' + str(dpto_tmp_id))
+        response = self.client.delete('/departments/' + str(self.department_id_test))
 
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 500)
@@ -429,7 +423,7 @@ class EmployeesTests(unittest.TestCase):
 
 
     def tearDown(self):
-        pass
+        self.client.delete('/departments/{}'.format(self.department_id_test))
 
 
 
