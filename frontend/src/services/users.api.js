@@ -14,4 +14,12 @@ export const signUp = async (user) => {
   const { data } = await axios.post(BASE_URL, user);
 
   return data;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> e4941db (UTEC-0013 - decorator)
+=======
+>>>>>>> 2264a0b (UTEC-0013 - decorator)
+>>>>>>> ddd02cd (UTEC-0013 - decorator)
+>>>>>>> ff2be9a (UTEC-0013 - decorator)
 };

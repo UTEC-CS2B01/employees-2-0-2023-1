@@ -127,6 +127,7 @@ class User(db.Model):
             'id': self.id,
             'username': self.username
         }
+<<<<<<< HEAD
     
     def insert(self):
         try:
@@ -142,5 +143,7 @@ class User(db.Model):
         
         return user_created_id
 
+=======
+>>>>>>> ddd02cd (UTEC-0013 - decorator)
 
     

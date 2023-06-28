@@ -29,8 +29,16 @@ def create_app(test_config=None):
                              'GET,PATCH,POST,DELETE,OPTIONS')
         response.headers.add('Access-Control-Max-Age', '10')
         return response
+<<<<<<< HEAD
 
     
+<<<<<<< HEAD
+=======
+>>>>>>> e4941db (UTEC-0013 - decorator)
+=======
+    
+>>>>>>> ddd02cd (UTEC-0013 - decorator)
+>>>>>>> ff2be9a (UTEC-0013 - decorator)
     # Post
     #########################################################
 
@@ -412,7 +420,20 @@ def create_app(test_config=None):
 
         return jsonify({'success': True, 'departments': department_list}), returned_code
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> e4941db (UTEC-0013 - decorator)
+=======
+    
+    
+
+>>>>>>> ddd02cd (UTEC-0013 - decorator)
+>>>>>>> ff2be9a (UTEC-0013 - decorator)
     @app.errorhandler(405)
     def method_not_allowed(error):
         return jsonify({

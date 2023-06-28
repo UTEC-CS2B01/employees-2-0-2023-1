@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask import (
     request,
     jsonify
@@ -36,3 +37,5 @@ def authorize(f):
         return f(*args, **kwargs)
     decorator.__name__ = f.__name__
     return decorator
+=======
+>>>>>>> ddd02cd (UTEC-0013 - decorator)
