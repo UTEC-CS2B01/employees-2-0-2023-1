@@ -1,21 +1,34 @@
 <template>
   <div>
     <h1>Sign Up!</h1>
-    <form @submit.prevent.stop="signUpEvent">
-      <div>
-        <label>Username:</label>
-        <input type="text" v-model="user.username" />
+    <div v-if="!isUserSubmitted">
+      <form @submit.prevent.stop="signUpEvent">
+        <div>
+          <label>Username:</label>
+          <input type="text" v-model="user.username" />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input type="password" v-model="user.password" />
+        </div>
+        <div>
+          <label>Confirmation Password:</label>
+          <input type="password" v-model="user.confirmationPassword" />
+        </div>
+        <button class="submit-button" type="submit">Submit</button>
+      </form>
+
+      <div class="user-message-errors" v-if="errorLists.length > 0">
+        <ul>
+          <li v-for="error in errorLists" :key="error">
+            {{ error }}
+          </li>
+        </ul>
       </div>
-      <div>
-        <label>Password:</label>
-        <input type="password" v-model="user.password" />
-      </div>
-      <div>
-        <label>Confirmation Password:</label>
-        <input type="password" v-model="user.confirmationPassword" />
-      </div>
-      <button class="submit-button" type="submit">Submit</button>
-    </form>
+    </div>
+    <div v-else>
+      <span class="user-message-success">User created Successfully!!</span>
+    </div>
   </div>
 </template>
 
@@ -30,12 +43,18 @@ export default {
         password: "",
         confirmationPassword: "",
       },
+      errorLists: [],
+      isUserSubmitted: false,
     };
   },
   methods: {
     async signUpEvent() {
-      const response = await signUp(this.user);
-      console.log("response: ", response);
+      const { success, errors = [] } = await signUp(this.user);
+      if (success) {
+        this.isUserSubmitted = true;
+      } else {
+        this.errorLists = errors;
+      }
     },
   },
 };
@@ -67,5 +86,15 @@ input[type="password"] {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.user-message-success {
+  color: green;
+  font-size: 24px;
+}
+
+.user-message-errors {
+  color: red;
+  font-size: 20px;
 }
 </style>

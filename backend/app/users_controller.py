@@ -71,7 +71,7 @@ def create_user():
             'success': False,
             'errors': error_lists,
             'message': 'Error creating a new user'
-        }), returned_code
+        })
     elif returned_code != 201:
         abort(returned_code)
     else:
