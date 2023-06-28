@@ -68,7 +68,6 @@ def create_user():
 
     if returned_code == 400:
         return jsonify({
-
             'success': False,
             'errors': error_lists,
             'message': 'Error creating a new user'
