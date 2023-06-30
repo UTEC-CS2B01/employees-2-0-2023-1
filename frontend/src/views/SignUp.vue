@@ -16,8 +16,21 @@
       </div>
       <button class="submit-button" type="submit">Submit</button>
     </form>
+    <div class="user-message-error" v-if="errorList.lenght> 0">
+      <ul>
+        <li v-for="error in errorList" :key="error">
+          {{ error }}
+        </li> 
+      </ul>
+    </div>
+    <div v-else>
+      <h1>Sign Up!</h1>
+      <p>Thank you for signing up!</p>
+    </div>
   </div>
+  
 </template>
+
 
 <script>
 import { signUp } from "@/services/users.api";
