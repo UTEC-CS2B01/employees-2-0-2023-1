@@ -82,6 +82,12 @@ def create_user():
         }), returned_code
 
 
+
+@users_bp.route('/api/signin', methods=['POST'])
+def login():
+    pass
+
+
 @users_bp.route('/users/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
     returned_code = 200   

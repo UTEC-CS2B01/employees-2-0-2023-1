@@ -3,15 +3,15 @@
     <h1>Sign Up!</h1>
     <div v-if="!isUserSubmitted">
       <form @submit.prevent.stop="signUpEvent">
-        <div>
+        <div class="form-group">
           <label>Username:</label>
           <input type="text" v-model="user.username" />
         </div>
-        <div>
+        <div class="form-group">
           <label>Password:</label>
           <input type="password" v-model="user.password" />
         </div>
-        <div>
+        <div class="form-group">
           <label>Confirmation Password:</label>
           <input type="password" v-model="user.confirmationPassword" />
         </div>
@@ -49,9 +49,13 @@ export default {
   },
   methods: {
     async signUpEvent() {
-      const { success, errors = [] } = await signUp(this.user);
+      const { success, errors = [], token = null } = await signUp(this.user);
       if (success) {
         this.isUserSubmitted = true;
+        localStorage.setItem("TOKEN", token);
+        setTimeout(() => {
+          this.$router.push({ name: "Dashboard" });
+        }, 2000);
       } else {
         this.errorLists = errors;
       }

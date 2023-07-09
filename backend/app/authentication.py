@@ -13,6 +13,7 @@ def authorize(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         token = None
+        print('authentication token: ', request.headers['X-ACCESS-TOKEN'])
         if 'X-ACCESS-TOKEN' in request.headers:
             token = request.headers['X-ACCESS-TOKEN']
 

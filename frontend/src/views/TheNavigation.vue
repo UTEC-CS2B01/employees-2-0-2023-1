@@ -10,16 +10,27 @@
       <ul id="menu">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/about">About</router-link></li>
-        <li>Contact us</li>
-        <li>Sign In</li>
-        <li>Sign Out</li>
-        <li><router-link to="/sign-up">Sign up</router-link></li>
+        <li v-if="isLogged">Sign Out</li>
+        <li v-else-if="isLogged !== null && !isLogged">Sign In</li>
+        <li v-else><router-link to="/sign-up">Sign up</router-link></li>
       </ul>
     </div>
   </nav>
 </template>
 
-<script></script>
+<script>
+export default {
+  name: "TheNavigation",
+  data() {
+    return {
+      isLogged: null,
+    };
+  },
+  mounted() {
+    console.log(localStorage.getItem("TOKEN"));
+  },
+};
+</script>
 
 <style>
 #menuToggle {
